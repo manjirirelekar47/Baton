@@ -1,0 +1,2506 @@
+{
+  "project": "Campus Event Portal",
+  "synthetic": true,
+  "commits": [
+    {
+      "sha": "0000000000000000000000000000000000000001",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-01T15:00:00Z",
+      "message": "add webhook retry handling",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [
+        "payment-gateway",
+        "queue"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 1,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000002",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-01T22:00:00Z",
+      "message": "fix idempotency guard",
+      "module": "payments",
+      "files": [
+        "backend/payments/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 2,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000003",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-02T05:00:00Z",
+      "message": "update payment status mapping",
+      "module": "payments",
+      "files": [
+        "backend/payments/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 3,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000004",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-02T12:00:00Z",
+      "message": "record payment provider timeout",
+      "module": "payments",
+      "files": [
+        "backend/payments/record.py"
+      ],
+      "imports": [
+        "payment-gateway",
+        "queue"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 4,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000005",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-02T19:00:00Z",
+      "message": "add reconciliation check",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 5,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000006",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-03T02:00:00Z",
+      "message": "add webhook retry handling",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 6,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000007",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-03T09:00:00Z",
+      "message": "fix idempotency guard",
+      "module": "payments",
+      "files": [
+        "backend/payments/fix.py"
+      ],
+      "imports": [
+        "payment-gateway",
+        "queue"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 7,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000008",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-03T16:00:00Z",
+      "message": "update payment status mapping",
+      "module": "payments",
+      "files": [
+        "backend/payments/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 8,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000009",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-03T23:00:00Z",
+      "message": "record payment provider timeout",
+      "module": "payments",
+      "files": [
+        "backend/payments/record.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 9,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000000a",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-04T06:00:00Z",
+      "message": "add reconciliation check",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [
+        "payment-gateway",
+        "queue"
+      ],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 10,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000000b",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-04T13:00:00Z",
+      "message": "add webhook retry handling",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 11,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000000c",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-04T20:00:00Z",
+      "message": "fix idempotency guard",
+      "module": "payments",
+      "files": [
+        "backend/payments/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 12,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000000d",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-05T03:00:00Z",
+      "message": "update payment status mapping",
+      "module": "payments",
+      "files": [
+        "backend/payments/update.py"
+      ],
+      "imports": [
+        "payment-gateway",
+        "queue"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 13,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000000e",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-05T10:00:00Z",
+      "message": "record payment provider timeout",
+      "module": "payments",
+      "files": [
+        "backend/payments/record.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 14,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000000f",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-05T17:00:00Z",
+      "message": "add reconciliation check",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 15,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000010",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-06T00:00:00Z",
+      "message": "add webhook retry handling",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [
+        "payment-gateway",
+        "queue"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 16,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000011",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-06T07:00:00Z",
+      "message": "fix idempotency guard",
+      "module": "payments",
+      "files": [
+        "backend/payments/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 17,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000012",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-06T14:00:00Z",
+      "message": "update payment status mapping",
+      "module": "payments",
+      "files": [
+        "backend/payments/update.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 18,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000013",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-06T21:00:00Z",
+      "message": "record payment provider timeout",
+      "module": "payments",
+      "files": [
+        "backend/payments/record.py"
+      ],
+      "imports": [
+        "payment-gateway",
+        "queue"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 19,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000014",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-07T04:00:00Z",
+      "message": "add reconciliation check",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 20,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000015",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-07T11:00:00Z",
+      "message": "add webhook retry handling",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 21,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000016",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-07T18:00:00Z",
+      "message": "fix idempotency guard",
+      "module": "payments",
+      "files": [
+        "backend/payments/fix.py"
+      ],
+      "imports": [
+        "payment-gateway",
+        "queue"
+      ],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 22,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000017",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-08T01:00:00Z",
+      "message": "update payment status mapping",
+      "module": "payments",
+      "files": [
+        "backend/payments/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 23,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000018",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-08T08:00:00Z",
+      "message": "record payment provider timeout",
+      "module": "payments",
+      "files": [
+        "backend/payments/record.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 24,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000019",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-08T15:00:00Z",
+      "message": "add reconciliation check",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [
+        "payment-gateway",
+        "queue"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 25,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000001a",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-08T22:00:00Z",
+      "message": "add webhook retry handling",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 26,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000001b",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-09T05:00:00Z",
+      "message": "fix idempotency guard",
+      "module": "payments",
+      "files": [
+        "backend/payments/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 27,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000001c",
+      "author": {
+        "name": "Rohan",
+        "login": "rohan"
+      },
+      "date": "2026-09-09T12:00:00Z",
+      "message": "update payment status mapping",
+      "module": "payments",
+      "files": [
+        "backend/payments/update.py"
+      ],
+      "imports": [
+        "payment-gateway",
+        "queue"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 28,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000001d",
+      "author": {
+        "name": "Rohan",
+        "login": "rohan"
+      },
+      "date": "2026-09-09T19:00:00Z",
+      "message": "record payment provider timeout",
+      "module": "payments",
+      "files": [
+        "backend/payments/record.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 29,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000001e",
+      "author": {
+        "name": "Rohan",
+        "login": "rohan"
+      },
+      "date": "2026-09-10T02:00:00Z",
+      "message": "add reconciliation check",
+      "module": "payments",
+      "files": [
+        "backend/payments/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 30,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000001f",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-10T09:00:00Z",
+      "message": "add kiosk session flow",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/add.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 31,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000020",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-10T16:00:00Z",
+      "message": "fix QR scan validation",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 32,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000021",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-10T23:00:00Z",
+      "message": "handle offline check-in",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/handle.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 33,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000022",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-11T06:00:00Z",
+      "message": "update kiosk device heartbeat",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/update.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 34,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000023",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-11T13:00:00Z",
+      "message": "add kiosk session flow",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 35,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000024",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-11T20:00:00Z",
+      "message": "fix QR scan validation",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 36,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000025",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-12T03:00:00Z",
+      "message": "handle offline check-in",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/handle.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 37,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000026",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-12T10:00:00Z",
+      "message": "update kiosk device heartbeat",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 38,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000027",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-12T17:00:00Z",
+      "message": "add kiosk session flow",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 39,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000028",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-13T00:00:00Z",
+      "message": "fix QR scan validation",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/fix.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 40,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000029",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-13T07:00:00Z",
+      "message": "handle offline check-in",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/handle.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 41,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000002a",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-13T14:00:00Z",
+      "message": "update kiosk device heartbeat",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 42,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000002b",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-13T21:00:00Z",
+      "message": "add kiosk session flow",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/add.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 43,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000002c",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-14T04:00:00Z",
+      "message": "fix QR scan validation",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 44,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000002d",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-14T11:00:00Z",
+      "message": "handle offline check-in",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/handle.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 45,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000002e",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-14T18:00:00Z",
+      "message": "update kiosk device heartbeat",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/update.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 46,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000002f",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-15T01:00:00Z",
+      "message": "add kiosk session flow",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 47,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000030",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-15T08:00:00Z",
+      "message": "fix QR scan validation",
+      "module": "check-in-kiosk",
+      "files": [
+        "backend/check-in-kiosk/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 48,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000031",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-15T15:00:00Z",
+      "message": "validate attendee form",
+      "module": "registration",
+      "files": [
+        "backend/registration/validate.py"
+      ],
+      "imports": [
+        "payments"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 49,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000032",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-15T22:00:00Z",
+      "message": "add registration status endpoint",
+      "module": "registration",
+      "files": [
+        "backend/registration/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 50,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000033",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-16T05:00:00Z",
+      "message": "connect registration to payments",
+      "module": "registration",
+      "files": [
+        "backend/registration/connect.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 51,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000034",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-16T12:00:00Z",
+      "message": "fix duplicate registration",
+      "module": "registration",
+      "files": [
+        "backend/registration/fix.py"
+      ],
+      "imports": [
+        "payments"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 52,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000035",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-16T19:00:00Z",
+      "message": "validate attendee form",
+      "module": "registration",
+      "files": [
+        "backend/registration/validate.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 53,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000036",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-17T02:00:00Z",
+      "message": "add registration status endpoint",
+      "module": "registration",
+      "files": [
+        "backend/registration/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 54,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000037",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-17T09:00:00Z",
+      "message": "connect registration to payments",
+      "module": "registration",
+      "files": [
+        "backend/registration/connect.py"
+      ],
+      "imports": [
+        "payments"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 55,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000038",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-17T16:00:00Z",
+      "message": "fix duplicate registration",
+      "module": "registration",
+      "files": [
+        "backend/registration/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 56,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000039",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-17T23:00:00Z",
+      "message": "validate attendee form",
+      "module": "registration",
+      "files": [
+        "backend/registration/validate.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 57,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000003a",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-18T06:00:00Z",
+      "message": "add registration status endpoint",
+      "module": "registration",
+      "files": [
+        "backend/registration/add.py"
+      ],
+      "imports": [
+        "payments"
+      ],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 58,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000003b",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-18T13:00:00Z",
+      "message": "connect registration to payments",
+      "module": "registration",
+      "files": [
+        "backend/registration/connect.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 59,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000003c",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-18T20:00:00Z",
+      "message": "fix duplicate registration",
+      "module": "registration",
+      "files": [
+        "backend/registration/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 60,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000003d",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-19T03:00:00Z",
+      "message": "validate attendee form",
+      "module": "registration",
+      "files": [
+        "backend/registration/validate.py"
+      ],
+      "imports": [
+        "payments"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 61,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000003e",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-19T10:00:00Z",
+      "message": "add registration status endpoint",
+      "module": "registration",
+      "files": [
+        "backend/registration/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 62,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000003f",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-19T17:00:00Z",
+      "message": "connect registration to payments",
+      "module": "registration",
+      "files": [
+        "backend/registration/connect.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 63,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000040",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-20T00:00:00Z",
+      "message": "fix duplicate registration",
+      "module": "registration",
+      "files": [
+        "backend/registration/fix.py"
+      ],
+      "imports": [
+        "payments"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 64,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000041",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-20T07:00:00Z",
+      "message": "validate attendee form",
+      "module": "registration",
+      "files": [
+        "backend/registration/validate.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 65,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000042",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-20T14:00:00Z",
+      "message": "add registration status endpoint",
+      "module": "registration",
+      "files": [
+        "backend/registration/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 66,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000043",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-20T21:00:00Z",
+      "message": "connect registration to payments",
+      "module": "registration",
+      "files": [
+        "backend/registration/connect.py"
+      ],
+      "imports": [
+        "payments"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 67,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000044",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-21T04:00:00Z",
+      "message": "fix duplicate registration",
+      "module": "registration",
+      "files": [
+        "backend/registration/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 68,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000045",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-21T11:00:00Z",
+      "message": "validate attendee form",
+      "module": "registration",
+      "files": [
+        "backend/registration/validate.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 69,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000046",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-21T18:00:00Z",
+      "message": "add registration status endpoint",
+      "module": "registration",
+      "files": [
+        "backend/registration/add.py"
+      ],
+      "imports": [
+        "payments"
+      ],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 70,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000047",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-22T01:00:00Z",
+      "message": "connect registration to payments",
+      "module": "registration",
+      "files": [
+        "backend/registration/connect.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 71,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000048",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-22T08:00:00Z",
+      "message": "fix duplicate registration",
+      "module": "registration",
+      "files": [
+        "backend/registration/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 72,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000049",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-22T15:00:00Z",
+      "message": "validate attendee form",
+      "module": "registration",
+      "files": [
+        "backend/registration/validate.py"
+      ],
+      "imports": [
+        "payments"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 73,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000004a",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-22T22:00:00Z",
+      "message": "add registration status endpoint",
+      "module": "registration",
+      "files": [
+        "backend/registration/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 74,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000004b",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-23T05:00:00Z",
+      "message": "add reminder delivery",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/add.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 75,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000004c",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-23T12:00:00Z",
+      "message": "retry notification queue",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/retry.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 76,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000004d",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-23T19:00:00Z",
+      "message": "update email template",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 77,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000004e",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-24T02:00:00Z",
+      "message": "record delivery status",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/record.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 78,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000004f",
+      "author": {
+        "name": "Aarav",
+        "login": "aarav"
+      },
+      "date": "2026-09-24T09:00:00Z",
+      "message": "add reminder delivery",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 79,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000050",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-24T16:00:00Z",
+      "message": "retry notification queue",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/retry.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 80,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000051",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-24T23:00:00Z",
+      "message": "update email template",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/update.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 81,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000052",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-25T06:00:00Z",
+      "message": "record delivery status",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/record.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 82,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000053",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-25T13:00:00Z",
+      "message": "add reminder delivery",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 83,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000054",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-25T20:00:00Z",
+      "message": "retry notification queue",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/retry.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 84,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000055",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-09-26T03:00:00Z",
+      "message": "update email template",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 85,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000056",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-09-26T10:00:00Z",
+      "message": "record delivery status",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/record.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 86,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000057",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-09-26T17:00:00Z",
+      "message": "add reminder delivery",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/add.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 87,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000058",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-09-27T00:00:00Z",
+      "message": "retry notification queue",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/retry.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 88,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000059",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-09-27T07:00:00Z",
+      "message": "update email template",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 89,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000005a",
+      "author": {
+        "name": "Samruddhi",
+        "login": "samruddhi"
+      },
+      "date": "2026-09-27T14:00:00Z",
+      "message": "record delivery status",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/record.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 90,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000005b",
+      "author": {
+        "name": "Samruddhi",
+        "login": "samruddhi"
+      },
+      "date": "2026-09-27T21:00:00Z",
+      "message": "add reminder delivery",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 91,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000005c",
+      "author": {
+        "name": "Samruddhi",
+        "login": "samruddhi"
+      },
+      "date": "2026-09-28T04:00:00Z",
+      "message": "retry notification queue",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/retry.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 92,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000005d",
+      "author": {
+        "name": "Samruddhi",
+        "login": "samruddhi"
+      },
+      "date": "2026-09-28T11:00:00Z",
+      "message": "update email template",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/update.py"
+      ],
+      "imports": [
+        "registration"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 93,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000005e",
+      "author": {
+        "name": "Samruddhi",
+        "login": "samruddhi"
+      },
+      "date": "2026-09-28T18:00:00Z",
+      "message": "record delivery status",
+      "module": "notifications",
+      "files": [
+        "backend/notifications/record.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 94,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000005f",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-29T01:00:00Z",
+      "message": "add event role permissions",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [
+        "notifications"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 95,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000060",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-29T08:00:00Z",
+      "message": "fix member invitation flow",
+      "module": "admin",
+      "files": [
+        "backend/admin/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 96,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000061",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-29T15:00:00Z",
+      "message": "update audit export",
+      "module": "admin",
+      "files": [
+        "backend/admin/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 97,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000062",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-29T22:00:00Z",
+      "message": "add project settings validation",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [
+        "notifications"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 98,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000063",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-30T05:00:00Z",
+      "message": "add event role permissions",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 99,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000064",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-30T12:00:00Z",
+      "message": "fix member invitation flow",
+      "module": "admin",
+      "files": [
+        "backend/admin/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 100,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000065",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-09-30T19:00:00Z",
+      "message": "update audit export",
+      "module": "admin",
+      "files": [
+        "backend/admin/update.py"
+      ],
+      "imports": [
+        "notifications"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 101,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000066",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-10-01T02:00:00Z",
+      "message": "add project settings validation",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 102,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000067",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-10-01T09:00:00Z",
+      "message": "add event role permissions",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 103,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000068",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-10-01T16:00:00Z",
+      "message": "fix member invitation flow",
+      "module": "admin",
+      "files": [
+        "backend/admin/fix.py"
+      ],
+      "imports": [
+        "notifications"
+      ],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 104,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000069",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-10-01T23:00:00Z",
+      "message": "update audit export",
+      "module": "admin",
+      "files": [
+        "backend/admin/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 105,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000006a",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-10-02T06:00:00Z",
+      "message": "add project settings validation",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 106,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000006b",
+      "author": {
+        "name": "Meera",
+        "login": "meera"
+      },
+      "date": "2026-10-02T13:00:00Z",
+      "message": "add event role permissions",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [
+        "notifications"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 107,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000006c",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-02T20:00:00Z",
+      "message": "fix member invitation flow",
+      "module": "admin",
+      "files": [
+        "backend/admin/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 108,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000006d",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-03T03:00:00Z",
+      "message": "update audit export",
+      "module": "admin",
+      "files": [
+        "backend/admin/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 109,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000006e",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-03T10:00:00Z",
+      "message": "add project settings validation",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [
+        "notifications"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 110,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "000000000000000000000000000000000000006f",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-03T17:00:00Z",
+      "message": "add event role permissions",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 111,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000070",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-04T00:00:00Z",
+      "message": "fix member invitation flow",
+      "module": "admin",
+      "files": [
+        "backend/admin/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 112,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000071",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-04T07:00:00Z",
+      "message": "update audit export",
+      "module": "admin",
+      "files": [
+        "backend/admin/update.py"
+      ],
+      "imports": [
+        "notifications"
+      ],
+      "reviewers": [],
+      "pull_request": {
+        "number": 113,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000072",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-04T14:00:00Z",
+      "message": "add project settings validation",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 114,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000073",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-04T21:00:00Z",
+      "message": "add event role permissions",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 115,
+        "state": "open"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000074",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-05T04:00:00Z",
+      "message": "fix member invitation flow",
+      "module": "admin",
+      "files": [
+        "backend/admin/fix.py"
+      ],
+      "imports": [
+        "notifications"
+      ],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 116,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000075",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-05T11:00:00Z",
+      "message": "update audit export",
+      "module": "admin",
+      "files": [
+        "backend/admin/update.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 117,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000076",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-05T18:00:00Z",
+      "message": "add project settings validation",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [],
+      "reviewers": [],
+      "pull_request": {
+        "number": 118,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000077",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-06T01:00:00Z",
+      "message": "add event role permissions",
+      "module": "admin",
+      "files": [
+        "backend/admin/add.py"
+      ],
+      "imports": [
+        "notifications"
+      ],
+      "reviewers": [
+        "Meera"
+      ],
+      "pull_request": {
+        "number": 119,
+        "state": "merged"
+      }
+    },
+    {
+      "sha": "0000000000000000000000000000000000000078",
+      "author": {
+        "name": "Samiksha",
+        "login": "samiksha"
+      },
+      "date": "2026-10-06T08:00:00Z",
+      "message": "fix member invitation flow",
+      "module": "admin",
+      "files": [
+        "backend/admin/fix.py"
+      ],
+      "imports": [],
+      "reviewers": [
+        "Samiksha"
+      ],
+      "pull_request": {
+        "number": 120,
+        "state": "open"
+      }
+    }
+  ]
+}
