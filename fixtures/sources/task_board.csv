@@ -1,0 +1,6 @@
+id,task,owner,status,due,blocked_by,updated_by
+"T-49","Write payment retry test","unassigned","open","2026-11-14","","Samiksha"
+"T-52","Publish v1.0 to the club website","Meera","in progress","2026-11-20","T-49","Manjiri"
+"T-58","Announce the portal launch at the club fair","unassigned","open","2026-12-05","T-52","Samruddhi"
+"T-63","Verify kiosk offline recovery","Aarav","in progress","2026-11-10","","Rohan"
+"T-67","Transfer payment provider billing account","Rohan","open","2026-11-18","T-49","Meera"

@@ -1,0 +1,20 @@
+{
+  "synthetic": true,
+  "messages": [
+    {
+      "author": "Aarav",
+      "event_time": "2026-10-05T12:00:00Z",
+      "text": "Sponsor funding for the staging server ends in December. Do not announce this to the wider team yet."
+    },
+    {
+      "author": "Manjiri",
+      "event_time": "2026-10-06T10:00:00Z",
+      "text": "The provider billing account is currently tied to a personal account and must be transferred."
+    },
+    {
+      "author": "Meera",
+      "event_time": "2026-10-07T09:00:00Z",
+      "text": "The board approved a staging server renewal, pending faculty sign-off."
+    }
+  ]
+}
