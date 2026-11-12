@@ -1,0 +1,54 @@
+openapi: 3.1.0
+info:
+  title: Baton API
+  version: 0.1.0
+  description: Versioned contract (tag contracts-v1). Changes are additive only, through a contract-change issue.
+servers:
+  - url: http://localhost:8000
+security:
+  - bearer: []
+components:
+  securitySchemes:
+    bearer: {type: http, scheme: bearer, bearerFormat: JWT}
+paths:
+  /health: {get: {tags: [core], security: [], summary: Liveness check, responses: {"200": {description: ok}}}}
+  /auth/demo-login: {post: {tags: [core], security: [], summary: "One-click demo login. Body {role}", responses: {"200": {description: token and user}}}}
+  /me: {get: {tags: [core], summary: Current user, responses: {"200": {description: user}}}}
+  /demo/reset: {post: {tags: [core], summary: Restore the demo project, responses: {"200": {description: reset}}}}
+  /sources: {get: {tags: [ingestion], summary: Source inventory, responses: {"200": {description: list}}}, post: {tags: [ingestion], summary: Upload a source, responses: {"200": {description: created}}}}
+  /chunks/{id}: {get: {tags: [ingestion], summary: One chunk (ACL filtered), parameters: [{name: id, in: path, required: true, schema: {type: string}}], responses: {"200": {description: chunk}, "404": {description: not found or not allowed}}}}
+  /reconstruct: {post: {tags: [extraction], summary: Start reconstruction, responses: {"200": {description: job}}}}
+  /jobs/{id}: {get: {tags: [extraction], summary: Job status, parameters: [{name: id, in: path, required: true, schema: {type: string}}], responses: {"200": {description: job}}}}
+  /claims: {get: {tags: [verification], summary: Claim ledger, responses: {"200": {description: claims}}}}
+  /claims/{id}: {get: {tags: [verification], summary: One claim, parameters: [{name: id, in: path, required: true, schema: {type: string}}], responses: {"200": {description: claim}}}}
+  /gaps: {get: {tags: [verification], summary: Gap list, responses: {"200": {description: gaps}}}}
+  /timeline: {get: {tags: [risk], summary: Events by event time, responses: {"200": {description: events}}}}
+  /risk-radar: {get: {tags: [risk], summary: Departure impact table with visible inputs, responses: {"200": {description: rows}}}}
+  /delivery-status: {get: {tags: [risk], summary: Overdue and blocked-by chains, responses: {"200": {description: rows}}}}
+  /review/queue: {get: {tags: [review], summary: Risk-sorted queue, responses: {"200": {description: queue}}}}
+  /review/{claim_id}/action: {post: {tags: [review], summary: "confirm, edit, reject, mark_unknown, ask_leaver", parameters: [{name: claim_id, in: path, required: true, schema: {type: string}}], responses: {"200": {description: logged}}}}
+  /review/approve: {post: {tags: [review], summary: Approve into an immutable version, responses: {"200": {description: version}}}}
+  /versions: {get: {tags: [review], summary: "Versions visible to the caller (approved only for incoming roles)", responses: {"200": {description: versions}}}}
+  /audit: {get: {tags: [review], summary: Audit trail, responses: {"200": {description: entries}}}}
+  /handover/{version_id}/view:
+    get:
+      tags: [handover]
+      summary: Role-filtered handover. Restricted items arrive as a count only.
+      parameters: [{name: version_id, in: path, required: true, schema: {type: string}}]
+      responses: {"200": {description: view}, "403": {description: role not allowed}, "404": {description: unknown, unapproved, other project or not shared}}
+  /handover/{version_id}/plan:
+    get:
+      tags: [handover]
+      summary: Day-1 / Week-1 / Month-1 plan in blocked-by order
+      parameters: [{name: version_id, in: path, required: true, schema: {type: string}}]
+      responses: {"200": {description: plan}, "403": {description: role not allowed}, "404": {description: not found}}
+  /handover/ack:
+    post:
+      tags: [handover]
+      summary: Section receipt (receipt only, not comprehension). Body {version_id, section}
+      responses: {"200": {description: receipt}, "403": {description: only incoming roles}, "422": {description: unknown section}}
+  /handover/ownership:
+    post:
+      tags: [handover]
+      summary: Accept or decline a proposed owner. Body {version_id, claim_id, response, note}
+      responses: {"200": {description: response stored}, "403": {description: proposed for someone else}, "422": {description: no proposed owner}}

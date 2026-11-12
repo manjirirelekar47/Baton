@@ -1,0 +1,8 @@
+[
+  {
+    "claim_id": "c-001",
+    "state": "conflicting",
+    "reason": "Task board says Aarav, chat says Rohan",
+    "risk_rank": 1
+  }
+]

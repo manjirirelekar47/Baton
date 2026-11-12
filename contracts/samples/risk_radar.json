@@ -1,0 +1,22 @@
+[
+  {
+    "module": "payments",
+    "person": "Aarav",
+    "exclusivity": 0.82,
+    "dependents": 3,
+    "undocumented_decisions": 2,
+    "account_ties": 1,
+    "work_in_flight": 2,
+    "flagged": true
+  },
+  {
+    "module": "check-in-kiosk",
+    "person": "Aarav",
+    "exclusivity": 0.91,
+    "dependents": 1,
+    "undocumented_decisions": 1,
+    "account_ties": 0,
+    "work_in_flight": 0,
+    "flagged": true
+  }
+]

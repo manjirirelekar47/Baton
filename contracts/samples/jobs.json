@@ -1,0 +1,6 @@
+{
+  "job_id": "job-demo-1",
+  "status": "done",
+  "mode": "replay",
+  "note": "Replay of stored verified extraction. Not live inference."
+}

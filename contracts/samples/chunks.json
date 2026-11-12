@@ -1,0 +1,194 @@
+{
+  "S4-212": {
+    "chunk_id": "S4-212",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S4",
+    "source_type": "chat",
+    "source_title": "Chat export",
+    "author": "Rohan",
+    "event_time": "2026-10-02T09:12:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:c62d1aae84ed879b34d3b8d3feade7d5d8259b3d21b78fb63a73a169b81248c5",
+    "char_span": [
+      0,
+      153
+    ],
+    "text": "[2 Oct 2026, #general] Rohan: Quick update for everyone: Rohan took payments over from Aarav last week, so ping me for anything on registration payments."
+  },
+  "S3-T41": {
+    "chunk_id": "S3-T41",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S3",
+    "source_type": "task_csv",
+    "source_title": "Task board export",
+    "author": "Aarav",
+    "event_time": "2026-08-12T16:40:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:b5072c446bd6f09e3ae5408b178213896cfdb8712fa4d713bc341a40b3144d5c",
+    "char_span": [
+      0,
+      91
+    ],
+    "text": "Task T-41 | Payments module | Owner: Aarav | Status: In progress | Last edited: 12 Aug 2026"
+  },
+  "S1-N04": {
+    "chunk_id": "S1-N04",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S1",
+    "source_type": "document",
+    "source_title": "Design notes and meeting notes",
+    "author": "Meera",
+    "event_time": "2026-10-10T17:00:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:1fce627d4801a67bafbe0f6a18d621086f50c2d4374cf95acf3712597ef9de53",
+    "char_span": [
+      0,
+      151
+    ],
+    "text": "Meeting note N-04 (10 Oct 2026). Decision: hold the v1.0 release until retry behaviour is tested. Nobody has been assigned to write the retry test yet."
+  },
+  "S1-README-3": {
+    "chunk_id": "S1-README-3",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S1",
+    "source_type": "document",
+    "source_title": "Design notes and meeting notes",
+    "author": "Aarav",
+    "event_time": "2026-09-14T11:00:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:9e244d8be303cef00b82a1c2e2f4c1965b73cdb6d570dceaa3bc64decdd6ca47",
+    "char_span": [
+      0,
+      127
+    ],
+    "text": "Payments: registration payments run in test mode. Live keys were never issued, and we stay in test mode until finance approves."
+  },
+  "S1-DESIGN-2": {
+    "chunk_id": "S1-DESIGN-2",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S1",
+    "source_type": "document",
+    "source_title": "Design notes and meeting notes",
+    "author": "Aarav",
+    "event_time": "2026-09-02T10:00:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:375a310ed22fb05c6025a0b36ac1ab7e790106f71299a0c2082751d98739daaa",
+    "char_span": [
+      0,
+      86
+    ],
+    "text": "Design note 2: The notification module sends reminder emails through the club mailbox."
+  },
+  "S2-CFG-7": {
+    "chunk_id": "S2-CFG-7",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S2",
+    "source_type": "git",
+    "source_title": "Git export",
+    "author": "Aarav",
+    "event_time": "2026-09-01T08:00:00Z",
+    "acl_label": "L2",
+    "content_hash": "sha256:6936aee01cff8b4c3e9a38cdad5a3237815bd1758e2804876dc2fc85065e1886",
+    "char_span": [
+      0,
+      72
+    ],
+    "text": "# staging.yml: free tier, 90 days. Created on first deploy (1 Sep 2026)."
+  },
+  "S2-C-001": {
+    "chunk_id": "S2-C-001",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S2",
+    "source_type": "git",
+    "source_title": "Git export",
+    "author": "Aarav",
+    "event_time": "2026-09-01T08:05:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:be44b4bd7a439266f1d452a26999d1f3b4c3806e8fb12f993953f2099a5a5912",
+    "char_span": [
+      0,
+      81
+    ],
+    "text": "commit 4f2a9c1 (1 Sep 2026) deploy: first deploy of staging to the free-tier host"
+  },
+  "S4-301": {
+    "chunk_id": "S4-301",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S4",
+    "source_type": "chat",
+    "source_title": "Chat export",
+    "author": "Aarav",
+    "event_time": "2026-10-05T19:30:00Z",
+    "acl_label": "L3",
+    "content_hash": "sha256:23bf4fbaeb2665ee1fec019f7e5a41a6701526920091f67fa06c93725be83f61",
+    "char_span": [
+      0,
+      133
+    ],
+    "text": "[Leadership channel, 5 Oct 2026] Sponsor funding for the staging server ends in December. Do not announce this to the wider team yet."
+  },
+  "S4-150": {
+    "chunk_id": "S4-150",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S4",
+    "source_type": "chat",
+    "source_title": "Chat export",
+    "author": "Aarav",
+    "event_time": "2026-09-18T14:20:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:96ef561634295b82a7fd8cc5af4c174cfb03b81db0396f69fc38a9dc687d8ddc",
+    "char_span": [
+      0,
+      97
+    ],
+    "text": "[18 Sep 2026, #ops] Aarav: The check-in kiosk code lives in /kiosk and nobody has claimed it yet."
+  },
+  "S3-T52": {
+    "chunk_id": "S3-T52",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S3",
+    "source_type": "task_csv",
+    "source_title": "Task board export",
+    "author": "Meera",
+    "event_time": "2026-10-11T09:00:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:8032ebe11c74b42db55726814d0b4f7bac175b4e76a772e521a2dd496cd8358f",
+    "char_span": [
+      0,
+      113
+    ],
+    "text": "Task T-52 | Publish v1.0 to the club website | Owner: unassigned | Due: 20 Nov 2026 | Blocked by: T-49 retry test"
+  },
+  "S3-T58": {
+    "chunk_id": "S3-T58",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S3",
+    "source_type": "task_csv",
+    "source_title": "Task board export",
+    "author": "Meera",
+    "event_time": "2026-10-11T09:05:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:767e10ff5ef3faf67167240e16971b3a1f45ea7383ff3ddc0348e37f49d9905b",
+    "char_span": [
+      0,
+      92
+    ],
+    "text": "Task T-58 | Announce the portal launch at the club fair | Due: 5 Dec 2026 | Blocked by: T-52"
+  },
+  "GI-001": {
+    "chunk_id": "GI-001",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "GI",
+    "source_type": "attested",
+    "source_title": "Gap Interview (Aarav)",
+    "author": "Aarav",
+    "event_time": "2026-11-08T12:00:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:e7f1297c3f76a2ab98e8adf46ce8b357041c33bb6fdb8b6fe9c5b3b5807e5f82",
+    "char_span": [
+      0,
+      97
+    ],
+    "text": "Gap Interview answer from Aarav: Deploys fail on Fridays unless the build cache is cleared first."
+  }
+}

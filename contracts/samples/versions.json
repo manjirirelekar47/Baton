@@ -1,0 +1,14 @@
+[
+  {
+    "version_id": "v1",
+    "project_id": "proj-campus-event-portal",
+    "status": "approved",
+    "approved_by": "u-approver",
+    "approved_at": "2026-11-09T10:00:00Z",
+    "snapshot_hash": "sha256:073ff4f4f85e317fe4ad4dc32de0a8d59c6f6546f0ff9d5046faf063c6644d0f",
+    "shared_with": [
+      "incoming_maintainer",
+      "incoming_contributor"
+    ]
+  }
+]

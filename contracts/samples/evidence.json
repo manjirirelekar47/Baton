@@ -1,0 +1,106 @@
+[
+  {
+    "chunk_id": "S4-212",
+    "quote": "Rohan took payments over",
+    "source_id": "S4",
+    "source_title": "Chat export",
+    "acl_label": "L1",
+    "event_time": "2026-10-02T09:12:00Z"
+  },
+  {
+    "chunk_id": "S4-150",
+    "quote": "nobody has claimed it yet",
+    "source_id": "S4",
+    "source_title": "Chat export",
+    "acl_label": "L1",
+    "event_time": "2026-09-18T14:20:00Z"
+  },
+  {
+    "chunk_id": "S1-DESIGN-2",
+    "quote": "The notification module sends reminder emails",
+    "source_id": "S1",
+    "source_title": "Design notes and meeting notes",
+    "acl_label": "L1",
+    "event_time": "2026-09-02T10:00:00Z"
+  },
+  {
+    "chunk_id": "S1-N04",
+    "quote": "hold the v1.0 release until retry behaviour is tested",
+    "source_id": "S1",
+    "source_title": "Design notes and meeting notes",
+    "acl_label": "L1",
+    "event_time": "2026-10-10T17:00:00Z"
+  },
+  {
+    "chunk_id": "S1-N04",
+    "quote": "Nobody has been assigned to write the retry test yet",
+    "source_id": "S1",
+    "source_title": "Design notes and meeting notes",
+    "acl_label": "L1",
+    "event_time": "2026-10-10T17:00:00Z"
+  },
+  {
+    "chunk_id": "S3-T52",
+    "quote": "Due: 20 Nov 2026",
+    "source_id": "S3",
+    "source_title": "Task board export",
+    "acl_label": "L1",
+    "event_time": "2026-10-11T09:00:00Z"
+  },
+  {
+    "chunk_id": "S3-T58",
+    "quote": "Due: 5 Dec 2026",
+    "source_id": "S3",
+    "source_title": "Task board export",
+    "acl_label": "L1",
+    "event_time": "2026-10-11T09:05:00Z"
+  },
+  {
+    "chunk_id": "S1-README-3",
+    "quote": "we stay in test mode until finance approves",
+    "source_id": "S1",
+    "source_title": "Design notes and meeting notes",
+    "acl_label": "L1",
+    "event_time": "2026-09-14T11:00:00Z"
+  },
+  {
+    "chunk_id": "S2-CFG-7",
+    "quote": "free tier, 90 days",
+    "source_id": "S2",
+    "source_title": "Git export",
+    "acl_label": "L2",
+    "event_time": "2026-09-01T08:00:00Z"
+  },
+  {
+    "chunk_id": "S4-301",
+    "quote": "Sponsor funding for the staging server ends in December",
+    "source_id": "S4",
+    "source_title": "Chat export",
+    "acl_label": "L3",
+    "event_time": "2026-10-05T19:30:00Z"
+  },
+  {
+    "chunk_id": "GI-001",
+    "quote": "Deploys fail on Fridays unless the build cache is cleared",
+    "source_id": "GI",
+    "source_title": "Gap Interview (Aarav)",
+    "acl_label": "L1",
+    "event_time": "2026-11-08T12:00:00Z"
+  },
+  {
+    "chunk_id": "S2-C-001",
+    "quote": "first deploy of staging",
+    "source_id": "S2",
+    "source_title": "Git export",
+    "acl_label": "L1",
+    "event_time": "2026-09-01T08:05:00Z"
+  },
+  {
+    "chunk_id": "S4-212",
+    "quote": "ping me for anything on registration payments",
+    "source_id": "S4",
+    "source_title": "Chat export",
+    "acl_label": "L1",
+    "event_time": "2026-10-02T09:12:00Z"
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "task": "T-52",
+    "title": "Publish v1.0 to the club website",
+    "due": "2026-11-20",
+    "status": "blocked",
+    "blocked_by": [
+      "T-49"
+    ],
+    "holds_up": [
+      "T-58"
+    ],
+    "chunk_id": "S3-T52",
+    "quote": "Blocked by: T-49 retry test",
+    "label": "At risk (Inferred)"
+  }
+]

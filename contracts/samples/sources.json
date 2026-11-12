@@ -1,0 +1,39 @@
+[
+  {
+    "source_id": "S1",
+    "title": "Design notes and meeting notes",
+    "type": "document",
+    "acl_label": "L1",
+    "consent": true,
+    "status": "parsed",
+    "chunks": 9
+  },
+  {
+    "source_id": "S2",
+    "title": "Git export",
+    "type": "git",
+    "acl_label": "L2",
+    "consent": true,
+    "status": "parsed",
+    "chunks": 120
+  },
+  {
+    "source_id": "S3",
+    "title": "Task board export",
+    "type": "task_csv",
+    "acl_label": "L1",
+    "consent": true,
+    "status": "parsed",
+    "chunks": 40
+  },
+  {
+    "source_id": "S4",
+    "title": "Chat export",
+    "type": "chat",
+    "acl_label": "L1",
+    "consent": true,
+    "status": "skipped",
+    "chunks": 0,
+    "note": "Chat parser starts only if Gate 1 passes"
+  }
+]

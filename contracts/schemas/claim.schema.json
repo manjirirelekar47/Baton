@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Claim (extraction contract, guide section 7)",
+  "type": "object",
+  "required": ["type", "entity_key", "attribute", "statement", "evidence"],
+  "properties": {
+    "type": {"enum": ["decision", "owner", "dependency", "blocker", "risk", "recurring_problem", "open_question", "contact", "next_action", "timeline_event"]},
+    "entity_key": {"type": "string"},
+    "attribute": {"type": "string"},
+    "statement": {"type": "string"},
+    "evidence": {
+      "type": "array",
+      "items": {"type": "object", "required": ["chunk_id", "quote"], "properties": {"chunk_id": {"type": "string"}, "quote": {"type": "string"}}}
+    }
+  }
+}

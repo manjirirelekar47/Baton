@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Approved version snapshot (read by the handover module through review/public.py)",
+  "type": "object",
+  "required": ["version_id", "project_id", "status", "claims"],
+  "properties": {
+    "version_id": {"type": "string"},
+    "project_id": {"type": "string"},
+    "status": {"enum": ["draft", "approved"]},
+    "approved_by": {"type": ["string", "null"]},
+    "approved_at": {"type": ["string", "null"]},
+    "snapshot_hash": {"type": ["string", "null"]},
+    "shared_with": {"type": "array", "items": {"enum": ["incoming_maintainer", "incoming_contributor"]}},
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim_id", "type", "statement", "state", "acl_label", "evidence"],
+        "properties": {
+          "claim_id": {"type": "string"},
+          "type": {"type": "string"},
+          "entity_key": {"type": "string"},
+          "attribute": {"type": "string"},
+          "statement": {"type": "string"},
+          "state": {"enum": ["verified", "inferred", "conflicting", "missing", "attested"]},
+          "acl_label": {"enum": ["L1", "L2", "L3", "L4"]},
+          "owner": {"type": ["string", "null"]},
+          "proposed_owner": {"type": ["string", "null"]},
+          "proposed_owner_id": {"type": ["string", "null"]},
+          "due_date": {"type": ["string", "null"]},
+          "blocked_by": {"type": "array", "items": {"type": "string"}},
+          "attested_by": {"type": ["string", "null"]},
+          "evidence": {"type": "array", "items": {"type": "object", "required": ["chunk_id", "quote", "acl_label"]}}
+        }
+      }
+    }
+  }
+}
