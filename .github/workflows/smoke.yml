@@ -1,4 +1,5 @@
-# Release smoke test on the live link after every merge to main. Set repository variable API_URL.
+# Release smoke test on the live link after every merge to main.
+# Skipped until the repository variable API_URL is set (Settings, Secrets and variables, Actions, Variables).
 name: Release smoke test
 on:
   push:
@@ -6,6 +7,7 @@ on:
   workflow_dispatch:
 jobs:
   smoke:
+    if: ${{ vars.API_URL != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
