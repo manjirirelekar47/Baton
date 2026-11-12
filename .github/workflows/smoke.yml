@@ -1,0 +1,15 @@
+# Release smoke test on the live link after every merge to main. Set repository variable API_URL.
+name: Release smoke test
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: sleep 180   # give Render time to redeploy
+      - run: python infra/smoke_test.py "${{ vars.API_URL }}"

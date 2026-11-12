@@ -1,0 +1,3 @@
+- {name: contract-change, color: "b60205", description: "Additive change to a frozen file"}
+- {name: deps, color: "0e8a16", description: "New dependency request"}
+- {name: bug, color: "d73a4a", description: "Something is broken"}

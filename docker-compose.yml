@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: baton
+      POSTGRES_PASSWORD: baton
+      POSTGRES_DB: baton
+    ports: ["5432:5432"]
+  api:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+    environment:
+      ENV: development
+      DATABASE_URL: postgresql://baton:baton@db:5432/baton
+      JWT_SECRET: dev-secret-change-me
+      CORS_ORIGINS: http://localhost:5173
+    ports: ["8000:8000"]
+    depends_on: [db]

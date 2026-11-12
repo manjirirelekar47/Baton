@@ -1,0 +1,17 @@
+/* Design tokens. FROZEN after Day 0. Palette follows the Baton pitch deck. */
+:root {
+  --paper: #f2eee0;
+  --card: #faf8f0;
+  --ink: #232a14;
+  --muted: #5d6350;
+  --line: #c9c7b0;
+  --olive: #4b5a28;
+  --leaf: #c8d68a;
+  --wash: #e5e8cf;
+  --verified: #476b28;
+  --inferred: #8a5c0c;
+  --conflicting: #a8362a;
+  --missing: #5f584c;
+  --attested: #6a3f6e;
+  --focus: #1f5fbf;
+}
