@@ -1,0 +1,8 @@
+# Aggregated. Each module owner edits only their own file under requirements/.
+-r requirements/base.txt
+-r requirements/ingestion.txt
+-r requirements/risk.txt
+-r requirements/extraction.txt
+-r requirements/verification.txt
+-r requirements/review.txt
+-r requirements/handover.txt
