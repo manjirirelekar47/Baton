@@ -1,5 +1,5 @@
-"""STUB router (Samiksha replaces). POST /reconstruct, GET /jobs/{id}. The stub is a labelled replay."""
-from fastapi import APIRouter, Depends
+"""Extraction router (F3). POST /reconstruct, GET /jobs/{id}."""
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.auth import User, current_user
 from app.modules.extraction import public
@@ -14,4 +14,7 @@ def reconstruct(user: User = Depends(current_user)):
 
 @router.get("/jobs/{job_id}")
 def job(job_id: str, user: User = Depends(current_user)):
-    return public.get_job(job_id)
+    res = public.get_job(job_id)
+    if res is None:
+        raise HTTPException(status_code=404, detail="Job not found.")
+    return res

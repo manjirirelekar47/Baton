@@ -1,0 +1,57 @@
+{
+  "project_id": "proj-campus-event-portal",
+  "expected_claims_count": 21,
+  "planted_conflicts_count": 6,
+  "conflicting_pairs": [
+    {
+      "entity_key": "module:payments",
+      "attribute": "owner",
+      "description": "Task board says Aarav, chat says Rohan"
+    },
+    {
+      "entity_key": "server:staging",
+      "attribute": "funding",
+      "description": "Leadership chat says sponsor funding ends in December, git config says 90-day free tier expires ~30 Nov"
+    },
+    {
+      "entity_key": "account:provider-billing",
+      "attribute": "transfer_owner",
+      "description": "Task board assigns Rohan, design document states project administrator must transfer"
+    },
+    {
+      "entity_key": "test:retry",
+      "attribute": "schedule",
+      "description": "Task board lists due date 2026-11-14, meeting note N-04 says unscheduled and unassigned"
+    },
+    {
+      "entity_key": "module:check-in-kiosk",
+      "attribute": "owner",
+      "description": "Task board assigns recovery to Aarav, chat and document state no successor has claimed kiosk"
+    },
+    {
+      "entity_key": "release:v1.0",
+      "attribute": "publish_owner",
+      "description": "Task export S3-T52 lists owner as unassigned, task_board.csv lists owner as Meera"
+    }
+  ],
+  "planted_gaps": [
+    {
+      "question": "Who holds the domain registrar login?",
+      "reason": "No source mentions it"
+    }
+  ],
+  "role_visibility": {
+    "approver": {
+      "visible_claims": 21,
+      "hidden_count": 0
+    },
+    "incoming_maintainer": {
+      "visible_claims": 20,
+      "hidden_count": 1
+    },
+    "incoming_contributor": {
+      "visible_claims": 19,
+      "hidden_count": 2
+    }
+  }
+}
