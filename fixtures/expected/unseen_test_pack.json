@@ -1,0 +1,244 @@
+{
+  "project_id": "proj-unseen-rover",
+  "project_name": "Autonomous Rover Navigation System",
+  "unseen_chunks": {
+    "U-CHK-01": {
+      "chunk_id": "U-CHK-01",
+      "source_title": "Rover Sensor Architecture",
+      "acl_label": "L1",
+      "text": "The primary lidar sensor driver is maintained by Sarah. All telemetry updates run on port 9090."
+    },
+    "U-CHK-02": {
+      "chunk_id": "U-CHK-02",
+      "source_title": "Sprint Task Board",
+      "acl_label": "L1",
+      "text": "Task RV-12: Primary lidar sensor driver | Owner: Alex | Status: Open"
+    },
+    "U-CHK-03": {
+      "chunk_id": "U-CHK-03",
+      "source_title": "Battery Management Specs",
+      "acl_label": "L1",
+      "text": "Battery pack safety cutoff is set at 15 percent charge. System shutoff occurs below 10 percent."
+    },
+    "U-CHK-04": {
+      "chunk_id": "U-CHK-04",
+      "source_title": "Lab Safety Protocol",
+      "acl_label": "L1",
+      "text": "Emergency battery cutoff must remain at 20 percent charge during rover test trials."
+    },
+    "U-CHK-05": {
+      "chunk_id": "U-CHK-05",
+      "source_title": "Cloud Uplink Configuration",
+      "acl_label": "L2",
+      "text": "Uplink server renewal is scheduled for 15 December 2026 under faculty grant."
+    },
+    "U-CHK-06": {
+      "chunk_id": "U-CHK-06",
+      "source_title": "Department Finance Notes",
+      "acl_label": "L2",
+      "text": "Faculty grant for uplink server terminates on 30 November 2026."
+    },
+    "U-CHK-07": {
+      "chunk_id": "U-CHK-07",
+      "source_title": "Motor Controller Integration",
+      "acl_label": "L1",
+      "text": "Motor firmware flashing deadline is 2026-11-25."
+    },
+    "U-CHK-08": {
+      "chunk_id": "U-CHK-08",
+      "source_title": "Mechanical Team Meeting",
+      "acl_label": "L1",
+      "text": "Motor firmware flashing deadline was moved to 2026-12-01."
+    },
+    "U-CHK-09": {
+      "chunk_id": "U-CHK-09",
+      "source_title": "Navigation Subsystem Notes",
+      "acl_label": "L1",
+      "text": "GPS calibration is owned by Priya as per lab records."
+    },
+    "U-CHK-10": {
+      "chunk_id": "U-CHK-10",
+      "source_title": "Weekly Standup Notes",
+      "acl_label": "L1",
+      "text": "GPS calibration has no active owner assigned."
+    },
+    "U-CHK-11": {
+      "chunk_id": "U-CHK-11",
+      "source_title": "Drive Test Log",
+      "acl_label": "L1",
+      "text": "Wheel motor slip occurs on gravel terrain when speed exceeds 2 m/s."
+    },
+    "U-CHK-12": {
+      "chunk_id": "U-CHK-12",
+      "source_title": "Field Report",
+      "acl_label": "L1",
+      "text": "Wheel motor slip occurs due to suspension stiffness regardless of velocity."
+    }
+  },
+  "unseen_claims": [
+    {
+      "claim_id": "u-c01",
+      "type": "owner",
+      "entity_key": "module:lidar",
+      "attribute": "owner",
+      "statement": "Sarah maintains the primary lidar sensor driver",
+      "acl_label": "L1",
+      "owner": "Sarah",
+      "evidence": [{"chunk_id": "U-CHK-01", "quote": "primary lidar sensor driver is maintained by Sarah"}]
+    },
+    {
+      "claim_id": "u-c02",
+      "type": "owner",
+      "entity_key": "module:lidar",
+      "attribute": "owner",
+      "statement": "Alex owns the primary lidar sensor driver",
+      "acl_label": "L1",
+      "owner": "Alex",
+      "evidence": [{"chunk_id": "U-CHK-02", "quote": "Primary lidar sensor driver | Owner: Alex"}]
+    },
+    {
+      "claim_id": "u-c03",
+      "type": "decision",
+      "entity_key": "battery:cutoff",
+      "attribute": "threshold",
+      "statement": "Battery safety cutoff is set at 15 percent charge",
+      "acl_label": "L1",
+      "evidence": [{"chunk_id": "U-CHK-03", "quote": "Battery pack safety cutoff is set at 15 percent charge"}]
+    },
+    {
+      "claim_id": "u-c04",
+      "type": "decision",
+      "entity_key": "battery:cutoff",
+      "attribute": "threshold",
+      "statement": "Emergency battery cutoff is set at 20 percent charge",
+      "acl_label": "L1",
+      "evidence": [{"chunk_id": "U-CHK-04", "quote": "Emergency battery cutoff must remain at 20 percent charge"}]
+    },
+    {
+      "claim_id": "u-c05",
+      "type": "risk",
+      "entity_key": "server:uplink",
+      "attribute": "funding_date",
+      "statement": "Uplink server renewal is scheduled for 15 December 2026",
+      "acl_label": "L2",
+      "evidence": [{"chunk_id": "U-CHK-05", "quote": "Uplink server renewal is scheduled for 15 December 2026"}]
+    },
+    {
+      "claim_id": "u-c06",
+      "type": "risk",
+      "entity_key": "server:uplink",
+      "attribute": "funding_date",
+      "statement": "Faculty grant for uplink server terminates on 30 November 2026",
+      "acl_label": "L2",
+      "evidence": [{"chunk_id": "U-CHK-06", "quote": "Faculty grant for uplink server terminates on 30 November 2026"}]
+    },
+    {
+      "claim_id": "u-c07",
+      "type": "next_action",
+      "entity_key": "motor:firmware",
+      "attribute": "deadline",
+      "statement": "Motor firmware flashing deadline is 2026-11-25",
+      "acl_label": "L1",
+      "due_date": "2026-11-25",
+      "evidence": [{"chunk_id": "U-CHK-07", "quote": "Motor firmware flashing deadline is 2026-11-25"}]
+    },
+    {
+      "claim_id": "u-c08",
+      "type": "next_action",
+      "entity_key": "motor:firmware",
+      "attribute": "deadline",
+      "statement": "Motor firmware flashing deadline was moved to 2026-12-01",
+      "acl_label": "L1",
+      "due_date": "2026-12-01",
+      "evidence": [{"chunk_id": "U-CHK-08", "quote": "Motor firmware flashing deadline was moved to 2026-12-01"}]
+    },
+    {
+      "claim_id": "u-c09",
+      "type": "owner",
+      "entity_key": "module:gps",
+      "attribute": "owner",
+      "statement": "GPS calibration is owned by Priya",
+      "acl_label": "L1",
+      "owner": "Priya",
+      "evidence": [{"chunk_id": "U-CHK-09", "quote": "GPS calibration is owned by Priya"}]
+    },
+    {
+      "claim_id": "u-c10",
+      "type": "owner",
+      "entity_key": "module:gps",
+      "attribute": "owner",
+      "statement": "GPS calibration has no active owner assigned",
+      "acl_label": "L1",
+      "owner": null,
+      "evidence": [{"chunk_id": "U-CHK-10", "quote": "GPS calibration has no active owner assigned"}]
+    },
+    {
+      "claim_id": "u-c11",
+      "type": "recurring_problem",
+      "entity_key": "terrain:slip",
+      "attribute": "cause",
+      "statement": "Wheel motor slip occurs on gravel terrain when speed exceeds 2 m/s",
+      "acl_label": "L1",
+      "evidence": [{"chunk_id": "U-CHK-11", "quote": "Wheel motor slip occurs on gravel terrain when speed exceeds 2 m/s"}]
+    },
+    {
+      "claim_id": "u-c12",
+      "type": "recurring_problem",
+      "entity_key": "terrain:slip",
+      "attribute": "cause",
+      "statement": "Wheel motor slip occurs due to suspension stiffness regardless of velocity",
+      "acl_label": "L1",
+      "evidence": [{"chunk_id": "U-CHK-12", "quote": "Wheel motor slip occurs due to suspension stiffness"}]
+    },
+    {
+      "claim_id": "u-c13",
+      "type": "decision",
+      "entity_key": "network:telemetry",
+      "attribute": "port",
+      "statement": "All telemetry updates run on port 9090",
+      "acl_label": "L1",
+      "evidence": [{"chunk_id": "U-CHK-01", "quote": "telemetry updates run on port 9090"}]
+    },
+    {
+      "claim_id": "u-c14",
+      "type": "blocker",
+      "entity_key": "system:cutoff",
+      "attribute": "condition",
+      "statement": "System shutoff occurs below 10 percent",
+      "acl_label": "L1",
+      "evidence": [{"chunk_id": "U-CHK-03", "quote": "System shutoff occurs below 10 percent"}]
+    },
+    {
+      "claim_id": "u-c15",
+      "type": "decision",
+      "entity_key": "hallucinated:sensor",
+      "attribute": "status",
+      "statement": "Fabricated ultrasonic rangefinder is mounted on the front chassis",
+      "acl_label": "L1",
+      "evidence": [{"chunk_id": "U-CHK-01", "quote": "ultrasonic rangefinder is installed on front bumper"}]
+    },
+    {
+      "claim_id": "u-c16",
+      "type": "contact",
+      "entity_key": "lab:admin",
+      "attribute": "contact",
+      "statement": "Contact lab admin at admin@rover.lab",
+      "acl_label": "L1",
+      "evidence": [{"chunk_id": "U-CHK-09", "quote": "GPS calibration is owned by Priya as per lab records"}]
+    }
+  ],
+  "expected_unseen_metrics": {
+    "total_claims": 16,
+    "valid_claims": 15,
+    "fabricated_claims": 1,
+    "planted_conflicts_count": 6,
+    "conflicting_pairs": [
+      {"entity_key": "module:lidar", "attribute": "owner"},
+      {"entity_key": "battery:cutoff", "attribute": "threshold"},
+      {"entity_key": "server:uplink", "attribute": "funding_date"},
+      {"entity_key": "motor:firmware", "attribute": "deadline"},
+      {"entity_key": "module:gps", "attribute": "owner"},
+      {"entity_key": "terrain:slip", "attribute": "cause"}
+    ]
+  }
+}
