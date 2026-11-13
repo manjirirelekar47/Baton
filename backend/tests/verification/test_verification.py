@@ -2,7 +2,6 @@
 Quote verification, fuzzy match, fabricated quotes, conflict detection,
 state labelling, Gap generation, alias resolution, reverify, and ACL.
 """
-import pytest
 from app.modules.verification import service
 
 
@@ -175,6 +174,7 @@ def test_secret_redaction_in_claim():
 def test_reverify_and_persistence(tmp_path):
     from sqlalchemy import create_engine
     from sqlalchemy.orm import Session
+
     from app.core.db import apply_schema
 
     db_path = tmp_path / "test_ver.db"
@@ -183,8 +183,9 @@ def test_reverify_and_persistence(tmp_path):
 
     with Session(engine) as session:
         # Seed a test project
-        from app.core.audit import now_iso
         from sqlalchemy import text
+
+        from app.core.audit import now_iso
         session.execute(text("insert into projects (id, name, created_at) values ('p-1', 'Test Project', :now)"), {"now": now_iso()})
         session.commit()
 

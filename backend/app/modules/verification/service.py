@@ -9,6 +9,7 @@ import json
 import re
 import uuid
 from typing import Any
+
 from rapidfuzz import fuzz
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -18,7 +19,6 @@ from app.core.audit import now_iso
 from app.core.auth import DEMO_PROJECT_ID
 from app.core.samples import load_sample
 from app.modules.ingestion import public as ingestion_public
-
 
 # Default fuzzy matching threshold (implementation decision, configurable)
 DEFAULT_FUZZY_THRESHOLD = 85.0
@@ -115,7 +115,7 @@ def detect_conflicts(claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
         key = (claim.get("entity_key", "").strip().lower(), claim.get("attribute", "").strip().lower())
         grouped.setdefault(key, []).append(claim)
 
-    for (ent, attr), group in grouped.items():
+    for (_ent, _attr), group in grouped.items():
         if len(group) < 2:
             continue
 

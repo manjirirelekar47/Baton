@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 from app.core.audit import now_iso
 from app.core.config import get_settings
 from app.core.db import get_engine
-from app.modules.extraction.models import ExtractionBatch, ExtractionClaim
+from app.modules.extraction.models import ExtractionBatch
 from app.modules.ingestion import public as ingestion_public
 from app.modules.verification import public as verification_public
 
