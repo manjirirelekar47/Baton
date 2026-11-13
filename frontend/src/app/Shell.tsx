@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { NavLink, Outlet, Link, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, Link, Navigate, useNavigate } from "react-router-dom";
 import { ErrorState, Loading } from "@/shared/ui";
 import { useAuth } from "./auth";
 import { ProgressBar } from "./ProgressBar";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { ROLE_LABELS, type Role } from "@/shared/types";
+import { isSupabaseConfigured } from "./supabase";
 
 export function Shell() {
-  const { user, loading, error, resetDemo, switchRole } = useAuth();
+  const { user, loading, error, resetDemo, switchRole, signOut } = useAuth();
   const navigate = useNavigate();
   const [resetting, setResetting] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -48,6 +49,8 @@ export function Shell() {
         : user?.role === "incoming_maintainer"
           ? "Incoming Maintainer"
           : "Incoming Contributor";
+
+  if (!loading && !user) return <Navigate to="/login" replace />;
 
   return (
     <div className="min-h-screen flex bg-[#F1F5F9] text-slate-900 selection:bg-indigo-500 selection:text-white">
@@ -343,13 +346,30 @@ export function Shell() {
                       <span>Reset Demo Project</span>
                       {resetting && <span className="text-[10px] text-indigo-600">Resetting...</span>}
                     </button>
-                    <Link
-                      to="/login"
-                      onClick={() => setShowProfileMenu(false)}
-                      className="w-full text-left px-2.5 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition block"
-                    >
-                      Sign In / Switch Account
-                    </Link>
+                    {isSupabaseConfigured ? (
+                      <button
+                        onClick={async () => {
+                          setShowProfileMenu(false);
+                          try {
+                            await signOut();
+                            navigate("/login", { replace: true });
+                          } catch (signOutError) {
+                            window.alert(signOutError instanceof Error ? signOutError.message : "Could not sign out.");
+                          }
+                        }}
+                        className="w-full text-left px-2.5 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition"
+                      >
+                        Sign out
+                      </button>
+                    ) : (
+                      <Link
+                        to="/login"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition block"
+                      >
+                        Sign In / Switch Account
+                      </Link>
+                    )}
                   </div>
                 </div>
               )}

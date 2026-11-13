@@ -1,13 +1,16 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Role, User } from "@/shared/types";
-import { api, ApiError, getToken, setToken } from "./api";
+import { api, setToken } from "./api";
+import { isSupabaseConfigured, supabase } from "./supabase";
 
 interface AuthValue {
   user: User | null;
   loading: boolean;
   error: string | null;
   switchRole: (role: Role) => Promise<void>;
+  enterDemoWorkspace: () => Promise<void>;
+  signOut: () => Promise<void>;
   resetDemo: () => Promise<void>;
 }
 
@@ -30,25 +33,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    (async () => {
-      try {
-        if (getToken()) {
-          try {
-            setUser(await api<User>("/me"));
-            return;
-          } catch (e) {
-            if (!(e instanceof ApiError && e.status === 401)) throw e;
-            setToken(null);
-          }
+    if (isSupabaseConfigured && supabase) {
+      let active = true;
+      const { data } = supabase.auth.onAuthStateChange((event) => {
+        if (event === "SIGNED_OUT") {
+          setToken(null);
+          queryClient.clear();
+          setUser(null);
+          setError(null);
         }
-        await login("approver"); // a judge lands straight in the product: no login screen
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Could not sign in.");
-      } finally {
-        setLoading(false);
-      }
-    })();
+      });
+
+      void supabase.auth
+        .getSession()
+        .then(({ data: sessionData, error: sessionError }) => {
+          if (sessionError) throw sessionError;
+          if (active && sessionData.session) return login("approver");
+        })
+        .catch((e) => {
+          if (active) setError(e instanceof Error ? e.message : "Could not restore your session.");
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
+
+      return () => {
+        active = false;
+        data.subscription.unsubscribe();
+      };
+    }
+
+    // Start at the sign-in page on every fresh app load. Demo access is an
+    // explicit action from that page instead of an implicit demo login.
+    setToken(null);
+    setLoading(false);
   }, [login]);
+
+  const enterDemoWorkspace = useCallback(async () => {
+    setError(null);
+    await login("approver");
+  }, [login]);
+
+  const signOut = useCallback(async () => {
+    if (supabase) {
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) throw signOutError;
+    }
+    setToken(null);
+    queryClient.clear();
+    setUser(null);
+  }, [queryClient]);
 
   const switchRole = useCallback(
     async (role: Role) => {
@@ -67,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await login("approver");
   }, [login]);
 
-  return <AuthContext.Provider value={{ user, loading, error, switchRole, resetDemo }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, error, switchRole, enterDemoWorkspace, signOut, resetDemo }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthValue {

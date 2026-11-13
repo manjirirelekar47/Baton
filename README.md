@@ -16,7 +16,13 @@ cd frontend && npm install && npm run dev
 
 Or everything at once: `docker compose up --build` (API on :8000, Postgres on :5432). Then start the web app as above.
 
-Open http://localhost:5173. The first visit signs you in as the Approver automatically; use the role switcher in the header to become Meera, the Incoming Contributor, and so on. **Reset demo** restores the Campus Event Portal project.
+Open http://localhost:5173. Baton opens the sign-in page first; sign in with Supabase or choose **Explore the demo** to enter the seeded workspace. Once inside, use the role switcher in the header to become Meera, the Incoming Contributor, and so on. **Reset demo** restores the Campus Event Portal project.
+
+### Supabase sign-in
+
+The frontend sign-in page supports email/password signup and login, password reset, and Google/GitHub OAuth through Supabase Auth. To enable it, copy `frontend/.env.example` to `frontend/.env.local`, then set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from your Supabase project. The publishable key is safe for browser use; never put a `service_role` or secret key in frontend environment variables. Restart Vite after changing the file. For OAuth, enable Google or GitHub in Supabase Authentication and add `http://localhost:5173/login` to the allowed redirect URLs.
+
+The current Baton API still authenticates against its seeded demo members. A successful Supabase login therefore opens the shared Approver demo workspace; it does not yet create a private Baton workspace or map a Supabase user to backend permissions. Keep this setup for the prototype until the API gains verified Supabase JWT handling and per-user membership provisioning.
 
 ## Where things live (one owner per folder, see .github/CODEOWNERS)
 
