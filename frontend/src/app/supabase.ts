@@ -2,8 +2,10 @@ import { createClient } from "@supabase/supabase-js";
 
 const url = import.meta.env.VITE_SUPABASE_URL?.trim();
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
+const isTestMode = import.meta.env.MODE === "test";
 
-export const isSupabaseConfigured = Boolean(url && publishableKey);
+// Keep real project credentials and network auth flows out of Vitest runs.
+export const isSupabaseConfigured = !isTestMode && Boolean(url && publishableKey);
 
 export const supabase =
   isSupabaseConfigured && url && publishableKey
