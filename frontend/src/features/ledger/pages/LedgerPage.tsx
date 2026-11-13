@@ -50,11 +50,11 @@ export function LedgerPage() {
   const gaps = gapsData ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto w-full">
       {/* Page Header */}
       <div>
-        <h1 className="font-display text-3xl text-olive">Claim Ledger & Reconstruction</h1>
-        <p className="mt-1 text-sm text-muted">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Claim Ledger & Reconstruction</h1>
+        <p className="mt-1 text-sm text-slate-500">
           Reconstructed project knowledge with deterministic quote verification, honesty state badges, and Gap identification.
         </p>
       </div>
@@ -66,7 +66,7 @@ export function LedgerPage() {
       {hiddenCount > 0 && (
         <div
           role="status"
-          className="rounded-lg border border-[#e0c870] bg-[#fffdf0] p-3 text-xs text-[#705800] flex items-center gap-2"
+          className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 text-xs text-amber-900 flex items-center gap-2 shadow-xs"
         >
           <span aria-hidden="true">🔒</span>
           <span>
@@ -76,14 +76,14 @@ export function LedgerPage() {
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-line">
+      <div className="flex items-center gap-2 border-b border-slate-200 text-xs font-semibold">
         <button
           type="button"
           onClick={() => setActiveTab("claims")}
-          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+          className={`border-b-2 px-4 py-2.5 transition-colors cursor-pointer ${
             activeTab === "claims"
-              ? "border-olive text-olive font-semibold"
-              : "border-transparent text-muted hover:text-ink"
+              ? "border-indigo-600 text-indigo-600 font-bold"
+              : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
           Claim Ledger ({claims.length})
@@ -91,10 +91,10 @@ export function LedgerPage() {
         <button
           type="button"
           onClick={() => setActiveTab("gaps")}
-          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+          className={`border-b-2 px-4 py-2.5 transition-colors cursor-pointer ${
             activeTab === "gaps"
-              ? "border-olive text-olive font-semibold"
-              : "border-transparent text-muted hover:text-ink"
+              ? "border-indigo-600 text-indigo-600 font-bold"
+              : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
           Knowledge Gaps ({gaps.length})

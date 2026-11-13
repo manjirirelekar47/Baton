@@ -3,7 +3,82 @@
 @tailwind components;
 @tailwind utilities;
 
-body { background: var(--paper); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
-:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-mark { background: var(--leaf); color: var(--ink); padding: 0 2px; border-radius: 2px; }
+body {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+mark { background: #ede9fe; color: #3730a3; padding: 0 2px; border-radius: 2px; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* Stitch Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Multi-ring SVG Radar chart styling */
+.radar-ring {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.6s ease;
+}
+.radar-bg {
+  fill: none;
+  stroke: #eef2f6;
+}
+
+/* Ambient mesh background for Login & dark themes */
+.mesh-glow-left {
+  background: radial-gradient(circle at 18% 25%, rgba(124, 58, 237, 0.35) 0%, rgba(67, 56, 202, 0.18) 45%, transparent 75%);
+}
+
+.mesh-glow-topright {
+  background: radial-gradient(circle at 82% 15%, rgba(99, 102, 241, 0.28) 0%, rgba(139, 92, 246, 0.12) 40%, transparent 70%);
+}
+
+.mesh-glow-bottom {
+  background: radial-gradient(circle at 45% 85%, rgba(79, 70, 229, 0.22) 0%, transparent 60%);
+}
+
+.contour-lines {
+  background-image: radial-gradient(ellipse at 10% 40%, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                    radial-gradient(ellipse at 90% 60%, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px, 32px 32px;
+}
+
+.btn-gradient-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-gradient-primary:hover {
+  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.45);
+}
+.btn-gradient-primary:active {
+  transform: translateY(0);
+}
+
+.social-btn {
+  transition: all 0.15s ease-in-out;
+}
+.social-btn:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
