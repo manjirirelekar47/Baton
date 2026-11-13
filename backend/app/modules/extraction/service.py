@@ -29,7 +29,8 @@ CRITICAL SECURITY AND ACCURACY RULES:
 2. CITATION OR SILENCE: Every claim must cite a verbatim quote from one of the supplied chunks, along with its exact chunk_id. Do not extrapolate, invent or fabricate quotes.
 3. CLAIM TYPES: Every extracted claim must be classified as exactly one of:
    decision, owner, dependency, blocker, risk, recurring_problem, open_question, contact, next_action, timeline_event.
-4. Output must strictly conform to the required JSON schema.
+4. Output must strictly be a JSON object conforming to:
+{"claims": [{"type": "...", "entity_key": "...", "attribute": "...", "statement": "...", "owner": "...", "due_date": "...", "evidence": [{"chunk_id": "...", "quote": "..."}]}]}
 """
 
 
@@ -53,10 +54,50 @@ def load_replay_claims() -> list[dict[str, Any]]:
     return load_sample("claims")
 
 
+def _normalize_extraction_payload(data: Any, tier: str = "L1") -> dict[str, Any]:
+    """Normalize LLM JSON output to match ExtractionBatch schema."""
+    if isinstance(data, list):
+        raw_claims = data
+    elif isinstance(data, dict):
+        raw_claims = data.get("claims") or data.get("items") or data.get("extracted_claims") or [data]
+    else:
+        raw_claims = []
+
+    normalized_claims = []
+    for c in raw_claims:
+        if not isinstance(c, dict):
+            continue
+        ev = c.get("evidence", [])
+        if not ev and "source" in c:
+            src = c["source"]
+            ev = [src] if isinstance(src, dict) else src
+        elif isinstance(ev, dict):
+            ev = [ev]
+
+        claim_type = c.get("type") or c.get("claim_type") or "decision"
+        normalized_claims.append({
+            "type": claim_type,
+            "entity_key": c.get("entity_key") or c.get("subject") or "module:general",
+            "attribute": c.get("attribute") or ("owner" if claim_type == "owner" else "status"),
+            "statement": c.get("statement") or c.get("details") or c.get("summary") or "",
+            "owner": c.get("owner"),
+            "due_date": c.get("due_date"),
+            "acl_label": c.get("acl_label") or tier,
+            "evidence": ev,
+        })
+    return {"claims": normalized_claims}
+
+
 class LLMProviderAdapter:
     """Provider-agnostic LLM adapter with schema enforcement and repair retry."""
 
     def __init__(self):
+        try:
+            import dotenv
+            dotenv.load_dotenv()
+        except ImportError:
+            pass
+
         self.provider = os.getenv("LLM_PROVIDER", "replay").lower()
         self.model = os.getenv("LLM_MODEL", "gpt-4o-mini")
         self.api_key = os.getenv("LLM_API_KEY", "")
@@ -64,6 +105,9 @@ class LLMProviderAdapter:
 
     def is_live_configured(self) -> bool:
         return self.provider != "replay" and bool(self.api_key)
+
+    def is_gemini(self) -> bool:
+        return self.provider in ("gemini", "google") or "gemini" in self.model.lower()
 
     def extract_from_chunks(self, tier: str, chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not chunks:
@@ -85,10 +129,17 @@ class LLMProviderAdapter:
         user_prompt = f"Extract all relevant claims for ACL tier {tier} from the following sources:\n\n{json.dumps(prompt_data)}"
 
         headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
-        url = self.base_url or "https://api.openai.com/v1/chat/completions"
-        payload = {
+        if self.base_url:
+            url = self.base_url
+            if url.rstrip("/").endswith(("/v1", "/openai")):
+                url = f"{url.rstrip('/')}/chat/completions"
+        elif self.is_gemini():
+            url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+        else:
+            url = "https://api.openai.com/v1/chat/completions"
+
+        payload: dict[str, Any] = {
             "model": self.model,
-            "temperature": 0,
             "messages": [
                 {"role": "system", "content": EXTRACTION_SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
@@ -96,12 +147,23 @@ class LLMProviderAdapter:
             "response_format": {"type": "json_object"},
         }
 
+        if self.is_gemini():
+            # Gemini 3.8 Flash / Thinking models: omit temperature and set reasoning_effort to low
+            payload["reasoning_effort"] = "low"
+        else:
+            payload["temperature"] = 0
+
         try:
-            resp = httpx.post(url, json=payload, headers=headers, timeout=60.0)
+            resp = httpx.post(url, json=payload, headers=headers, timeout=90.0)
+            if resp.status_code == 503:
+                import time
+                time.sleep(3)
+                resp = httpx.post(url, json=payload, headers=headers, timeout=90.0)
             resp.raise_for_status()
             content = resp.json()["choices"][0]["message"]["content"]
             data = json.loads(content)
-            batch = ExtractionBatch.model_validate(data)
+            norm = _normalize_extraction_payload(data, tier=tier)
+            batch = ExtractionBatch.model_validate(norm)
             return [c.model_dump() for c in batch.claims]
         except (httpx.HTTPError, json.JSONDecodeError, ValidationError, KeyError):
             # One schema repair retry
@@ -112,12 +174,19 @@ class LLMProviderAdapter:
                     "\"attribute\": \"...\", \"statement\": \"...\", \"evidence\": [{\"chunk_id\": \"...\", \"quote\": \"...\"}]}]}"
                 )
                 repair_payload = dict(payload)
-                repair_payload["messages"].append({"role": "user", "content": repair_prompt})
-                resp = httpx.post(url, json=repair_payload, headers=headers, timeout=60.0)
+                repair_payload["messages"] = list(payload["messages"]) + [
+                    {"role": "user", "content": repair_prompt}
+                ]
+                resp = httpx.post(url, json=repair_payload, headers=headers, timeout=90.0)
+                if resp.status_code == 503:
+                    import time
+                    time.sleep(3)
+                    resp = httpx.post(url, json=repair_payload, headers=headers, timeout=90.0)
                 resp.raise_for_status()
                 content = resp.json()["choices"][0]["message"]["content"]
                 data = json.loads(content)
-                batch = ExtractionBatch.model_validate(data)
+                norm = _normalize_extraction_payload(data, tier=tier)
+                batch = ExtractionBatch.model_validate(norm)
                 return [c.model_dump() for c in batch.claims]
             except Exception:
                 # If live retry fails, fall back safely to replay mode without fabricating data
