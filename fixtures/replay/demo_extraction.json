@@ -1,0 +1,334 @@
+[
+  {
+    "claim_id": "c-001",
+    "type": "owner",
+    "entity_key": "module:payments",
+    "attribute": "owner",
+    "statement": "Rohan owns the payments module",
+    "acl_label": "L1",
+    "owner": "Rohan",
+    "proposed_owner": "Meera",
+    "proposed_owner_id": "u-meera",
+    "evidence": [
+      {
+        "chunk_id": "S4-212",
+        "quote": "Rohan took payments over",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-015",
+    "type": "owner",
+    "entity_key": "module:payments",
+    "attribute": "owner",
+    "statement": "Aarav is recorded as the owner of the payments module",
+    "acl_label": "L1",
+    "owner": "Aarav",
+    "proposed_owner": "Meera",
+    "proposed_owner_id": "u-meera",
+    "evidence": [
+      {
+        "chunk_id": "S3-T41",
+        "quote": "Payments module | Owner: Aarav",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-009",
+    "type": "risk",
+    "entity_key": "server:staging",
+    "attribute": "funding",
+    "statement": "Staging server operates on a 90-day free tier expiring around 30 Nov",
+    "acl_label": "L2",
+    "evidence": [
+      {
+        "chunk_id": "S2-CFG-7",
+        "quote": "free tier, 90 days",
+        "acl_label": "L2"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-010",
+    "type": "decision",
+    "entity_key": "server:staging",
+    "attribute": "funding",
+    "statement": "Sponsor funding for the staging server ends in December",
+    "acl_label": "L3",
+    "evidence": [
+      {
+        "chunk_id": "S4-301",
+        "quote": "Sponsor funding for the staging server ends in December",
+        "acl_label": "L3"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-018",
+    "type": "owner",
+    "entity_key": "account:provider-billing",
+    "attribute": "transfer_owner",
+    "statement": "Transfer payment provider billing account ownership is assigned to Rohan",
+    "acl_label": "L1",
+    "owner": "Rohan",
+    "evidence": [
+      {
+        "chunk_id": "demo-task_board-173e580149ca",
+        "quote": "Transfer payment provider billing account | owner: Rohan",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-019",
+    "type": "decision",
+    "entity_key": "account:provider-billing",
+    "attribute": "transfer_owner",
+    "statement": "The project administrator must transfer billing ownership before handover is complete",
+    "acl_label": "L1",
+    "owner": "Project Administrator",
+    "evidence": [
+      {
+        "chunk_id": "demo-campus_event_portal-a4ba512c79db",
+        "quote": "The project administrator must transfer billing ownership before the handover is complete",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-020",
+    "type": "next_action",
+    "entity_key": "test:retry",
+    "attribute": "schedule",
+    "statement": "Write payment retry test is scheduled open with due date 2026-11-14",
+    "acl_label": "L1",
+    "due_date": "2026-11-14",
+    "evidence": [
+      {
+        "chunk_id": "demo-task_board-02551447f926",
+        "quote": "Write payment retry test | owner: unassigned | status: open | due: 2026-11-14",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-005",
+    "type": "next_action",
+    "entity_key": "test:retry",
+    "attribute": "schedule",
+    "statement": "Nobody has been assigned to write the retry test yet",
+    "acl_label": "L1",
+    "evidence": [
+      {
+        "chunk_id": "S1-N04",
+        "quote": "Nobody has been assigned to write the retry test yet",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-002",
+    "type": "owner",
+    "entity_key": "module:check-in-kiosk",
+    "attribute": "owner",
+    "statement": "The check-in kiosk module has no recorded owner or successor",
+    "acl_label": "L1",
+    "owner": null,
+    "proposed_owner": "Incoming Contributor",
+    "proposed_owner_id": "u-contrib",
+    "evidence": [
+      {
+        "chunk_id": "S4-150",
+        "quote": "nobody has claimed it yet",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-021",
+    "type": "owner",
+    "entity_key": "module:check-in-kiosk",
+    "attribute": "owner",
+    "statement": "Verify kiosk offline recovery is assigned to Aarav",
+    "acl_label": "L1",
+    "owner": "Aarav",
+    "evidence": [
+      {
+        "chunk_id": "demo-task_board-780090831bae",
+        "quote": "Verify kiosk offline recovery | owner: Aarav",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-006",
+    "type": "next_action",
+    "entity_key": "release:v1.0",
+    "attribute": "publish_owner",
+    "statement": "Publish v1.0 to the club website has owner unassigned",
+    "acl_label": "L1",
+    "owner": "unassigned",
+    "due_date": "2026-11-20",
+    "evidence": [
+      {
+        "chunk_id": "S3-T52",
+        "quote": "Publish v1.0 to the club website | Owner: unassigned",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-022",
+    "type": "next_action",
+    "entity_key": "release:v1.0",
+    "attribute": "publish_owner",
+    "statement": "Publish v1.0 to the club website is assigned to Meera",
+    "acl_label": "L1",
+    "owner": "Meera",
+    "due_date": "2026-11-20",
+    "evidence": [
+      {
+        "chunk_id": "demo-task_board-be1017a7721c",
+        "quote": "Publish v1.0 to the club website | owner: Meera",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-003",
+    "type": "owner",
+    "entity_key": "module:notifications",
+    "attribute": "owner",
+    "statement": "The notification module sends reminder emails and has no assigned owner",
+    "acl_label": "L1",
+    "owner": null,
+    "proposed_owner": null,
+    "proposed_owner_id": null,
+    "evidence": [
+      {
+        "chunk_id": "S1-DESIGN-2",
+        "quote": "The notification module sends reminder emails",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-004",
+    "type": "blocker",
+    "entity_key": "release:v1.0",
+    "attribute": "status",
+    "statement": "The v1.0 release is on hold until retry behaviour is tested",
+    "acl_label": "L1",
+    "evidence": [
+      {
+        "chunk_id": "S1-N04",
+        "quote": "hold the v1.0 release until retry behaviour is tested",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-007",
+    "type": "next_action",
+    "entity_key": "event:club-fair",
+    "attribute": "announce",
+    "statement": "Announce the portal launch at the club fair",
+    "acl_label": "L1",
+    "due_date": "2026-12-05",
+    "blocked_by": ["c-006"],
+    "evidence": [
+      {
+        "chunk_id": "S3-T58",
+        "quote": "Due: 5 Dec 2026",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-008",
+    "type": "decision",
+    "entity_key": "module:payments",
+    "attribute": "mode",
+    "statement": "Registration payments stay in test mode until finance approves",
+    "acl_label": "L1",
+    "evidence": [
+      {
+        "chunk_id": "S1-README-3",
+        "quote": "we stay in test mode until finance approves",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-011",
+    "type": "recurring_problem",
+    "entity_key": "deploy",
+    "attribute": "failure",
+    "statement": "Deploys fail on Fridays unless the build cache is cleared",
+    "acl_label": "L1",
+    "attested_by": "Aarav",
+    "evidence": [
+      {
+        "chunk_id": "GI-001",
+        "quote": "Deploys fail on Fridays unless the build cache is cleared",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-012",
+    "type": "timeline_event",
+    "entity_key": "server:staging",
+    "attribute": "first_deploy",
+    "statement": "Staging was first deployed on 1 Sep 2026",
+    "acl_label": "L1",
+    "evidence": [
+      {
+        "chunk_id": "S2-C-001",
+        "quote": "first deploy of staging",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-013",
+    "type": "open_question",
+    "entity_key": "account:domain-registrar",
+    "attribute": "login_holder",
+    "statement": "Who holds the domain registrar login?",
+    "acl_label": "L1",
+    "evidence": []
+  },
+  {
+    "claim_id": "c-014",
+    "type": "contact",
+    "entity_key": "module:payments",
+    "attribute": "contact",
+    "statement": "Ask Rohan about registration payments",
+    "acl_label": "L1",
+    "evidence": [
+      {
+        "chunk_id": "S4-212",
+        "quote": "ping me for anything on registration payments",
+        "acl_label": "L1"
+      }
+    ]
+  },
+  {
+    "claim_id": "c-016",
+    "type": "dependency",
+    "entity_key": "module:notifications",
+    "attribute": "external_service",
+    "statement": "The notification module sends reminder emails through the club mailbox",
+    "acl_label": "L1",
+    "evidence": [
+      {
+        "chunk_id": "S1-DESIGN-2",
+        "quote": "The notification module sends reminder emails through the club mailbox",
+        "acl_label": "L1"
+      }
+    ]
+  }
+]

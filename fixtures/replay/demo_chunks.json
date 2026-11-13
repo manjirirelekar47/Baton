@@ -1,0 +1,2466 @@
+{
+  "S4-212": {
+    "chunk_id": "S4-212",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S4",
+    "source_type": "chat",
+    "source_title": "Chat export",
+    "author": "Rohan",
+    "event_time": "2026-10-02T09:12:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:c62d1aae84ed879b34d3b8d3feade7d5d8259b3d21b78fb63a73a169b81248c5",
+    "char_span": [
+      0,
+      153
+    ],
+    "text": "[2 Oct 2026, #general] Rohan: Quick update for everyone: Rohan took payments over from Aarav last week, so ping me for anything on registration payments."
+  },
+  "S3-T41": {
+    "chunk_id": "S3-T41",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S3",
+    "source_type": "task_csv",
+    "source_title": "Task board export",
+    "author": "Aarav",
+    "event_time": "2026-08-12T16:40:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:b5072c446bd6f09e3ae5408b178213896cfdb8712fa4d713bc341a40b3144d5c",
+    "char_span": [
+      0,
+      91
+    ],
+    "text": "Task T-41 | Payments module | Owner: Aarav | Status: In progress | Last edited: 12 Aug 2026"
+  },
+  "S1-N04": {
+    "chunk_id": "S1-N04",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S1",
+    "source_type": "document",
+    "source_title": "Design notes and meeting notes",
+    "author": "Meera",
+    "event_time": "2026-10-10T17:00:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:1fce627d4801a67bafbe0f6a18d621086f50c2d4374cf95acf3712597ef9de53",
+    "char_span": [
+      0,
+      151
+    ],
+    "text": "Meeting note N-04 (10 Oct 2026). Decision: hold the v1.0 release until retry behaviour is tested. Nobody has been assigned to write the retry test yet."
+  },
+  "S1-README-3": {
+    "chunk_id": "S1-README-3",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S1",
+    "source_type": "document",
+    "source_title": "Design notes and meeting notes",
+    "author": "Aarav",
+    "event_time": "2026-09-14T11:00:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:9e244d8be303cef00b82a1c2e2f4c1965b73cdb6d570dceaa3bc64decdd6ca47",
+    "char_span": [
+      0,
+      127
+    ],
+    "text": "Payments: registration payments run in test mode. Live keys were never issued, and we stay in test mode until finance approves."
+  },
+  "S1-DESIGN-2": {
+    "chunk_id": "S1-DESIGN-2",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S1",
+    "source_type": "document",
+    "source_title": "Design notes and meeting notes",
+    "author": "Aarav",
+    "event_time": "2026-09-02T10:00:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:375a310ed22fb05c6025a0b36ac1ab7e790106f71299a0c2082751d98739daaa",
+    "char_span": [
+      0,
+      86
+    ],
+    "text": "Design note 2: The notification module sends reminder emails through the club mailbox."
+  },
+  "S2-CFG-7": {
+    "chunk_id": "S2-CFG-7",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S2",
+    "source_type": "git",
+    "source_title": "Git export",
+    "author": "Aarav",
+    "event_time": "2026-09-01T08:00:00Z",
+    "acl_label": "L2",
+    "content_hash": "sha256:6936aee01cff8b4c3e9a38cdad5a3237815bd1758e2804876dc2fc85065e1886",
+    "char_span": [
+      0,
+      72
+    ],
+    "text": "# staging.yml: free tier, 90 days. Created on first deploy (1 Sep 2026)."
+  },
+  "S2-C-001": {
+    "chunk_id": "S2-C-001",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S2",
+    "source_type": "git",
+    "source_title": "Git export",
+    "author": "Aarav",
+    "event_time": "2026-09-01T08:05:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:be44b4bd7a439266f1d452a26999d1f3b4c3806e8fb12f993953f2099a5a5912",
+    "char_span": [
+      0,
+      81
+    ],
+    "text": "commit 4f2a9c1 (1 Sep 2026) deploy: first deploy of staging to the free-tier host"
+  },
+  "S4-301": {
+    "chunk_id": "S4-301",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S4",
+    "source_type": "chat",
+    "source_title": "Chat export",
+    "author": "Aarav",
+    "event_time": "2026-10-05T19:30:00Z",
+    "acl_label": "L3",
+    "content_hash": "sha256:23bf4fbaeb2665ee1fec019f7e5a41a6701526920091f67fa06c93725be83f61",
+    "char_span": [
+      0,
+      133
+    ],
+    "text": "[Leadership channel, 5 Oct 2026] Sponsor funding for the staging server ends in December. Do not announce this to the wider team yet."
+  },
+  "S4-150": {
+    "chunk_id": "S4-150",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S4",
+    "source_type": "chat",
+    "source_title": "Chat export",
+    "author": "Aarav",
+    "event_time": "2026-09-18T14:20:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:96ef561634295b82a7fd8cc5af4c174cfb03b81db0396f69fc38a9dc687d8ddc",
+    "char_span": [
+      0,
+      97
+    ],
+    "text": "[18 Sep 2026, #ops] Aarav: The check-in kiosk code lives in /kiosk and nobody has claimed it yet."
+  },
+  "S3-T52": {
+    "chunk_id": "S3-T52",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S3",
+    "source_type": "task_csv",
+    "source_title": "Task board export",
+    "author": "Meera",
+    "event_time": "2026-10-11T09:00:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:8032ebe11c74b42db55726814d0b4f7bac175b4e76a772e521a2dd496cd8358f",
+    "char_span": [
+      0,
+      113
+    ],
+    "text": "Task T-52 | Publish v1.0 to the club website | Owner: unassigned | Due: 20 Nov 2026 | Blocked by: T-49 retry test"
+  },
+  "S3-T58": {
+    "chunk_id": "S3-T58",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "S3",
+    "source_type": "task_csv",
+    "source_title": "Task board export",
+    "author": "Meera",
+    "event_time": "2026-10-11T09:05:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:767e10ff5ef3faf67167240e16971b3a1f45ea7383ff3ddc0348e37f49d9905b",
+    "char_span": [
+      0,
+      92
+    ],
+    "text": "Task T-58 | Announce the portal launch at the club fair | Due: 5 Dec 2026 | Blocked by: T-52"
+  },
+  "GI-001": {
+    "chunk_id": "GI-001",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "GI",
+    "source_type": "attested",
+    "source_title": "Gap Interview (Aarav)",
+    "author": "Aarav",
+    "event_time": "2026-11-08T12:00:00Z",
+    "acl_label": "L1",
+    "content_hash": "sha256:e7f1297c3f76a2ab98e8adf46ce8b357041c33bb6fdb8b6fe9c5b3b5807e5f82",
+    "char_span": [
+      0,
+      97
+    ],
+    "text": "Gap Interview answer from Aarav: Deploys fail on Fridays unless the build cache is cleared first."
+  },
+  "demo-campus_event_portal-8f76df920b3b": {
+    "chunk_id": "demo-campus_event_portal-8f76df920b3b",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:0aa5c7b35ca6e44f2b04148b4949df591b135b48865a106b22b17ab07a3ea030",
+    "char_span": [
+      0,
+      45
+    ],
+    "text": "# Campus Event Portal \u2014 synthetic source pack"
+  },
+  "demo-campus_event_portal-52405cd05f60": {
+    "chunk_id": "demo-campus_event_portal-52405cd05f60",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:4f6add190346b2f417c6c270d20c7c41dbf3b29b6a53d89ba6aa0e3f3370dc2a",
+    "char_span": [
+      0,
+      85
+    ],
+    "text": "> Synthetic demonstration data only. Names, project details and events are fictional."
+  },
+  "demo-campus_event_portal-099693751b51": {
+    "chunk_id": "demo-campus_event_portal-099693751b51",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:29332f7cb62033971367476f48ad2ba3eff75dea5eb4caddb7f3fca07d9d985f",
+    "char_span": [
+      0,
+      19
+    ],
+    "text": "## Project overview"
+  },
+  "demo-campus_event_portal-8992123f902b": {
+    "chunk_id": "demo-campus_event_portal-8992123f902b",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:4bd8a472f20b9982d80ea0615e4efb4d11d5ad79aa8961a4df81f88a3d5f66fe",
+    "char_span": [
+      0,
+      90
+    ],
+    "text": "The Campus Event Portal supports event registration, payments, check-in and announcements."
+  },
+  "demo-campus_event_portal-a96ac589c00f": {
+    "chunk_id": "demo-campus_event_portal-a96ac589c00f",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:59dbe9b2f51e55f3e6862c6bfde5831af08b0677b2b64a9decded6fc35eca72f",
+    "char_span": [
+      0,
+      11
+    ],
+    "text": "## Payments"
+  },
+  "demo-campus_event_portal-7263401bf04a": {
+    "chunk_id": "demo-campus_event_portal-7263401bf04a",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:6841119b0c62ba102d17ba13231457b3885d26c5ce7292a16d22a5fb1a22f535",
+    "char_span": [
+      0,
+      157
+    ],
+    "text": "Payments module: Rohan took payments over from Aarav last week, so ping Rohan for registration payment questions. The payments code is in `backend/payments`."
+  },
+  "demo-campus_event_portal-f5a8d2e9972a": {
+    "chunk_id": "demo-campus_event_portal-f5a8d2e9972a",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:aa8b8dfb74635bf305ca733176c5bc6543073a6b9ba1b315cbf96a8bd5bf0885",
+    "char_span": [
+      0,
+      118
+    ],
+    "text": "Decision: keep registration payments in test mode until Finance approves live processing. Live keys were never issued."
+  },
+  "demo-campus_event_portal-97d652a1e163": {
+    "chunk_id": "demo-campus_event_portal-97d652a1e163",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:955dcd6a393c7eca325ed260d369d84ba6406178207cfaa6e775608f5ce593a0",
+    "char_span": [
+      0,
+      159
+    ],
+    "text": "The payments module has an unfinished retry worker. The release is on hold until retry behaviour is tested. No owner has been assigned to write the retry test."
+  },
+  "demo-campus_event_portal-a4ba512c79db": {
+    "chunk_id": "demo-campus_event_portal-a4ba512c79db",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:7dbff8e365891e1e38bbf46d67c02fddcd4bbd03691bebdd26ef44f1a7689a90",
+    "char_span": [
+      0,
+      167
+    ],
+    "text": "A personal account is still used for the payment provider's staging webhook. The project administrator must transfer billing ownership before the handover is complete."
+  },
+  "demo-campus_event_portal-306367072a44": {
+    "chunk_id": "demo-campus_event_portal-306367072a44",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:6692eb359df02a23b360d8ba36d18fa0df4b48f4e5b4205ca6d0b2cc0029895a",
+    "char_span": [
+      0,
+      17
+    ],
+    "text": "## Check-in kiosk"
+  },
+  "demo-campus_event_portal-ed179731c6b5": {
+    "chunk_id": "demo-campus_event_portal-ed179731c6b5",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:531c1aa24a4cb2298805c829c70ec50cb33dfb32bcea65d62e6e80918caf0fd0",
+    "char_span": [
+      0,
+      128
+    ],
+    "text": "The check-in kiosk code lives in `/kiosk`. Aarav authored the current kiosk implementation. No successor has accepted ownership."
+  },
+  "demo-campus_event_portal-f4827af647b8": {
+    "chunk_id": "demo-campus_event_portal-f4827af647b8",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:57a899037230c693380012d69ecde68fbea79f406dcb24b89a230e296a3f37dd",
+    "char_span": [
+      0,
+      11
+    ],
+    "text": "## Timeline"
+  },
+  "demo-campus_event_portal-df0aa34cbe28": {
+    "chunk_id": "demo-campus_event_portal-df0aa34cbe28",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:096908ec656f7d383447732ea2d0be870eb9528dd271f5272fa13535ce4ace50",
+    "char_span": [
+      0,
+      288
+    ],
+    "text": "- 2026-09-01T08:05:00Z \u2014 First staging deployment.\r\n- 2026-09-14T11:00:00Z \u2014 Team confirmed registration remains in test mode pending Finance approval.\r\n- 2026-10-02T09:12:00Z \u2014 Rohan announced that he had taken over payments.\r\n- 2026-10-10T17:00:00Z \u2014 Release held pending retry testing."
+  },
+  "demo-campus_event_portal-dcc13578dae9": {
+    "chunk_id": "demo-campus_event_portal-dcc13578dae9",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:1fc97ac5f3118650badfb1c92c837cf15debfdf72c381628c446b58a66d58825",
+    "char_span": [
+      0,
+      19
+    ],
+    "text": "## Unfinished tasks"
+  },
+  "demo-campus_event_portal-88e10b8f4041": {
+    "chunk_id": "demo-campus_event_portal-88e10b8f4041",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:21f42c5578054e07a658e3d193f8f6e0ab4815448068cc847be5b036860f79e5",
+    "char_span": [
+      0,
+      235
+    ],
+    "text": "- T-49 \u2014 Write retry test; owner unassigned; status open.\r\n- T-52 \u2014 Publish v1.0 to the club website; owner Meera; due 2026-11-20; blocked by T-49.\r\n- T-58 \u2014 Announce the portal launch at the club fair; due 2026-12-05; blocked by T-52."
+  },
+  "demo-campus_event_portal-a7c3fdcc6c4d": {
+    "chunk_id": "demo-campus_event_portal-a7c3fdcc6c4d",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:e5752e94417b4081a1f6adf7894ed48bf83c6e2d2ad45c24fb6f76d7fc031280",
+    "char_span": [
+      0,
+      23
+    ],
+    "text": "## Security test marker"
+  },
+  "demo-campus_event_portal-cdb369686b3b": {
+    "chunk_id": "demo-campus_event_portal-cdb369686b3b",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-campus_event_portal",
+    "source_type": "document",
+    "source_title": "campus_event_portal.md",
+    "author": "Unknown",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:081832faf067a1387ffda42308c871802b1beca3077b776dcfcc57322087a773",
+    "char_span": [
+      0,
+      58
+    ],
+    "text": "Example only: [REDACTED_SECRET]\r\nContact: [REDACTED_EMAIL]"
+  },
+  "demo-git_export-55983e573094": {
+    "chunk_id": "demo-git_export-55983e573094",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-01T15:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:019edea35ba561c5bab0a59e1e95b879c14128379817b95e1e0a264fd34a5db3",
+    "char_span": [
+      0,
+      242
+    ],
+    "text": "commit 0000000000000000000000000000000000000001 | add webhook retry handling | module: payments | files: [\"backend/payments/add.py\"] | imports: [\"payment-gateway\", \"queue\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 1, \"state\": \"open\"}"
+  },
+  "demo-git_export-898d718ebc43": {
+    "chunk_id": "demo-git_export-898d718ebc43",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-01T22:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:1a42c57f95d2935d5009e11f5feb77a6d72ac091e1dd1bd20e0fbb9c36676ad0",
+    "char_span": [
+      0,
+      202
+    ],
+    "text": "commit 0000000000000000000000000000000000000002 | fix idempotency guard | module: payments | files: [\"backend/payments/fix.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 2, \"state\": \"merged\"}"
+  },
+  "demo-git_export-6a8d7bb56e01": {
+    "chunk_id": "demo-git_export-6a8d7bb56e01",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-02T05:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:55bb1114cfa050dff7e4e0823d703bb1faf0ba947e16da87b7f6dc2ce310c03e",
+    "char_span": [
+      0,
+      187
+    ],
+    "text": "commit 0000000000000000000000000000000000000003 | update payment status mapping | module: payments | files: [\"backend/payments/update.py\"] | pull_request: {\"number\": 3, \"state\": \"merged\"}"
+  },
+  "demo-git_export-1bf15efca96d": {
+    "chunk_id": "demo-git_export-1bf15efca96d",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-02T12:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:ddfc2c7148e5ff5c415bf21911def245f85554437f2dca55347a6b542e1d6466",
+    "char_span": [
+      0,
+      229
+    ],
+    "text": "commit 0000000000000000000000000000000000000004 | record payment provider timeout | module: payments | files: [\"backend/payments/record.py\"] | imports: [\"payment-gateway\", \"queue\"] | pull_request: {\"number\": 4, \"state\": \"merged\"}"
+  },
+  "demo-git_export-df88abbd2b3b": {
+    "chunk_id": "demo-git_export-df88abbd2b3b",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-02T19:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:88efffbcbc91f2577f0503f94c0b4229f3471ac66551cebaf9c87129cc0f9361",
+    "char_span": [
+      0,
+      202
+    ],
+    "text": "commit 0000000000000000000000000000000000000005 | add reconciliation check | module: payments | files: [\"backend/payments/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 5, \"state\": \"merged\"}"
+  },
+  "demo-git_export-3d2b656acae5": {
+    "chunk_id": "demo-git_export-3d2b656acae5",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-03T02:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:8c33da30566da4f05e3db0c014d07e6f8981d84953250a2e3570f232b2185fcf",
+    "char_span": [
+      0,
+      205
+    ],
+    "text": "commit 0000000000000000000000000000000000000006 | add webhook retry handling | module: payments | files: [\"backend/payments/add.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 6, \"state\": \"open\"}"
+  },
+  "demo-git_export-fd550683c94d": {
+    "chunk_id": "demo-git_export-fd550683c94d",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-03T09:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:1ce4e88d13bdbb07c26e9c4c47a1e0c188e7b9e2f2d7696270a10885875c10a0",
+    "char_span": [
+      0,
+      216
+    ],
+    "text": "commit 0000000000000000000000000000000000000007 | fix idempotency guard | module: payments | files: [\"backend/payments/fix.py\"] | imports: [\"payment-gateway\", \"queue\"] | pull_request: {\"number\": 7, \"state\": \"merged\"}"
+  },
+  "demo-git_export-4f2350455a60": {
+    "chunk_id": "demo-git_export-4f2350455a60",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-03T16:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:1a3dfd33acd4857b5f00707c3c54da75b52c3829fe60721d0ecc7bd622528ed0",
+    "char_span": [
+      0,
+      187
+    ],
+    "text": "commit 0000000000000000000000000000000000000008 | update payment status mapping | module: payments | files: [\"backend/payments/update.py\"] | pull_request: {\"number\": 8, \"state\": \"merged\"}"
+  },
+  "demo-git_export-6cb2c7208925": {
+    "chunk_id": "demo-git_export-6cb2c7208925",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-03T23:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:1fc7702e8a778580c3b560599c4e3b23bac82c9b6be08bbad48ffa70a41e28df",
+    "char_span": [
+      0,
+      212
+    ],
+    "text": "commit 0000000000000000000000000000000000000009 | record payment provider timeout | module: payments | files: [\"backend/payments/record.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 9, \"state\": \"merged\"}"
+  },
+  "demo-git_export-ebe57a9e2f00": {
+    "chunk_id": "demo-git_export-ebe57a9e2f00",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-04T06:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:353561dd4df0b649b64c698824cb7fd359d7bf1f20de974fb230c2be309c3cfb",
+    "char_span": [
+      0,
+      246
+    ],
+    "text": "commit 000000000000000000000000000000000000000a | add reconciliation check | module: payments | files: [\"backend/payments/add.py\"] | imports: [\"payment-gateway\", \"queue\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 10, \"state\": \"merged\"}"
+  },
+  "demo-git_export-910b9644fe8d": {
+    "chunk_id": "demo-git_export-910b9644fe8d",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-04T13:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:44e2efe1d5ee9b936aa0086e8ea7de0c8dd5cd8ea7ac397f1ebb2b072a4d79be",
+    "char_span": [
+      0,
+      180
+    ],
+    "text": "commit 000000000000000000000000000000000000000b | add webhook retry handling | module: payments | files: [\"backend/payments/add.py\"] | pull_request: {\"number\": 11, \"state\": \"open\"}"
+  },
+  "demo-git_export-b0b8d612c0fc": {
+    "chunk_id": "demo-git_export-b0b8d612c0fc",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-04T20:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:9abd120bca8c969d302866238f25d5e4f958614b4191c2cc60a4dc48daa27a16",
+    "char_span": [
+      0,
+      177
+    ],
+    "text": "commit 000000000000000000000000000000000000000c | fix idempotency guard | module: payments | files: [\"backend/payments/fix.py\"] | pull_request: {\"number\": 12, \"state\": \"merged\"}"
+  },
+  "demo-git_export-a3ac218a8f22": {
+    "chunk_id": "demo-git_export-a3ac218a8f22",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-05T03:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:e904ed1bde171a6fd203f0da4de23cdc73746ab01d0c15ee3c7e8a7860c81be1",
+    "char_span": [
+      0,
+      251
+    ],
+    "text": "commit 000000000000000000000000000000000000000d | update payment status mapping | module: payments | files: [\"backend/payments/update.py\"] | imports: [\"payment-gateway\", \"queue\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 13, \"state\": \"merged\"}"
+  },
+  "demo-git_export-a16de4c9cc35": {
+    "chunk_id": "demo-git_export-a16de4c9cc35",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-05T10:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:2e8d4288405159c9d3afcff05d5b21838f0b6fa4ebf0bbd5d5a79f59525ebfc0",
+    "char_span": [
+      0,
+      216
+    ],
+    "text": "commit 000000000000000000000000000000000000000e | record payment provider timeout | module: payments | files: [\"backend/payments/record.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 14, \"state\": \"merged\"}"
+  },
+  "demo-git_export-3c1e877cf505": {
+    "chunk_id": "demo-git_export-3c1e877cf505",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-05T17:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:5d94b2c9755ccf4a7c882df79b9e5e30d054d6a75a6e86abd1c823f175654a21",
+    "char_span": [
+      0,
+      180
+    ],
+    "text": "commit 000000000000000000000000000000000000000f | add reconciliation check | module: payments | files: [\"backend/payments/add.py\"] | pull_request: {\"number\": 15, \"state\": \"merged\"}"
+  },
+  "demo-git_export-03fe5e4ac021": {
+    "chunk_id": "demo-git_export-03fe5e4ac021",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-06T00:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:f3ec5b4cce788f846ec29953ec730f9376b740346626d12d3b75b585755426e4",
+    "char_span": [
+      0,
+      220
+    ],
+    "text": "commit 0000000000000000000000000000000000000010 | add webhook retry handling | module: payments | files: [\"backend/payments/add.py\"] | imports: [\"payment-gateway\", \"queue\"] | pull_request: {\"number\": 16, \"state\": \"open\"}"
+  },
+  "demo-git_export-d7fa893b876c": {
+    "chunk_id": "demo-git_export-d7fa893b876c",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-06T07:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:35557709897c1f93246c293d932e6f7406de9da9fc1fc33726bcbf36219afa40",
+    "char_span": [
+      0,
+      200
+    ],
+    "text": "commit 0000000000000000000000000000000000000011 | fix idempotency guard | module: payments | files: [\"backend/payments/fix.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 17, \"state\": \"merged\"}"
+  },
+  "demo-git_export-7174f372ecaf": {
+    "chunk_id": "demo-git_export-7174f372ecaf",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-06T14:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:51d0c8a947d94cc2a54eaf42593e7fedb14fbd0c93b0f7d04bca821f4b103d8f",
+    "char_span": [
+      0,
+      214
+    ],
+    "text": "commit 0000000000000000000000000000000000000012 | update payment status mapping | module: payments | files: [\"backend/payments/update.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 18, \"state\": \"merged\"}"
+  },
+  "demo-git_export-6aee6f251a41": {
+    "chunk_id": "demo-git_export-6aee6f251a41",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-06T21:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:4dd72f1d830366637c12debf90dd37a353167d98b7cc21ce79481b5b074a0dff",
+    "char_span": [
+      0,
+      230
+    ],
+    "text": "commit 0000000000000000000000000000000000000013 | record payment provider timeout | module: payments | files: [\"backend/payments/record.py\"] | imports: [\"payment-gateway\", \"queue\"] | pull_request: {\"number\": 19, \"state\": \"merged\"}"
+  },
+  "demo-git_export-8b9f64d05414": {
+    "chunk_id": "demo-git_export-8b9f64d05414",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-07T04:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:862340a4685962ab750fba9559473a0fd9f610a3a6902acf9b6231ee0934de18",
+    "char_span": [
+      0,
+      180
+    ],
+    "text": "commit 0000000000000000000000000000000000000014 | add reconciliation check | module: payments | files: [\"backend/payments/add.py\"] | pull_request: {\"number\": 20, \"state\": \"merged\"}"
+  },
+  "demo-git_export-8f8e7a1c77b7": {
+    "chunk_id": "demo-git_export-8f8e7a1c77b7",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-07T11:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:f89af031c06e03c4e282532a5113227668129fcc1b5859e69131521ec1bffb59",
+    "char_span": [
+      0,
+      203
+    ],
+    "text": "commit 0000000000000000000000000000000000000015 | add webhook retry handling | module: payments | files: [\"backend/payments/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 21, \"state\": \"open\"}"
+  },
+  "demo-git_export-1852563a6876": {
+    "chunk_id": "demo-git_export-1852563a6876",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-07T18:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:a86cca41343ee70ff45c2cd3161a478d0467c7a82824e38de2a9ed80ea994cfa",
+    "char_span": [
+      0,
+      243
+    ],
+    "text": "commit 0000000000000000000000000000000000000016 | fix idempotency guard | module: payments | files: [\"backend/payments/fix.py\"] | imports: [\"payment-gateway\", \"queue\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 22, \"state\": \"merged\"}"
+  },
+  "demo-git_export-28849f471160": {
+    "chunk_id": "demo-git_export-28849f471160",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-08T01:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:f37c2f563002da6fa3033c200778a20d20dc70e5498a464e1aafd69276494c7a",
+    "char_span": [
+      0,
+      188
+    ],
+    "text": "commit 0000000000000000000000000000000000000017 | update payment status mapping | module: payments | files: [\"backend/payments/update.py\"] | pull_request: {\"number\": 23, \"state\": \"merged\"}"
+  },
+  "demo-git_export-1405b3f0be48": {
+    "chunk_id": "demo-git_export-1405b3f0be48",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-08T08:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:9c0aa2f8b1486bc67710a6aef9d901df9d874cf0bb1f8ce32793a2a9e86a7c93",
+    "char_span": [
+      0,
+      190
+    ],
+    "text": "commit 0000000000000000000000000000000000000018 | record payment provider timeout | module: payments | files: [\"backend/payments/record.py\"] | pull_request: {\"number\": 24, \"state\": \"merged\"}"
+  },
+  "demo-git_export-b3f371366fbb": {
+    "chunk_id": "demo-git_export-b3f371366fbb",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-08T15:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:3d3993a2951f5429530e42279858efcb2f83eb3f66547db976f9bf34e6afff03",
+    "char_span": [
+      0,
+      243
+    ],
+    "text": "commit 0000000000000000000000000000000000000019 | add reconciliation check | module: payments | files: [\"backend/payments/add.py\"] | imports: [\"payment-gateway\", \"queue\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 25, \"state\": \"merged\"}"
+  },
+  "demo-git_export-34f1f5f3a212": {
+    "chunk_id": "demo-git_export-34f1f5f3a212",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-08T22:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:0ec76efe2e8d6660ba15fa915277fb173c764026bd3cdcbf7a6f07129297ff93",
+    "char_span": [
+      0,
+      206
+    ],
+    "text": "commit 000000000000000000000000000000000000001a | add webhook retry handling | module: payments | files: [\"backend/payments/add.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 26, \"state\": \"open\"}"
+  },
+  "demo-git_export-9db772319e8a": {
+    "chunk_id": "demo-git_export-9db772319e8a",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-09T05:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:5bacab6ff1fce60c88655be9fef3f3c69a465922afa7b8b591af237b920ce234",
+    "char_span": [
+      0,
+      177
+    ],
+    "text": "commit 000000000000000000000000000000000000001b | fix idempotency guard | module: payments | files: [\"backend/payments/fix.py\"] | pull_request: {\"number\": 27, \"state\": \"merged\"}"
+  },
+  "demo-git_export-ec9079ca0868": {
+    "chunk_id": "demo-git_export-ec9079ca0868",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Rohan",
+    "event_time": "2026-09-09T12:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:5ff3afce7fb5271194af4d6b3f1a3db43db046592d97392ca394bdac413b0f80",
+    "char_span": [
+      0,
+      228
+    ],
+    "text": "commit 000000000000000000000000000000000000001c | update payment status mapping | module: payments | files: [\"backend/payments/update.py\"] | imports: [\"payment-gateway\", \"queue\"] | pull_request: {\"number\": 28, \"state\": \"merged\"}"
+  },
+  "demo-git_export-d0ed9e39ccfa": {
+    "chunk_id": "demo-git_export-d0ed9e39ccfa",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Rohan",
+    "event_time": "2026-09-09T19:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:fad683fed95f3e5e72751037d277f2275395ed431f54065f8ac8b338608032e8",
+    "char_span": [
+      0,
+      213
+    ],
+    "text": "commit 000000000000000000000000000000000000001d | record payment provider timeout | module: payments | files: [\"backend/payments/record.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 29, \"state\": \"merged\"}"
+  },
+  "demo-git_export-0da5aa373092": {
+    "chunk_id": "demo-git_export-0da5aa373092",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Rohan",
+    "event_time": "2026-09-10T02:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:e65f495763c589b004eaa000325560d6d1b048ad49c84af36a587f1d102a4b32",
+    "char_span": [
+      0,
+      206
+    ],
+    "text": "commit 000000000000000000000000000000000000001e | add reconciliation check | module: payments | files: [\"backend/payments/add.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 30, \"state\": \"merged\"}"
+  },
+  "demo-git_export-07a0b7ea830e": {
+    "chunk_id": "demo-git_export-07a0b7ea830e",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-10T09:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:a60448d5dcd8989b7f2465b1af75eb7f8f104d8f68cf4ba76b29a9d4cf165916",
+    "char_span": [
+      0,
+      239
+    ],
+    "text": "commit 000000000000000000000000000000000000001f | add kiosk session flow | module: check-in-kiosk | files: [\"backend/check-in-kiosk/add.py\"] | imports: [\"registration\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 31, \"state\": \"open\"}"
+  },
+  "demo-git_export-ad2ed32d1cc1": {
+    "chunk_id": "demo-git_export-ad2ed32d1cc1",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-10T16:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:4f37248a839bf6f8685e22c4c3c0aea8f96253adc6c89d61066f01a3415ffd0f",
+    "char_span": [
+      0,
+      216
+    ],
+    "text": "commit 0000000000000000000000000000000000000020 | fix QR scan validation | module: check-in-kiosk | files: [\"backend/check-in-kiosk/fix.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 32, \"state\": \"merged\"}"
+  },
+  "demo-git_export-422623f2805d": {
+    "chunk_id": "demo-git_export-422623f2805d",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-10T23:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:761e00f378659e468b24b610bd2a4e64f49f570a6f7ec7a913a36c72bdb6d5be",
+    "char_span": [
+      0,
+      194
+    ],
+    "text": "commit 0000000000000000000000000000000000000021 | handle offline check-in | module: check-in-kiosk | files: [\"backend/check-in-kiosk/handle.py\"] | pull_request: {\"number\": 33, \"state\": \"merged\"}"
+  },
+  "demo-git_export-8f820631fa52": {
+    "chunk_id": "demo-git_export-8f820631fa52",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-11T06:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:ae32c7e1f4208ba4fed01a98f78833d6965d8722a3b83c94bd413fef1e882a43",
+    "char_span": [
+      0,
+      228
+    ],
+    "text": "commit 0000000000000000000000000000000000000022 | update kiosk device heartbeat | module: check-in-kiosk | files: [\"backend/check-in-kiosk/update.py\"] | imports: [\"registration\"] | pull_request: {\"number\": 34, \"state\": \"merged\"}"
+  },
+  "demo-git_export-f7cd9d431fc1": {
+    "chunk_id": "demo-git_export-f7cd9d431fc1",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-11T13:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:0ddcee8e0633599ca07dbd05b251e8efb2b3e4996c92107d779a6aa635df0b84",
+    "char_span": [
+      0,
+      213
+    ],
+    "text": "commit 0000000000000000000000000000000000000023 | add kiosk session flow | module: check-in-kiosk | files: [\"backend/check-in-kiosk/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 35, \"state\": \"merged\"}"
+  },
+  "demo-git_export-ac721633c60c": {
+    "chunk_id": "demo-git_export-ac721633c60c",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-11T20:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:25c2878946725e0cc464f32821469936f72bf1750fb207c58b206bb84b7e37ec",
+    "char_span": [
+      0,
+      214
+    ],
+    "text": "commit 0000000000000000000000000000000000000024 | fix QR scan validation | module: check-in-kiosk | files: [\"backend/check-in-kiosk/fix.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 36, \"state\": \"open\"}"
+  },
+  "demo-git_export-6d8b398c0646": {
+    "chunk_id": "demo-git_export-6d8b398c0646",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-12T03:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:5bc9ceda53a1175b5c78270884fb2e21f5e2da5c5d3f4b3caccc7880510f27d4",
+    "char_span": [
+      0,
+      222
+    ],
+    "text": "commit 0000000000000000000000000000000000000025 | handle offline check-in | module: check-in-kiosk | files: [\"backend/check-in-kiosk/handle.py\"] | imports: [\"registration\"] | pull_request: {\"number\": 37, \"state\": \"merged\"}"
+  },
+  "demo-git_export-039850a29719": {
+    "chunk_id": "demo-git_export-039850a29719",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-12T10:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:73235ec2b3729f852f6a52ee5f6d1e373303c1e662f8fc1cfdbcf267cbed25e6",
+    "char_span": [
+      0,
+      200
+    ],
+    "text": "commit 0000000000000000000000000000000000000026 | update kiosk device heartbeat | module: check-in-kiosk | files: [\"backend/check-in-kiosk/update.py\"] | pull_request: {\"number\": 38, \"state\": \"merged\"}"
+  },
+  "demo-git_export-118a2a01a9cd": {
+    "chunk_id": "demo-git_export-118a2a01a9cd",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-12T17:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:e8557bf4a31c75653ec1328b0bc14334d81bf4f7d4672947ff52171e7202ae94",
+    "char_span": [
+      0,
+      213
+    ],
+    "text": "commit 0000000000000000000000000000000000000027 | add kiosk session flow | module: check-in-kiosk | files: [\"backend/check-in-kiosk/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 39, \"state\": \"merged\"}"
+  },
+  "demo-git_export-e744032917ff": {
+    "chunk_id": "demo-git_export-e744032917ff",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-13T00:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:cc44a59b513732fcd6b222e3734ea1df1d5eac07a8ab26b9ed75782c252eba21",
+    "char_span": [
+      0,
+      244
+    ],
+    "text": "commit 0000000000000000000000000000000000000028 | fix QR scan validation | module: check-in-kiosk | files: [\"backend/check-in-kiosk/fix.py\"] | imports: [\"registration\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 40, \"state\": \"merged\"}"
+  },
+  "demo-git_export-44d5257be437": {
+    "chunk_id": "demo-git_export-44d5257be437",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-13T07:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:f0b4cb7ed480b6c265650035b0825458d01fbdb718a104617a7111c5d703bb75",
+    "char_span": [
+      0,
+      192
+    ],
+    "text": "commit 0000000000000000000000000000000000000029 | handle offline check-in | module: check-in-kiosk | files: [\"backend/check-in-kiosk/handle.py\"] | pull_request: {\"number\": 41, \"state\": \"open\"}"
+  },
+  "demo-git_export-02bb47b6d72b": {
+    "chunk_id": "demo-git_export-02bb47b6d72b",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-13T14:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:a2641538c71fc263b9c4316bcd3f2a172a1f5873934c4f3c505dce67a9500512",
+    "char_span": [
+      0,
+      200
+    ],
+    "text": "commit 000000000000000000000000000000000000002a | update kiosk device heartbeat | module: check-in-kiosk | files: [\"backend/check-in-kiosk/update.py\"] | pull_request: {\"number\": 42, \"state\": \"merged\"}"
+  },
+  "demo-git_export-01c0de9079b4": {
+    "chunk_id": "demo-git_export-01c0de9079b4",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-13T21:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:af567a2e3a765c07193fdb65068efa14495712b1b5b73b57f1971d2caa61ef9f",
+    "char_span": [
+      0,
+      241
+    ],
+    "text": "commit 000000000000000000000000000000000000002b | add kiosk session flow | module: check-in-kiosk | files: [\"backend/check-in-kiosk/add.py\"] | imports: [\"registration\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 43, \"state\": \"merged\"}"
+  },
+  "demo-git_export-5f1b70bbd181": {
+    "chunk_id": "demo-git_export-5f1b70bbd181",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-14T04:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:594c9dc27f38b25b3b7387a38aa11476fc7df68c3d34e5b67e795ebe5062652e",
+    "char_span": [
+      0,
+      216
+    ],
+    "text": "commit 000000000000000000000000000000000000002c | fix QR scan validation | module: check-in-kiosk | files: [\"backend/check-in-kiosk/fix.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 44, \"state\": \"merged\"}"
+  },
+  "demo-git_export-eeb2ca52b38f": {
+    "chunk_id": "demo-git_export-eeb2ca52b38f",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-14T11:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:85f6da5fda216ee4bfcb385340babf76ce751293a1f9ea65d759ee275ebf2fc2",
+    "char_span": [
+      0,
+      194
+    ],
+    "text": "commit 000000000000000000000000000000000000002d | handle offline check-in | module: check-in-kiosk | files: [\"backend/check-in-kiosk/handle.py\"] | pull_request: {\"number\": 45, \"state\": \"merged\"}"
+  },
+  "demo-git_export-4dff8aa29eeb": {
+    "chunk_id": "demo-git_export-4dff8aa29eeb",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-14T18:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:7ccd15bca7b0f8ab69c7331119aa6af221df72dd0397d6fbd0d6c8a7d566a1a4",
+    "char_span": [
+      0,
+      226
+    ],
+    "text": "commit 000000000000000000000000000000000000002e | update kiosk device heartbeat | module: check-in-kiosk | files: [\"backend/check-in-kiosk/update.py\"] | imports: [\"registration\"] | pull_request: {\"number\": 46, \"state\": \"open\"}"
+  },
+  "demo-git_export-366d9bd06d5d": {
+    "chunk_id": "demo-git_export-366d9bd06d5d",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-15T01:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:31d900600a9289f28765da41fa03d3b2e7a57a6cacba23a5e30b7796ae0076a4",
+    "char_span": [
+      0,
+      213
+    ],
+    "text": "commit 000000000000000000000000000000000000002f | add kiosk session flow | module: check-in-kiosk | files: [\"backend/check-in-kiosk/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 47, \"state\": \"merged\"}"
+  },
+  "demo-git_export-c57fdead2f44": {
+    "chunk_id": "demo-git_export-c57fdead2f44",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-15T08:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:cae9c63efb7db121bc8b0f369b88adbaccef42d8933631e28f0c3b897d0aa4c4",
+    "char_span": [
+      0,
+      216
+    ],
+    "text": "commit 0000000000000000000000000000000000000030 | fix QR scan validation | module: check-in-kiosk | files: [\"backend/check-in-kiosk/fix.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 48, \"state\": \"merged\"}"
+  },
+  "demo-git_export-4aa39a6708c5": {
+    "chunk_id": "demo-git_export-4aa39a6708c5",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-15T15:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:2912ef77e086da344150b98639f8f30f5cd6b12322d980b9ed7b07745fadcf21",
+    "char_span": [
+      0,
+      236
+    ],
+    "text": "commit 0000000000000000000000000000000000000031 | validate attendee form | module: registration | files: [\"backend/registration/validate.py\"] | imports: [\"payments\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 49, \"state\": \"open\"}"
+  },
+  "demo-git_export-a5925a3808f2": {
+    "chunk_id": "demo-git_export-a5925a3808f2",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-15T22:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:6b2ebd73a5eabfa577c89057f614b3114c05370ca42ff8243eb09d2c2229f072",
+    "char_span": [
+      0,
+      222
+    ],
+    "text": "commit 0000000000000000000000000000000000000032 | add registration status endpoint | module: registration | files: [\"backend/registration/add.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 50, \"state\": \"merged\"}"
+  },
+  "demo-git_export-02bc7577983d": {
+    "chunk_id": "demo-git_export-02bc7577983d",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-16T05:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:d686e951d3593da3cabc168330842fee62408968606724e242780e57579b223a",
+    "char_span": [
+      0,
+      200
+    ],
+    "text": "commit 0000000000000000000000000000000000000033 | connect registration to payments | module: registration | files: [\"backend/registration/connect.py\"] | pull_request: {\"number\": 51, \"state\": \"merged\"}"
+  },
+  "demo-git_export-057df883d9df": {
+    "chunk_id": "demo-git_export-057df883d9df",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-16T12:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:b6f2b6f721f24bca40099394720e2684847233c50d0561a3630c83fec0b236cb",
+    "char_span": [
+      0,
+      214
+    ],
+    "text": "commit 0000000000000000000000000000000000000034 | fix duplicate registration | module: registration | files: [\"backend/registration/fix.py\"] | imports: [\"payments\"] | pull_request: {\"number\": 52, \"state\": \"merged\"}"
+  },
+  "demo-git_export-c07cb34aab8f": {
+    "chunk_id": "demo-git_export-c07cb34aab8f",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-16T19:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:5fa5c72f1af8490e663e27db58204a570df1769b4e5c16a7d5cd8fe4fdea8fc7",
+    "char_span": [
+      0,
+      214
+    ],
+    "text": "commit 0000000000000000000000000000000000000035 | validate attendee form | module: registration | files: [\"backend/registration/validate.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 53, \"state\": \"merged\"}"
+  },
+  "demo-git_export-e362c61abcba": {
+    "chunk_id": "demo-git_export-e362c61abcba",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-17T02:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:b8f9c9e24ad5f8c62863563fb8e1397774052f4d8e5421fd991368181354e398",
+    "char_span": [
+      0,
+      220
+    ],
+    "text": "commit 0000000000000000000000000000000000000036 | add registration status endpoint | module: registration | files: [\"backend/registration/add.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 54, \"state\": \"open\"}"
+  },
+  "demo-git_export-a449097f26e7": {
+    "chunk_id": "demo-git_export-a449097f26e7",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-17T09:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:ef167f6c74241654ee0bd950ae339a70a2680b80a35d28821b7186612ad84da9",
+    "char_span": [
+      0,
+      224
+    ],
+    "text": "commit 0000000000000000000000000000000000000037 | connect registration to payments | module: registration | files: [\"backend/registration/connect.py\"] | imports: [\"payments\"] | pull_request: {\"number\": 55, \"state\": \"merged\"}"
+  },
+  "demo-git_export-c39fc4bb50d3": {
+    "chunk_id": "demo-git_export-c39fc4bb50d3",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-17T16:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:9d632fc5889d338abe46d33ed6bcaa190a4325fe4e7037c0a73e9ddebee9087f",
+    "char_span": [
+      0,
+      190
+    ],
+    "text": "commit 0000000000000000000000000000000000000038 | fix duplicate registration | module: registration | files: [\"backend/registration/fix.py\"] | pull_request: {\"number\": 56, \"state\": \"merged\"}"
+  },
+  "demo-git_export-21d203f42e3b": {
+    "chunk_id": "demo-git_export-21d203f42e3b",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-17T23:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:b4d223c63ffb34a9dcfac49c2a69343769f9f1f62eacd1a550f309901b886b2d",
+    "char_span": [
+      0,
+      214
+    ],
+    "text": "commit 0000000000000000000000000000000000000039 | validate attendee form | module: registration | files: [\"backend/registration/validate.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 57, \"state\": \"merged\"}"
+  },
+  "demo-git_export-cd4ee644c808": {
+    "chunk_id": "demo-git_export-cd4ee644c808",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-18T06:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:8c9de0cd58bd1d19fa061edc7ffd9b7fe05ab562689f882d5aa54db3a723960e",
+    "char_span": [
+      0,
+      246
+    ],
+    "text": "commit 000000000000000000000000000000000000003a | add registration status endpoint | module: registration | files: [\"backend/registration/add.py\"] | imports: [\"payments\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 58, \"state\": \"merged\"}"
+  },
+  "demo-git_export-eec9697d6fc2": {
+    "chunk_id": "demo-git_export-eec9697d6fc2",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-18T13:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:7031de2d0acc2e658aa35fadbc9e0f88a909711dc1002127fa8521cede01d40c",
+    "char_span": [
+      0,
+      198
+    ],
+    "text": "commit 000000000000000000000000000000000000003b | connect registration to payments | module: registration | files: [\"backend/registration/connect.py\"] | pull_request: {\"number\": 59, \"state\": \"open\"}"
+  },
+  "demo-git_export-46ebd790d8c5": {
+    "chunk_id": "demo-git_export-46ebd790d8c5",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-18T20:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:8aca03707f43802e6527e15d30201a27bfc4c8855250bc350412c2728a0cff1b",
+    "char_span": [
+      0,
+      190
+    ],
+    "text": "commit 000000000000000000000000000000000000003c | fix duplicate registration | module: registration | files: [\"backend/registration/fix.py\"] | pull_request: {\"number\": 60, \"state\": \"merged\"}"
+  },
+  "demo-git_export-2bf8248a30d7": {
+    "chunk_id": "demo-git_export-2bf8248a30d7",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-19T03:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:62ca907130f6edb3105e63da87dc6fd96e1e10ffbf19725d6a8d7d948fe79e81",
+    "char_span": [
+      0,
+      238
+    ],
+    "text": "commit 000000000000000000000000000000000000003d | validate attendee form | module: registration | files: [\"backend/registration/validate.py\"] | imports: [\"payments\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 61, \"state\": \"merged\"}"
+  },
+  "demo-git_export-ddd0598ff21e": {
+    "chunk_id": "demo-git_export-ddd0598ff21e",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-19T10:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:c4143171ef8c43be41da6138a17d255e3e31408b64147f3a81d5c0b05c817ef9",
+    "char_span": [
+      0,
+      222
+    ],
+    "text": "commit 000000000000000000000000000000000000003e | add registration status endpoint | module: registration | files: [\"backend/registration/add.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 62, \"state\": \"merged\"}"
+  },
+  "demo-git_export-c50946fe0d8c": {
+    "chunk_id": "demo-git_export-c50946fe0d8c",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-19T17:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:2e50d86f1bda5d0f0acc3d6a1e6efe727ea20b3cb5b44e3d5f509e3ffda2e2c1",
+    "char_span": [
+      0,
+      200
+    ],
+    "text": "commit 000000000000000000000000000000000000003f | connect registration to payments | module: registration | files: [\"backend/registration/connect.py\"] | pull_request: {\"number\": 63, \"state\": \"merged\"}"
+  },
+  "demo-git_export-a178d25f30a3": {
+    "chunk_id": "demo-git_export-a178d25f30a3",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-20T00:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:7c1aa051a565cb96adba7def2094866b459ca0a269139780ee4002766d7ca0cc",
+    "char_span": [
+      0,
+      212
+    ],
+    "text": "commit 0000000000000000000000000000000000000040 | fix duplicate registration | module: registration | files: [\"backend/registration/fix.py\"] | imports: [\"payments\"] | pull_request: {\"number\": 64, \"state\": \"open\"}"
+  },
+  "demo-git_export-44e19e821982": {
+    "chunk_id": "demo-git_export-44e19e821982",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-20T07:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:628e0112dd90fdd126716aba1aab77084c3adea95b26076092b08368ce9474fd",
+    "char_span": [
+      0,
+      214
+    ],
+    "text": "commit 0000000000000000000000000000000000000041 | validate attendee form | module: registration | files: [\"backend/registration/validate.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 65, \"state\": \"merged\"}"
+  },
+  "demo-git_export-84b341fb81c5": {
+    "chunk_id": "demo-git_export-84b341fb81c5",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-20T14:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:5e506c84885cc638cbfc309152629322790545fffa830d2a9a7a5c47c536b892",
+    "char_span": [
+      0,
+      222
+    ],
+    "text": "commit 0000000000000000000000000000000000000042 | add registration status endpoint | module: registration | files: [\"backend/registration/add.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 66, \"state\": \"merged\"}"
+  },
+  "demo-git_export-1c642956209c": {
+    "chunk_id": "demo-git_export-1c642956209c",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-20T21:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:a46fec79ea9beacf3daf7dd551dc51f1861f46db946f6e6a371b5df484bde310",
+    "char_span": [
+      0,
+      224
+    ],
+    "text": "commit 0000000000000000000000000000000000000043 | connect registration to payments | module: registration | files: [\"backend/registration/connect.py\"] | imports: [\"payments\"] | pull_request: {\"number\": 67, \"state\": \"merged\"}"
+  },
+  "demo-git_export-7fdb5542a0d2": {
+    "chunk_id": "demo-git_export-7fdb5542a0d2",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-21T04:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:fee75a01d4f68b6fcef1482d509db1e12d09e99cbbebf9bf8ff1aa28ac9e71ec",
+    "char_span": [
+      0,
+      190
+    ],
+    "text": "commit 0000000000000000000000000000000000000044 | fix duplicate registration | module: registration | files: [\"backend/registration/fix.py\"] | pull_request: {\"number\": 68, \"state\": \"merged\"}"
+  },
+  "demo-git_export-25ab7bf42b20": {
+    "chunk_id": "demo-git_export-25ab7bf42b20",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-21T11:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:da377c1d6a0eb8ab8e827cf9d35d13c0a86e6ca369c4ad5646343c084b6a055b",
+    "char_span": [
+      0,
+      212
+    ],
+    "text": "commit 0000000000000000000000000000000000000045 | validate attendee form | module: registration | files: [\"backend/registration/validate.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 69, \"state\": \"open\"}"
+  },
+  "demo-git_export-9ea3e6e73ec7": {
+    "chunk_id": "demo-git_export-9ea3e6e73ec7",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-21T18:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:45683d0a123944280106b6968016176b29ca8daf6abd5d98926caac377c3c311",
+    "char_span": [
+      0,
+      246
+    ],
+    "text": "commit 0000000000000000000000000000000000000046 | add registration status endpoint | module: registration | files: [\"backend/registration/add.py\"] | imports: [\"payments\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 70, \"state\": \"merged\"}"
+  },
+  "demo-git_export-1cacf3865591": {
+    "chunk_id": "demo-git_export-1cacf3865591",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-22T01:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:7d9fde3eb2b9b7a1f7a3630ccfe01fc26d737e81caa96c1d1afedf7e1c0f193c",
+    "char_span": [
+      0,
+      200
+    ],
+    "text": "commit 0000000000000000000000000000000000000047 | connect registration to payments | module: registration | files: [\"backend/registration/connect.py\"] | pull_request: {\"number\": 71, \"state\": \"merged\"}"
+  },
+  "demo-git_export-d9e21413a47e": {
+    "chunk_id": "demo-git_export-d9e21413a47e",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-22T08:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:f2bf98a0b2a0340f41bded598ae7aaf8006e0c59fb200c0dfd5c11219b7e3934",
+    "char_span": [
+      0,
+      190
+    ],
+    "text": "commit 0000000000000000000000000000000000000048 | fix duplicate registration | module: registration | files: [\"backend/registration/fix.py\"] | pull_request: {\"number\": 72, \"state\": \"merged\"}"
+  },
+  "demo-git_export-d98a1ba3c43a": {
+    "chunk_id": "demo-git_export-d98a1ba3c43a",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-22T15:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:04c08344631309a3e0048d8cca7a92b257dcef6c379963cd3e8b3fc5904f0949",
+    "char_span": [
+      0,
+      238
+    ],
+    "text": "commit 0000000000000000000000000000000000000049 | validate attendee form | module: registration | files: [\"backend/registration/validate.py\"] | imports: [\"payments\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 73, \"state\": \"merged\"}"
+  },
+  "demo-git_export-ea3466e25dd0": {
+    "chunk_id": "demo-git_export-ea3466e25dd0",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-22T22:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:59fb575c959f9cd38937a1b79f52404265a79b562dbfb247e08fb55a13f625ff",
+    "char_span": [
+      0,
+      220
+    ],
+    "text": "commit 000000000000000000000000000000000000004a | add registration status endpoint | module: registration | files: [\"backend/registration/add.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 74, \"state\": \"open\"}"
+  },
+  "demo-git_export-c803b6896f1f": {
+    "chunk_id": "demo-git_export-c803b6896f1f",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-23T05:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:5e153cfc6cbd47b7c81c6771af174225696d87ff559bbb3865cde07403c8c415",
+    "char_span": [
+      0,
+      236
+    ],
+    "text": "commit 000000000000000000000000000000000000004b | add reminder delivery | module: notifications | files: [\"backend/notifications/add.py\"] | imports: [\"registration\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 75, \"state\": \"open\"}"
+  },
+  "demo-git_export-104f2e00a2f0": {
+    "chunk_id": "demo-git_export-104f2e00a2f0",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-23T12:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:16baa82729da15f947d7faa46b0f95e138ae8b99430950b619ba74766489cf9e",
+    "char_span": [
+      0,
+      218
+    ],
+    "text": "commit 000000000000000000000000000000000000004c | retry notification queue | module: notifications | files: [\"backend/notifications/retry.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 76, \"state\": \"merged\"}"
+  },
+  "demo-git_export-7f89c506161f": {
+    "chunk_id": "demo-git_export-7f89c506161f",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-23T19:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:836167082c03b1e09018df5c8ccf142c80fafd6e55c992d6036c6a6b4d0131d1",
+    "char_span": [
+      0,
+      190
+    ],
+    "text": "commit 000000000000000000000000000000000000004d | update email template | module: notifications | files: [\"backend/notifications/update.py\"] | pull_request: {\"number\": 77, \"state\": \"merged\"}"
+  },
+  "demo-git_export-6d37e88cbc1b": {
+    "chunk_id": "demo-git_export-6d37e88cbc1b",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-24T02:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:b673f60f28213425b8be8b3c2b6f9b033055c401cf408b8d6a7ad096a4106c9d",
+    "char_span": [
+      0,
+      219
+    ],
+    "text": "commit 000000000000000000000000000000000000004e | record delivery status | module: notifications | files: [\"backend/notifications/record.py\"] | imports: [\"registration\"] | pull_request: {\"number\": 78, \"state\": \"merged\"}"
+  },
+  "demo-git_export-ddff9917b867": {
+    "chunk_id": "demo-git_export-ddff9917b867",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Aarav",
+    "event_time": "2026-09-24T09:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:4bd8ccc71c6fad099b523498be58c502bac7c9e20d859e750af3efad1268b596",
+    "char_span": [
+      0,
+      210
+    ],
+    "text": "commit 000000000000000000000000000000000000004f | add reminder delivery | module: notifications | files: [\"backend/notifications/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 79, \"state\": \"merged\"}"
+  },
+  "demo-git_export-a244ece8fb6a": {
+    "chunk_id": "demo-git_export-a244ece8fb6a",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-24T16:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:865c076fd1f3548340a6d974e19d92bdbb1ce041408fdf1fb3ba16c2b61ce857",
+    "char_span": [
+      0,
+      216
+    ],
+    "text": "commit 0000000000000000000000000000000000000050 | retry notification queue | module: notifications | files: [\"backend/notifications/retry.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 80, \"state\": \"open\"}"
+  },
+  "demo-git_export-6525b234e60a": {
+    "chunk_id": "demo-git_export-6525b234e60a",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-24T23:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:fdc2ea75faab62de6086875abf8dad924f7c062d71b42cbf8fd5d32bd4211dec",
+    "char_span": [
+      0,
+      218
+    ],
+    "text": "commit 0000000000000000000000000000000000000051 | update email template | module: notifications | files: [\"backend/notifications/update.py\"] | imports: [\"registration\"] | pull_request: {\"number\": 81, \"state\": \"merged\"}"
+  },
+  "demo-git_export-00a8f0102c4a": {
+    "chunk_id": "demo-git_export-00a8f0102c4a",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-25T06:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:27e4bdb98783e43d1a058bcc1a169af6ff3a780426baa797bb10bb4c97363a34",
+    "char_span": [
+      0,
+      191
+    ],
+    "text": "commit 0000000000000000000000000000000000000052 | record delivery status | module: notifications | files: [\"backend/notifications/record.py\"] | pull_request: {\"number\": 82, \"state\": \"merged\"}"
+  },
+  "demo-git_export-f765c41ae701": {
+    "chunk_id": "demo-git_export-f765c41ae701",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-25T13:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:7985ae9fb93aa2407a10acb72ce72c052cde9340bbbafdcbe47671bfcbcf5e77",
+    "char_span": [
+      0,
+      210
+    ],
+    "text": "commit 0000000000000000000000000000000000000053 | add reminder delivery | module: notifications | files: [\"backend/notifications/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 83, \"state\": \"merged\"}"
+  },
+  "demo-git_export-9e72c181f414": {
+    "chunk_id": "demo-git_export-9e72c181f414",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-25T20:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:8e5c1ba976ee71b191676cfaa1e816cdbc11e24c0f6ed2bb3be10357b97d965a",
+    "char_span": [
+      0,
+      246
+    ],
+    "text": "commit 0000000000000000000000000000000000000054 | retry notification queue | module: notifications | files: [\"backend/notifications/retry.py\"] | imports: [\"registration\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 84, \"state\": \"merged\"}"
+  },
+  "demo-git_export-a5b45258d630": {
+    "chunk_id": "demo-git_export-a5b45258d630",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-09-26T03:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:57c6e40ad814e06af2692988911515bfbe5db4c55a3dd3c6ddef74c61331dfe6",
+    "char_span": [
+      0,
+      188
+    ],
+    "text": "commit 0000000000000000000000000000000000000055 | update email template | module: notifications | files: [\"backend/notifications/update.py\"] | pull_request: {\"number\": 85, \"state\": \"open\"}"
+  },
+  "demo-git_export-b04f93c914b2": {
+    "chunk_id": "demo-git_export-b04f93c914b2",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-09-26T10:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:694a68d18f66e9a114f86734bbd74820542f6e627ba36158e40681f6961f4418",
+    "char_span": [
+      0,
+      191
+    ],
+    "text": "commit 0000000000000000000000000000000000000056 | record delivery status | module: notifications | files: [\"backend/notifications/record.py\"] | pull_request: {\"number\": 86, \"state\": \"merged\"}"
+  },
+  "demo-git_export-a1448490cb1c": {
+    "chunk_id": "demo-git_export-a1448490cb1c",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-09-26T17:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:1a1a0993d7ad82c13d4f0ff60baa89d50c962fddc53feafab9708085840fd7a2",
+    "char_span": [
+      0,
+      238
+    ],
+    "text": "commit 0000000000000000000000000000000000000057 | add reminder delivery | module: notifications | files: [\"backend/notifications/add.py\"] | imports: [\"registration\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 87, \"state\": \"merged\"}"
+  },
+  "demo-git_export-49d3bf217b5b": {
+    "chunk_id": "demo-git_export-49d3bf217b5b",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-09-27T00:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:9f68f74b8bacc4da8d1ec243bf05f15f10cfc58efe1b80b486dbb4a206229cc8",
+    "char_span": [
+      0,
+      218
+    ],
+    "text": "commit 0000000000000000000000000000000000000058 | retry notification queue | module: notifications | files: [\"backend/notifications/retry.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 88, \"state\": \"merged\"}"
+  },
+  "demo-git_export-f74a6ee1cbb2": {
+    "chunk_id": "demo-git_export-f74a6ee1cbb2",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-09-27T07:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:fc99c367cd0111b38f5352c4b0c5db495c503e018333cdc3ee90c151529f88db",
+    "char_span": [
+      0,
+      190
+    ],
+    "text": "commit 0000000000000000000000000000000000000059 | update email template | module: notifications | files: [\"backend/notifications/update.py\"] | pull_request: {\"number\": 89, \"state\": \"merged\"}"
+  },
+  "demo-git_export-645ab6826c0e": {
+    "chunk_id": "demo-git_export-645ab6826c0e",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samruddhi",
+    "event_time": "2026-09-27T14:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:67c8ff2192805aa0660ce4f1e7b58833751aa50c3017f866ff7fcda729bfcb44",
+    "char_span": [
+      0,
+      217
+    ],
+    "text": "commit 000000000000000000000000000000000000005a | record delivery status | module: notifications | files: [\"backend/notifications/record.py\"] | imports: [\"registration\"] | pull_request: {\"number\": 90, \"state\": \"open\"}"
+  },
+  "demo-git_export-15d06ba29e48": {
+    "chunk_id": "demo-git_export-15d06ba29e48",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samruddhi",
+    "event_time": "2026-09-27T21:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:4a62d9e4f2128de67648e90c56c611be2a236fa81881ceea69ed69aeb80520d1",
+    "char_span": [
+      0,
+      210
+    ],
+    "text": "commit 000000000000000000000000000000000000005b | add reminder delivery | module: notifications | files: [\"backend/notifications/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 91, \"state\": \"merged\"}"
+  },
+  "demo-git_export-5b0c50668a67": {
+    "chunk_id": "demo-git_export-5b0c50668a67",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samruddhi",
+    "event_time": "2026-09-28T04:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:084f32d0907fa53edd77d1b1f0e51d45208a0e9a6a2a0d12a0fc85c3ecae282d",
+    "char_span": [
+      0,
+      218
+    ],
+    "text": "commit 000000000000000000000000000000000000005c | retry notification queue | module: notifications | files: [\"backend/notifications/retry.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 92, \"state\": \"merged\"}"
+  },
+  "demo-git_export-221ad35fbf2e": {
+    "chunk_id": "demo-git_export-221ad35fbf2e",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samruddhi",
+    "event_time": "2026-09-28T11:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:10c42873c5aad55fd62a7621d2f2d5eceaefcf2974fc345dd3a89631bf516e4d",
+    "char_span": [
+      0,
+      218
+    ],
+    "text": "commit 000000000000000000000000000000000000005d | update email template | module: notifications | files: [\"backend/notifications/update.py\"] | imports: [\"registration\"] | pull_request: {\"number\": 93, \"state\": \"merged\"}"
+  },
+  "demo-git_export-d4f3bafe4326": {
+    "chunk_id": "demo-git_export-d4f3bafe4326",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samruddhi",
+    "event_time": "2026-09-28T18:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:84b5570b0e6ea04cacd5457786f7f49ae2d09bb8682ee54c6fc145c826f9fefc",
+    "char_span": [
+      0,
+      191
+    ],
+    "text": "commit 000000000000000000000000000000000000005e | record delivery status | module: notifications | files: [\"backend/notifications/record.py\"] | pull_request: {\"number\": 94, \"state\": \"merged\"}"
+  },
+  "demo-git_export-8cdf387b9e5a": {
+    "chunk_id": "demo-git_export-8cdf387b9e5a",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-29T01:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:072e3381d6b379ea16a669f8056919fb44335338ac0cd189e8709a42bc6645c5",
+    "char_span": [
+      0,
+      226
+    ],
+    "text": "commit 000000000000000000000000000000000000005f | add event role permissions | module: admin | files: [\"backend/admin/add.py\"] | imports: [\"notifications\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 95, \"state\": \"open\"}"
+  },
+  "demo-git_export-d2aebf57be35": {
+    "chunk_id": "demo-git_export-d2aebf57be35",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-29T08:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:ec2626c30d47f86e58cf941c55f0779fbf72416fdfd73d4170d2417c67e25ed9",
+    "char_span": [
+      0,
+      202
+    ],
+    "text": "commit 0000000000000000000000000000000000000060 | fix member invitation flow | module: admin | files: [\"backend/admin/fix.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 96, \"state\": \"merged\"}"
+  },
+  "demo-git_export-c0b340dd72ef": {
+    "chunk_id": "demo-git_export-c0b340dd72ef",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-29T15:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:9483cb73052cdcaf24d44d1c91426bb848f85b9acc4ecd12837bffaec8206a08",
+    "char_span": [
+      0,
+      172
+    ],
+    "text": "commit 0000000000000000000000000000000000000061 | update audit export | module: admin | files: [\"backend/admin/update.py\"] | pull_request: {\"number\": 97, \"state\": \"merged\"}"
+  },
+  "demo-git_export-729baba1ddf0": {
+    "chunk_id": "demo-git_export-729baba1ddf0",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-29T22:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:15737df49874f2432d74aac3f6e3f1b3d4d1501c64387db5881cb88b6a30d6e6",
+    "char_span": [
+      0,
+      210
+    ],
+    "text": "commit 0000000000000000000000000000000000000062 | add project settings validation | module: admin | files: [\"backend/admin/add.py\"] | imports: [\"notifications\"] | pull_request: {\"number\": 98, \"state\": \"merged\"}"
+  },
+  "demo-git_export-2a01e6a1d4f7": {
+    "chunk_id": "demo-git_export-2a01e6a1d4f7",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-30T05:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:48daef79e60072093c0130b3dac0b7f151b56519c5e7939f55a2a430cc1d99a2",
+    "char_span": [
+      0,
+      199
+    ],
+    "text": "commit 0000000000000000000000000000000000000063 | add event role permissions | module: admin | files: [\"backend/admin/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 99, \"state\": \"merged\"}"
+  },
+  "demo-git_export-98a28916b68e": {
+    "chunk_id": "demo-git_export-98a28916b68e",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-30T12:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:001482b2286b691d6cb4a3eec753e78707e9871eea03b85aaa4e6c4e6be7dc36",
+    "char_span": [
+      0,
+      201
+    ],
+    "text": "commit 0000000000000000000000000000000000000064 | fix member invitation flow | module: admin | files: [\"backend/admin/fix.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 100, \"state\": \"open\"}"
+  },
+  "demo-git_export-51652f6d0d42": {
+    "chunk_id": "demo-git_export-51652f6d0d42",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-09-30T19:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:3ede38093213c72864682d620a009054fd3e13a4c9be975467970c719bf3f6b1",
+    "char_span": [
+      0,
+      202
+    ],
+    "text": "commit 0000000000000000000000000000000000000065 | update audit export | module: admin | files: [\"backend/admin/update.py\"] | imports: [\"notifications\"] | pull_request: {\"number\": 101, \"state\": \"merged\"}"
+  },
+  "demo-git_export-e1e1035881a8": {
+    "chunk_id": "demo-git_export-e1e1035881a8",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-10-01T02:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:2f25ffaf7dd60dfb5c23ae9f769800a0e07028fc66d28f331979dfc7f31863f5",
+    "char_span": [
+      0,
+      182
+    ],
+    "text": "commit 0000000000000000000000000000000000000066 | add project settings validation | module: admin | files: [\"backend/admin/add.py\"] | pull_request: {\"number\": 102, \"state\": \"merged\"}"
+  },
+  "demo-git_export-ddb292099c6c": {
+    "chunk_id": "demo-git_export-ddb292099c6c",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-10-01T09:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:8b64654b540f1c955e3640047809e6006dfb5e9a9fb538dee429878520a85580",
+    "char_span": [
+      0,
+      200
+    ],
+    "text": "commit 0000000000000000000000000000000000000067 | add event role permissions | module: admin | files: [\"backend/admin/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 103, \"state\": \"merged\"}"
+  },
+  "demo-git_export-f3b0166dc5a3": {
+    "chunk_id": "demo-git_export-f3b0166dc5a3",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-10-01T16:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:60a5eebda07c975e99230c0df4dc2501e12b7ae5c2c74c710bbfd3c09afdd53d",
+    "char_span": [
+      0,
+      232
+    ],
+    "text": "commit 0000000000000000000000000000000000000068 | fix member invitation flow | module: admin | files: [\"backend/admin/fix.py\"] | imports: [\"notifications\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 104, \"state\": \"merged\"}"
+  },
+  "demo-git_export-f3d0e4de21cc": {
+    "chunk_id": "demo-git_export-f3d0e4de21cc",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-10-01T23:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:00c6fcdbab7e2df4ce26f15d565f3ca7b33b06f31b9bdc8d352365018bc88599",
+    "char_span": [
+      0,
+      171
+    ],
+    "text": "commit 0000000000000000000000000000000000000069 | update audit export | module: admin | files: [\"backend/admin/update.py\"] | pull_request: {\"number\": 105, \"state\": \"open\"}"
+  },
+  "demo-git_export-43e7281b304a": {
+    "chunk_id": "demo-git_export-43e7281b304a",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-10-02T06:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:e5bd17644ce845d5edde054a17c1f7d5a0d702f3c74c9035cae05d32dfefe8b7",
+    "char_span": [
+      0,
+      182
+    ],
+    "text": "commit 000000000000000000000000000000000000006a | add project settings validation | module: admin | files: [\"backend/admin/add.py\"] | pull_request: {\"number\": 106, \"state\": \"merged\"}"
+  },
+  "demo-git_export-bfb16ffcf8a2": {
+    "chunk_id": "demo-git_export-bfb16ffcf8a2",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Meera",
+    "event_time": "2026-10-02T13:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:efb304bbf0b05e8f4486dd661d5c91ae4402f2a06da6e77ba458f65be9b1b016",
+    "char_span": [
+      0,
+      229
+    ],
+    "text": "commit 000000000000000000000000000000000000006b | add event role permissions | module: admin | files: [\"backend/admin/add.py\"] | imports: [\"notifications\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 107, \"state\": \"merged\"}"
+  },
+  "demo-git_export-a13d143c6bd8": {
+    "chunk_id": "demo-git_export-a13d143c6bd8",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-02T20:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:46ed17e7efe045f59128ae9116feb8e348ab29e8b73837b1be662fc68c406666",
+    "char_span": [
+      0,
+      203
+    ],
+    "text": "commit 000000000000000000000000000000000000006c | fix member invitation flow | module: admin | files: [\"backend/admin/fix.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 108, \"state\": \"merged\"}"
+  },
+  "demo-git_export-d70bd831d70f": {
+    "chunk_id": "demo-git_export-d70bd831d70f",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-03T03:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:a9ff1588f0d2a6318e1392891d1fb3ecd776496b95aba8d0407eb2d9e50e57e3",
+    "char_span": [
+      0,
+      173
+    ],
+    "text": "commit 000000000000000000000000000000000000006d | update audit export | module: admin | files: [\"backend/admin/update.py\"] | pull_request: {\"number\": 109, \"state\": \"merged\"}"
+  },
+  "demo-git_export-a79e9b12deda": {
+    "chunk_id": "demo-git_export-a79e9b12deda",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-03T10:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:2de78401fb5d7851865dcbe9a8efca1e45cd39371320d5d1effe80c9acc60a96",
+    "char_span": [
+      0,
+      209
+    ],
+    "text": "commit 000000000000000000000000000000000000006e | add project settings validation | module: admin | files: [\"backend/admin/add.py\"] | imports: [\"notifications\"] | pull_request: {\"number\": 110, \"state\": \"open\"}"
+  },
+  "demo-git_export-d68c98a9c01b": {
+    "chunk_id": "demo-git_export-d68c98a9c01b",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-03T17:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:ba921a940b962e07fc76279a5d99fafdc94e3ccf7bb6c013f2cb3c732d3e1804",
+    "char_span": [
+      0,
+      200
+    ],
+    "text": "commit 000000000000000000000000000000000000006f | add event role permissions | module: admin | files: [\"backend/admin/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 111, \"state\": \"merged\"}"
+  },
+  "demo-git_export-adfaf5f973c9": {
+    "chunk_id": "demo-git_export-adfaf5f973c9",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-04T00:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:6db079216a30e8915c256ef8be50ee02b0b731de93c39995d389bd4ad811ce0f",
+    "char_span": [
+      0,
+      203
+    ],
+    "text": "commit 0000000000000000000000000000000000000070 | fix member invitation flow | module: admin | files: [\"backend/admin/fix.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 112, \"state\": \"merged\"}"
+  },
+  "demo-git_export-9667b061daff": {
+    "chunk_id": "demo-git_export-9667b061daff",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-04T07:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:014073800fd421ab9d0f21b00895e32c558e3ab0c3ecee0268afcfd10a435187",
+    "char_span": [
+      0,
+      202
+    ],
+    "text": "commit 0000000000000000000000000000000000000071 | update audit export | module: admin | files: [\"backend/admin/update.py\"] | imports: [\"notifications\"] | pull_request: {\"number\": 113, \"state\": \"merged\"}"
+  },
+  "demo-git_export-f3b4474b0a3b": {
+    "chunk_id": "demo-git_export-f3b4474b0a3b",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-04T14:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:d43a822ba34fd84639b112259838051fbf50640fea4f9c6102d660ab9d9745b9",
+    "char_span": [
+      0,
+      182
+    ],
+    "text": "commit 0000000000000000000000000000000000000072 | add project settings validation | module: admin | files: [\"backend/admin/add.py\"] | pull_request: {\"number\": 114, \"state\": \"merged\"}"
+  },
+  "demo-git_export-32db17094891": {
+    "chunk_id": "demo-git_export-32db17094891",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-04T21:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:14e858be43762da83e361e9d0da8f33d8bad7ff627704233ec7c7649536aabc0",
+    "char_span": [
+      0,
+      198
+    ],
+    "text": "commit 0000000000000000000000000000000000000073 | add event role permissions | module: admin | files: [\"backend/admin/add.py\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 115, \"state\": \"open\"}"
+  },
+  "demo-git_export-d6dee5e53ceb": {
+    "chunk_id": "demo-git_export-d6dee5e53ceb",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-05T04:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:185b6904d6d4b64de2fa5ef37c83ce416e9ecafe5aa01b36088de93045143005",
+    "char_span": [
+      0,
+      232
+    ],
+    "text": "commit 0000000000000000000000000000000000000074 | fix member invitation flow | module: admin | files: [\"backend/admin/fix.py\"] | imports: [\"notifications\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 116, \"state\": \"merged\"}"
+  },
+  "demo-git_export-d7d8c262ec79": {
+    "chunk_id": "demo-git_export-d7d8c262ec79",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-05T11:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:14b1d850836a544564ef501c50e37844b11d18c49875d076476efac3b0a8d301",
+    "char_span": [
+      0,
+      173
+    ],
+    "text": "commit 0000000000000000000000000000000000000075 | update audit export | module: admin | files: [\"backend/admin/update.py\"] | pull_request: {\"number\": 117, \"state\": \"merged\"}"
+  },
+  "demo-git_export-fc69f5926f92": {
+    "chunk_id": "demo-git_export-fc69f5926f92",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-05T18:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:9f40765facb589efd7c6e720004a969930c1daf9dd91d5c4bf1ef74bd229d099",
+    "char_span": [
+      0,
+      182
+    ],
+    "text": "commit 0000000000000000000000000000000000000076 | add project settings validation | module: admin | files: [\"backend/admin/add.py\"] | pull_request: {\"number\": 118, \"state\": \"merged\"}"
+  },
+  "demo-git_export-61be0d5c58c9": {
+    "chunk_id": "demo-git_export-61be0d5c58c9",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-06T01:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:31fa56e95517ef7dcb5da23a794b839c0db97e575b462bee90af60fca906ce2c",
+    "char_span": [
+      0,
+      229
+    ],
+    "text": "commit 0000000000000000000000000000000000000077 | add event role permissions | module: admin | files: [\"backend/admin/add.py\"] | imports: [\"notifications\"] | reviewers: [\"Meera\"] | pull_request: {\"number\": 119, \"state\": \"merged\"}"
+  },
+  "demo-git_export-b4f461907d4c": {
+    "chunk_id": "demo-git_export-b4f461907d4c",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-git_export",
+    "source_type": "git",
+    "source_title": "git_export.json",
+    "author": "Samiksha",
+    "event_time": "2026-10-06T08:00:00+00:00",
+    "acl_label": "L2",
+    "content_hash": "sha256:468cf9f76c2670566f01d79a1247222763cb6237401f95b33800d8811abe68d6",
+    "char_span": [
+      0,
+      201
+    ],
+    "text": "commit 0000000000000000000000000000000000000078 | fix member invitation flow | module: admin | files: [\"backend/admin/fix.py\"] | reviewers: [\"Samiksha\"] | pull_request: {\"number\": 120, \"state\": \"open\"}"
+  },
+  "demo-task_board-02551447f926": {
+    "chunk_id": "demo-task_board-02551447f926",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-task_board",
+    "source_type": "task_csv",
+    "source_title": "task_board.csv",
+    "author": "Samiksha",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:f56e1864935b6de3b8cae3fc29c36cf4d3ffda99f4aeab6cd29bfc1708187ccb",
+    "char_span": [
+      0,
+      117
+    ],
+    "text": "id: T-49 | task: Write payment retry test | owner: unassigned | status: open | due: 2026-11-14 | updated_by: Samiksha"
+  },
+  "demo-task_board-be1017a7721c": {
+    "chunk_id": "demo-task_board-be1017a7721c",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-task_board",
+    "source_type": "task_csv",
+    "source_title": "task_board.csv",
+    "author": "Manjiri",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:c65c84e033edc0db9eb8e7008200ebae49527729d9b76c3f933119aa809a02f5",
+    "char_span": [
+      0,
+      145
+    ],
+    "text": "id: T-52 | task: Publish v1.0 to the club website | owner: Meera | status: in progress | due: 2026-11-20 | blocked_by: T-49 | updated_by: Manjiri"
+  },
+  "demo-task_board-8150f28e7ab4": {
+    "chunk_id": "demo-task_board-8150f28e7ab4",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-task_board",
+    "source_type": "task_csv",
+    "source_title": "task_board.csv",
+    "author": "Samruddhi",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:e1a8280bbce71c83971a60b50170a179b1369a69bb1f733d142f869ac4272866",
+    "char_span": [
+      0,
+      156
+    ],
+    "text": "id: T-58 | task: Announce the portal launch at the club fair | owner: unassigned | status: open | due: 2026-12-05 | blocked_by: T-52 | updated_by: Samruddhi"
+  },
+  "demo-task_board-780090831bae": {
+    "chunk_id": "demo-task_board-780090831bae",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-task_board",
+    "source_type": "task_csv",
+    "source_title": "task_board.csv",
+    "author": "Rohan",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:ead37a2263627c6fe858855ab95651d50a72e6a5ce54033642c174d0b1d8e902",
+    "char_span": [
+      0,
+      121
+    ],
+    "text": "id: T-63 | task: Verify kiosk offline recovery | owner: Aarav | status: in progress | due: 2026-11-10 | updated_by: Rohan"
+  },
+  "demo-task_board-173e580149ca": {
+    "chunk_id": "demo-task_board-173e580149ca",
+    "project_id": "proj-campus-event-portal",
+    "source_id": "demo-task_board",
+    "source_type": "task_csv",
+    "source_title": "task_board.csv",
+    "author": "Meera",
+    "event_time": "1970-01-01T00:00:00+00:00",
+    "acl_label": "L1",
+    "content_hash": "sha256:d9e2dfad3c2363ec39b0c42745ab5c026c9cc96e11e21fa6ddc10f73fad4ab7f",
+    "char_span": [
+      0,
+      145
+    ],
+    "text": "id: T-67 | task: Transfer payment provider billing account | owner: Rohan | status: open | due: 2026-11-18 | blocked_by: T-49 | updated_by: Meera"
+  }
+}
