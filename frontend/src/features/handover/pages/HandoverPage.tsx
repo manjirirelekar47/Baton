@@ -51,20 +51,22 @@ export function HandoverPage() {
 
   const mutationError = (ack.error ?? respond.error) as Error | null;
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto w-full">
       <header>
-        <h1 className="font-display text-3xl text-olive">Handover for Campus Event Portal</h1>
-        <p className="mt-1 text-sm text-muted">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Handover for Campus Event Portal</h1>
+        <p className="mt-1 text-sm text-slate-500">
           Version {version.version_id}, approved {version.approved_at ? new Date(version.approved_at).toLocaleDateString() : "recently"}
           {version.snapshot_hash ? `, snapshot ${version.snapshot_hash.replace("sha256:", "").slice(0, 10)}` : ""}.
           Every claim links to its source quote.
         </p>
         {view.data && !view.data.can_acknowledge && (
-          <p className="mt-2 text-sm">You are previewing this as the approver. Receipts and owner responses belong to the incoming person.</p>
+          <p className="mt-2 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200/80 p-3 rounded-xl">
+            You are previewing this as the approver. Receipts and owner responses belong to the incoming person.
+          </p>
         )}
       </header>
 
-      <div role="tablist" aria-label="Handover views" className="flex gap-2 border-b border-line">
+      <div role="tablist" aria-label="Handover views" className="flex gap-2 border-b border-slate-200 text-xs font-semibold">
         {(["handover", "plan"] as Tab[]).map((t) => (
           <button
             key={t}
@@ -72,9 +74,13 @@ export function HandoverPage() {
             type="button"
             aria-selected={tab === t}
             onClick={() => setTab(t)}
-            className={`px-3 py-2 text-sm ${tab === t ? "border-b-2 border-olive font-semibold text-olive" : "text-muted hover:text-ink"}`}
+            className={`px-4 py-2.5 transition cursor-pointer ${
+              tab === t
+                ? "border-b-2 border-indigo-600 font-bold text-indigo-600"
+                : "text-slate-500 hover:text-slate-800"
+            }`}
           >
-            {t === "handover" ? "Handover" : "Day 1, Week 1, Month 1 plan"}
+            {t === "handover" ? "Handover Package" : "Day 1, Week 1, Month 1 Action Plan"}
           </button>
         ))}
       </div>
