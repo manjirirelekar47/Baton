@@ -1,1 +1,2 @@
-# Samruddhi
+# Samruddhi: Review and Quality slice dependencies
+# Uses base dependencies: fastapi, pydantic, sqlalchemy, pyjwt
