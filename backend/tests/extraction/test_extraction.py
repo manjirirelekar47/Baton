@@ -2,11 +2,12 @@
 Schemas, provider adapter, tier partitioning, entity merging, and job worker.
 """
 import time
+
 import pytest
 from pydantic import ValidationError
 
-from app.modules.extraction.models import ExtractionBatch, ExtractionClaim
 from app.modules.extraction import service
+from app.modules.extraction.models import ExtractionBatch
 
 
 def test_extraction_claim_schema_valid():
@@ -74,10 +75,11 @@ def test_replay_mode_job_execution(tmp_path, monkeypatch):
     db_file = tmp_path / "test_job.db"
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db_file}")
 
-    from app.core.db import apply_schema, get_engine
-    from sqlalchemy.orm import Session
     from sqlalchemy import text
+    from sqlalchemy.orm import Session
+
     from app.core.audit import now_iso
+    from app.core.db import apply_schema, get_engine
 
     engine = get_engine()
     apply_schema(engine)

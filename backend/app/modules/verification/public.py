@@ -1,5 +1,6 @@
 """PUBLIC API of the verification module. Other modules import only from here."""
 from typing import Any
+
 from sqlalchemy.orm import Session
 
 from app.core.db import get_engine

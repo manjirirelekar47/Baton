@@ -1,5 +1,6 @@
 """PUBLIC API of the extraction module."""
 from typing import Any
+
 from app.modules.extraction import service
 
 
