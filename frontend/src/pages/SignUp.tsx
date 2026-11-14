@@ -280,6 +280,7 @@ export function SignUp() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const completingLogin = useRef(false);
+  const signupInProgress = useRef(false);
 
   const completeAuthenticatedLogin = useCallback(async () => {
     if (completingLogin.current) return;
@@ -319,6 +320,7 @@ export function SignUp() {
         setNotice("Choose a new password for your account.");
         return;
       }
+      if (event === "SIGNED_IN" && signupInProgress.current) return;
       if (event === "SIGNED_IN" && session && !isRecovery) {
         window.setTimeout(() => {
           if (active) void completeAuthenticatedLogin();
@@ -329,7 +331,7 @@ export function SignUp() {
     void supabase.auth.getSession().then(({ data: sessionData, error: sessionError }) => {
       if (!active) return;
       if (sessionError) setError(sessionError.message);
-      else if (sessionData.session && !isRecovery) void completeAuthenticatedLogin();
+      else if (sessionData.session && !isRecovery && !signupInProgress.current) void completeAuthenticatedLogin();
     });
 
     return () => {
@@ -395,17 +397,54 @@ export function SignUp() {
         if (signInError) throw signInError;
         await completeAuthenticatedLogin();
       } else {
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: name.trim() },
-            emailRedirectTo: `${window.location.origin}/login`,
-          },
-        });
-        if (signUpError) throw signUpError;
-        if (data.session) await completeAuthenticatedLogin();
-        else setNotice("Check your email for the confirmation link. After confirming, return here to sign in.");
+        signupInProgress.current = true;
+        try {
+          const { data, error: signUpError } = await supabase.auth.signUp({
+            email: email.trim(),
+            password,
+            options: {
+              data: { full_name: name.trim() },
+              emailRedirectTo: `${window.location.origin}/login`,
+            },
+          });
+          if (signUpError) throw signUpError;
+
+          // Supabase can return an empty identities array for an email that is
+          // already registered (when email enumeration protection is enabled).
+          // Keep the address and take the user straight to sign-in/recovery.
+          if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+            setIsLogin(true);
+            setIsForgotPassword(false);
+            setIsRecovery(false);
+            setPassword("");
+            setRepeatPassword("");
+            setError("An account may already exist for this email. Sign in or use “Forgot password?” to reset it.");
+            navigate("/login", { replace: true });
+          } else if (data.session) {
+            // Return to the requested sign-in page even when Supabase has email
+            // confirmation disabled. Clear the just-created local session so
+            // the auth listener does not skip the sign-in screen.
+            const { error: signOutError } = await supabase.auth.signOut({ scope: "local" });
+            if (signOutError) throw signOutError;
+            setIsLogin(true);
+            setIsForgotPassword(false);
+            setIsRecovery(false);
+            setPassword("");
+            setRepeatPassword("");
+            setNotice("Account created. Sign in with your email and password.");
+            navigate("/login", { replace: true });
+          } else {
+            setIsLogin(true);
+            setIsForgotPassword(false);
+            setIsRecovery(false);
+            setPassword("");
+            setRepeatPassword("");
+            setNotice("Account created. Check your email to confirm it, then sign in here.");
+            navigate("/login", { replace: true });
+          }
+        } finally {
+          signupInProgress.current = false;
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "We couldn’t complete that request. Please try again.");
