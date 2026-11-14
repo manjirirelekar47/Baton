@@ -1081,7 +1081,7 @@ export function SignUp() {
                 <span>{isForgotPassword || isRecovery ? "Remembered your password? " : isLogin ? "Don't have an account? " : "Already have an account? "}</span>
                 <button
                   type="button"
-                  onClick={() => changeAuthPage(true)}
+                  onClick={() => changeAuthPage(isForgotPassword || isRecovery ? true : !isLogin)}
                   className="font-bold text-indigo-500 hover:text-indigo-400 hover:underline transition-colors cursor-pointer"
                 >
                   {isForgotPassword || isRecovery ? "Sign in here" : isLogin ? "Sign up here" : "Sign in here"}
