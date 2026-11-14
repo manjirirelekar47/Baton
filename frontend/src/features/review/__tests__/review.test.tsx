@@ -236,7 +236,7 @@ describe("ConflictModal component", () => {
       />
     );
 
-    expect(screen.getByText("Side-by-Side Conflict Resolution")).toBeInTheDocument();
+    expect(screen.getByText("Fix Disagreement")).toBeInTheDocument();
     expect(screen.getByText(/Priya owns payments service/)).toBeInTheDocument();
     expect(screen.getByText(/Kiran owns payments service/)).toBeInTheDocument();
 
