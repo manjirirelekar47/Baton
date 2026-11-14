@@ -68,6 +68,25 @@ describe("Supabase sign-in page", () => {
     expect(screen.queryByText("Dashboard")).not.toBeInTheDocument();
   });
 
+  it("opens account creation from the sign-in footer link", async () => {
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<SignUp />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/dashboard" element={<div>Dashboard</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const signupLinks = screen.getAllByRole("button", { name: "Sign up here" });
+    fireEvent.click(signupLinks[signupLinks.length - 1]);
+
+    expect(await screen.findByRole("heading", { name: "Create Your Account" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Your Name")).toBeInTheDocument();
+    expect(screen.getByLabelText("Repeat Password")).toBeInTheDocument();
+  });
+
   it("starts Supabase password recovery instead of a demo login", async () => {
     render(
       <MemoryRouter initialEntries={["/login"]}>
