@@ -129,7 +129,7 @@ npm run dev
 
 ---
 
-### 4. Supabase Environment Setup (Optional)
+### 4. Supabase Environment Setup
 
 Baton includes pre-seeded demo personas so you can explore the entire platform without external services. To enable production Supabase Authentication (OAuth, magic links, email verification):
 
@@ -144,6 +144,16 @@ Baton includes pre-seeded demo personas so you can explore the entire platform w
    VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-anon-key
    ```
 3. Restart the Vite development server.
+
+For the deployed site, set these same variables in **Vercel → Project Settings → Environment Variables** for Production and Preview:
+
+```env
+VITE_API_URL=https://baton-dw2j.onrender.com
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+```
+
+Then redeploy so Vite includes them in the frontend build. Add `http://localhost:5173/**` and `https://baton-pearl.vercel.app/**` to **Supabase → Authentication → URL Configuration → Redirect URLs**. Set the Site URL to `https://baton-pearl.vercel.app`. OAuth providers also need their provider credentials configured in Supabase; their callback URL is `https://<project-ref>.supabase.co/auth/v1/callback`.
 
 ---
 

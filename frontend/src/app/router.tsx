@@ -41,7 +41,7 @@ function RootRedirect() {
     );
   }
 
-  return <Navigate to={isAuthed ? "/dashboard" : "/signup"} replace />;
+  return <Navigate to={isAuthed ? "/dashboard" : "/login"} replace />;
 }
 
 export const router = createBrowserRouter([

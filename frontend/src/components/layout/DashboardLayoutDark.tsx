@@ -352,8 +352,8 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    logout();
+                  onClick={async () => {
+                    await logout();
                     setProfileDropdownOpen(false);
                   }}
                   className="text-rose-400 hover:text-rose-300 font-medium px-2 py-1 rounded hover:bg-rose-950/40 transition-colors"

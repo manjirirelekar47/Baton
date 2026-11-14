@@ -21,6 +21,7 @@ import {
   type UserProfile,
   ApiError,
 } from "../api/client";
+import { supabase } from "../features/auth/supabase";
 
 export interface ExtendedUser extends UserProfile {
   firstName: string;
@@ -36,7 +37,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   loginDemo: (role: Role) => Promise<void>;
   switchRole: (role: Role) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   resetDemo: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -198,7 +199,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   /**
    * Logout and clear session
    */
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    if (supabase) {
+      await supabase.auth.signOut({ scope: "local" });
+    }
     setStoredToken(null);
     setUser(null);
   }, []);
