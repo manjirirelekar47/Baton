@@ -202,33 +202,6 @@ baton/
 
 ---
 
-## 🤝 Contributing
-
-We welcome contributions from the community! To maintain enterprise-grade reliability and clean history, we enforce strict engineering practices:
-
-1. **Fork & Branch:** Create a feature branch off `main` using descriptive names:
-   ```bash
-   git checkout -b feat/evidence-graph-filter
-   ```
-2. **Atomic & Conventional Commits:** Structure commit messages clearly following Conventional Commits:
-   - `feat: add risk radar threshold slider`
-   - `fix: resolve quote highlight mismatch on multiline sources`
-   - `docs: update deployment architecture diagram`
-3. **Automated Testing & Static Analysis:** Ensure static analysis and tests pass locally before submitting:
-   ```bash
-   # In frontend/
-   npx vitest run --no-file-parallelism
-   npm run build
-
-   # In backend/
-   pytest
-   ruff check .
-   ```
-4. **Open a Pull Request:** Open a PR against `main` detailing your changes, motivation, and test coverage.
-
----
-
-<div align="center">
 
 **Built with precision for engineering teams that value continuity.**
 
