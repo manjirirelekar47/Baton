@@ -32,7 +32,8 @@ def get_settings() -> Settings:
     secret = os.environ.get("JWT_SECRET", DEV_SECRET)
     if env == "production" and secret == DEV_SECRET:
         raise RuntimeError("JWT_SECRET must be set in production")
-    origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",") if o.strip()]
+    default_origins = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000"
+    origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", default_origins).split(",") if o.strip()]
     return Settings(
         env=env,
         database_url=_normalise_db_url(os.environ.get("DATABASE_URL", "sqlite:///./baton_dev.db")),

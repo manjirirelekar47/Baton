@@ -1,7 +1,21 @@
+/**
+ * ClaimsList.tsx
+ * Pure White Modern Claims List for Claim Ledger.
+ * 
+ * Strict Light Mode Overhaul Rules:
+ * - Pure White Cards: bg-white border border-slate-200 shadow-sm
+ * - High Contrast: Primary text text-slate-900, secondary text-slate-600.
+ * - Zero muddy grays: No bg-gray-400, bg-slate-400, bg-gray-500, bg-slate-500, or bg-black/20.
+ * - Zero text-white on light backgrounds.
+ * - Modular ClaimCard integration.
+ * - Dark Mode Strictly Preserved: All dark: classes remain untouched.
+ */
+
 import { useState, useMemo } from "react";
-import { StateBadge, EmptyState } from "@/shared/ui";
+import { EmptyState } from "@/shared/ui";
 import type { Claim } from "../api";
 import type { ClaimState } from "@/shared/types";
+import { ClaimCard } from "./ClaimCard";
 
 interface ClaimsListProps {
   claims: Claim[];
@@ -46,14 +60,14 @@ export function ClaimsList({ claims, onSelectClaim, onOpenSource }: ClaimsListPr
 
   return (
     <div className="space-y-4">
-      {/* Filter Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-card p-3">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <label className="font-medium text-muted">State:</label>
+      {/* Filter & Search Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black/40 dark:backdrop-blur-xl dark:shadow-2xl">
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <label className="font-semibold text-slate-700 dark:text-gray-300">State:</label>
           <select
             value={selectedState}
             onChange={(e) => setSelectedState(e.target.value)}
-            className="rounded border border-line bg-wash px-2 py-1 text-xs text-ink"
+            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-purple-500 shadow-xs transition-colors dark:border-white/15 dark:bg-slate-900 dark:text-white"
           >
             <option value="all">All States</option>
             {ALL_STATES.map((s) => (
@@ -63,11 +77,11 @@ export function ClaimsList({ claims, onSelectClaim, onOpenSource }: ClaimsListPr
             ))}
           </select>
 
-          <label className="ml-2 font-medium text-muted">Type:</label>
+          <label className="ml-2 font-semibold text-slate-700 dark:text-gray-300">Type:</label>
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="rounded border border-line bg-wash px-2 py-1 text-xs text-ink"
+            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-purple-500 shadow-xs transition-colors dark:border-white/15 dark:bg-slate-900 dark:text-white"
           >
             <option value="all">All Types</option>
             {ALL_TYPES.map((t) => (
@@ -78,96 +92,38 @@ export function ClaimsList({ claims, onSelectClaim, onOpenSource }: ClaimsListPr
           </select>
         </div>
 
-        <div className="w-full sm:w-64">
+        <div className="w-full sm:w-auto">
           <input
             type="search"
-            placeholder="Search statement or entity…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded border border-line bg-wash px-3 py-1 text-xs text-ink placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-olive"
+            placeholder="Search statement, entity, or owner…"
+            className="w-full sm:w-64 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-purple-500 shadow-xs transition-colors dark:border-white/15 dark:bg-slate-900 dark:text-white dark:placeholder-gray-500"
           />
         </div>
       </div>
 
-      {/* Claims List Table / Cards */}
+      {/* Spacious Claims List */}
       {filtered.length === 0 ? (
-        <EmptyState title="No matching claims found">
-          Try adjusting your state or type filters, or search query.
-        </EmptyState>
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-black/40 dark:backdrop-blur-xl dark:shadow-2xl">
+          <EmptyState title="No claims match your filters">
+            Try adjusting the State or Type filters, or clearing the search query.
+          </EmptyState>
+        </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-line bg-card shadow-sm">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-line bg-wash text-xs font-semibold text-muted">
-              <tr>
-                <th className="py-2.5 px-4">State</th>
-                <th className="py-2.5 px-3">Type</th>
-                <th className="py-2.5 px-3">Entity & Attribute</th>
-                <th className="py-2.5 px-4">Statement</th>
-                <th className="py-2.5 px-3">Citations</th>
-                <th className="py-2.5 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {filtered.map((claim) => (
-                <tr
-                  key={claim.claim_id}
-                  className="hover:bg-wash/60 transition-colors cursor-pointer"
-                  onClick={() => onSelectClaim(claim)}
-                >
-                  <td className="py-3 px-4 whitespace-nowrap">
-                    <StateBadge state={claim.state} />
-                  </td>
-                  <td className="py-3 px-3 whitespace-nowrap">
-                    <span className="rounded bg-wash px-2 py-0.5 text-xs font-mono text-muted border border-line">
-                      {claim.type}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3">
-                    <div className="font-mono text-xs text-ink font-medium">{claim.entity_key}</div>
-                    <div className="text-[11px] text-muted">{claim.attribute}</div>
-                  </td>
-                  <td className="py-3 px-4 max-w-md">
-                    <div className="font-medium text-ink">{claim.statement}</div>
-                    {claim.owner && (
-                      <div className="mt-0.5 text-xs text-muted">Owner: {claim.owner}</div>
-                    )}
-                  </td>
-                  <td className="py-3 px-3 whitespace-nowrap">
-                    {claim.evidence.length > 0 ? (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const ev = claim.evidence[0];
-                          onOpenSource(ev.chunk_id, ev.quote);
-                        }}
-                        className="inline-flex items-center gap-1 rounded bg-[#eef3f7] px-2 py-0.5 text-xs font-medium text-[#1a4a6e] hover:bg-[#dbe6f0]"
-                      >
-                        <span>{claim.evidence.length} citation{claim.evidence.length > 1 ? "s" : ""}</span>
-                        <span aria-hidden="true">↗</span>
-                      </button>
-                    ) : (
-                      <span className="text-xs text-muted italic">None (Gap)</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 text-right whitespace-nowrap">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectClaim(claim);
-                      }}
-                      className="rounded border border-line bg-card px-2.5 py-1 text-xs font-medium text-olive hover:bg-wash"
-                    >
-                      Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-4">
+          {filtered.map((claim) => (
+            <ClaimCard
+              key={claim.claim_id}
+              claim={claim}
+              onSelectClaim={onSelectClaim}
+              onOpenSource={onOpenSource}
+            />
+          ))}
         </div>
       )}
     </div>
   );
 }
+
+export default ClaimsList;

@@ -49,7 +49,7 @@ export function ConflictModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Resolve Conflict"
+      aria-label="Fix Disagreement"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
     >
       <div className="flex max-h-[90vh] w-full max-w-4xl flex-col rounded-lg border border-line bg-card p-6 shadow-2xl">
@@ -57,18 +57,17 @@ export function ConflictModal({
           <div>
             <div className="flex items-center gap-2">
               <span className="rounded bg-[var(--conflicting)] px-2 py-0.5 text-xs font-semibold text-white">
-                ≠ Conflicting Claim
+                ≠ Disagreement
               </span>
               <span className="text-sm font-semibold text-olive">
                 {claim.entity_key || "Entity"} • {claim.attribute || "attribute"}
               </span>
             </div>
             <h2 className="mt-1 font-display text-2xl text-ink">
-              Side-by-Side Conflict Resolution
+              Fix Disagreement
             </h2>
             <p className="mt-1 text-xs text-muted">
-              {conflictClaims.length} sources disagree on this fact. The system
-              provides suggestions, but a human must make the authoritative choice.
+              {conflictClaims.length} sources disagree on this fact. Review both options below and choose the correct one.
             </p>
           </div>
           <button

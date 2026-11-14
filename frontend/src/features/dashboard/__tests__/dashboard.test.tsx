@@ -11,8 +11,6 @@ vi.mock("@/app/auth", () => ({
     loading: false,
     error: null,
     switchRole: vi.fn(),
-    enterDemoWorkspace: vi.fn(),
-    signOut: vi.fn(),
     resetDemo: vi.fn(),
   }),
 }));
@@ -57,11 +55,10 @@ describe("LoginPage", () => {
   it("renders Baton branding and sign-in controls", () => {
     renderWithProviders(<LoginPage />);
 
-    expect(screen.getByText(/Every handover/i)).toBeInTheDocument();
-    expect(screen.getByText(/Keep the decisions, context, and proof/i)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /Welcome back/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /Create account/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Explore the demo/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Sign in to Baton/i })).toBeInTheDocument();
+    expect(screen.getByText(/Every Handover/i)).toBeInTheDocument();
+    expect(screen.getByText(/Capture. Verify. Transfer./i)).toBeInTheDocument();
+    expect(screen.getByText("Welcome Back!")).toBeInTheDocument();
+    expect(screen.getByText("Select Demo Persona")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Sign In to Baton/i })).toBeInTheDocument();
   });
 });
