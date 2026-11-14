@@ -14,7 +14,6 @@ interface Chunk {
   text: string;
 }
 
-/** STUB (Bhavesh replaces). Contract: SourceDrawer({ chunkId, quote, onClose }) opens the chunk with the quote highlighted. */
 export function SourceDrawer({ chunkId, quote, onClose }: { chunkId: string; quote: string; onClose: () => void }) {
   const { user } = useAuth();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -32,14 +31,24 @@ export function SourceDrawer({ chunkId, quote, onClose }: { chunkId: string; quo
 
   const parts = data ? splitAroundQuote(data.text, quote) : null;
   return (
-    <aside role="dialog" aria-modal="true" aria-label="Source" className="fixed inset-y-0 right-0 z-20 w-full max-w-md overflow-y-auto border-l border-line bg-card p-5 shadow-xl">
-      <div className="flex items-start justify-between gap-3">
-        <h2 className="font-display text-xl text-olive">Source {chunkId}</h2>
+    <aside
+      role="dialog"
+      aria-modal="true"
+      aria-label="Source"
+      className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto border-l border-slate-200 bg-white/95 backdrop-blur-2xl p-6 shadow-2xl text-slate-900"
+    >
+      <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-4">
+        <div>
+          <span className="font-mono text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-lg border border-purple-200">
+            Source Chunk
+          </span>
+          <h2 className="text-xl font-bold text-slate-900 mt-1">{chunkId}</h2>
+        </div>
         <button
           ref={closeRef}
           type="button"
           onClick={onClose}
-          className="rounded-md border border-line bg-card px-3 py-1.5 text-sm font-medium hover:bg-wash"
+          className="rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
         >
           Close
         </button>
@@ -47,17 +56,28 @@ export function SourceDrawer({ chunkId, quote, onClose }: { chunkId: string; quo
       {isLoading && <Loading label="Opening source" />}
       {error && <ErrorState title="Could not open this source" detail={(error as Error).message} onRetry={() => void refetch()} />}
       {data && parts && (
-        <div className="mt-3 space-y-3 text-sm">
-          <p className="text-muted">
-            {data.source_title}, written by {data.author} on {new Date(data.event_time).toLocaleDateString()}. Access {data.acl_label}.
-          </p>
-          <p className="whitespace-pre-wrap rounded-md border border-line bg-paper p-3 leading-relaxed">
+        <div className="mt-4 space-y-4 text-xs">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-700 space-y-1">
+            <div className="font-bold text-slate-900 text-sm">{data.source_title}</div>
+            <div className="text-slate-500">
+              Author: <span className="text-slate-800 font-medium">{data.author}</span> • Date:{" "}
+              <span className="text-slate-800 font-medium">{new Date(data.event_time).toLocaleDateString()}</span>
+            </div>
+            <div className="text-slate-500">
+              Classification: <span className="font-mono font-bold text-purple-700">{data.acl_label}</span>
+            </div>
+          </div>
+          <div className="whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-xs text-slate-800 leading-relaxed max-h-[60vh] overflow-y-auto shadow-inner">
             {parts.before}
-            {parts.found && <mark>{parts.match}</mark>}
+            {parts.found && (
+              <mark className="bg-purple-100 text-purple-900 border-b-2 border-purple-600 px-1 py-0.5 rounded font-semibold">
+                {parts.match}
+              </mark>
+            )}
             {parts.after}
-          </p>
+          </div>
           {!parts.found && (
-            <p role="alert" className="text-[var(--conflicting)]">
+            <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-rose-800">
               The quoted text was not found in this source passage. Treat this claim as unverified.
             </p>
           )}
