@@ -73,6 +73,20 @@ describe("Supabase sign-in page", () => {
     expect(screen.queryByText("Dashboard")).not.toBeInTheDocument();
   });
 
+  it("explains the Supabase duplicate-account OAuth callback error", async () => {
+    render(
+      <MemoryRouter initialEntries={["/login?error=server_error&error_description=Multiple%20accounts%20with%20the%20same%20email%20address"]}>
+        <Routes>
+          <Route path="/login" element={<SignUp />} />
+          <Route path="/dashboard" element={<div>Dashboard</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/Supabase found more than one account/i)).toBeInTheDocument();
+    expect(screen.getByText(/Link GitHub account from the profile menu/i)).toBeInTheDocument();
+  });
+
   it("opens account creation from the sign-in footer link", async () => {
     render(
       <MemoryRouter initialEntries={["/login"]}>
