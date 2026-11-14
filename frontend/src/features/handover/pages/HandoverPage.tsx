@@ -51,22 +51,22 @@ export function HandoverPage() {
 
   const mutationError = (ack.error ?? respond.error) as Error | null;
   return (
-    <div className="space-y-6 max-w-7xl mx-auto w-full">
+    <div className="space-y-6 max-w-7xl mx-auto w-full pb-12">
       <header>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Handover for Campus Event Portal</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Handover for Campus Event Portal</h1>
+        <p className="mt-1 text-sm text-gray-300">
           Version {version.version_id}, approved {version.approved_at ? new Date(version.approved_at).toLocaleDateString() : "recently"}
           {version.snapshot_hash ? `, snapshot ${version.snapshot_hash.replace("sha256:", "").slice(0, 10)}` : ""}.
           Every claim links to its source quote.
         </p>
         {view.data && !view.data.can_acknowledge && (
-          <p className="mt-2 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200/80 p-3 rounded-xl">
+          <p className="mt-3 text-xs font-medium text-purple-200 bg-purple-950/40 border border-purple-500/30 p-3.5 rounded-2xl shadow-lg backdrop-blur-xl">
             You are previewing this as the approver. Receipts and owner responses belong to the incoming person.
           </p>
         )}
       </header>
 
-      <div role="tablist" aria-label="Handover views" className="flex gap-2 border-b border-slate-200 text-xs font-semibold">
+      <div role="tablist" aria-label="Handover views" className="flex gap-4 border-b border-white/10 text-sm font-semibold pt-2">
         {(["handover", "plan"] as Tab[]).map((t) => (
           <button
             key={t}
@@ -74,10 +74,10 @@ export function HandoverPage() {
             type="button"
             aria-selected={tab === t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2.5 transition cursor-pointer ${
+            className={`pb-3 -mb-px transition cursor-pointer font-bold ${
               tab === t
-                ? "border-b-2 border-indigo-600 font-bold text-indigo-600"
-                : "text-slate-500 hover:text-slate-800"
+                ? "border-b-2 border-indigo-500 text-white shadow-[0_4px_12px_rgba(99,102,241,0.25)]"
+                : "border-b-2 border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
             {t === "handover" ? "Handover Package" : "Day 1, Week 1, Month 1 Action Plan"}
@@ -106,7 +106,7 @@ export function HandoverPage() {
               onOpenCitation={setCitation}
             />
           ))}
-          <p className="text-sm text-muted">{view.data.receipt_note}</p>
+          <p className="text-xs text-gray-400 font-mono">{view.data.receipt_note}</p>
         </div>
       )}
 
@@ -117,7 +117,7 @@ export function HandoverPage() {
           {plan.data && (
             <>
               <PlanPanel plan={plan.data.plan} onOpenCitation={setCitation} />
-              <p className="mt-6 text-sm text-muted">{plan.data.note}</p>
+              <p className="mt-6 text-xs text-gray-400 font-mono">{plan.data.note}</p>
             </>
           )}
         </div>

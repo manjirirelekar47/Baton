@@ -1,3 +1,14 @@
+/**
+ * LedgerPage.tsx
+ * Pure White High-Contrast Ledger Page.
+ * 
+ * Strict Light Mode Overhaul Rules:
+ * - Base Backgrounds MUST be White: bg-white border border-slate-200 shadow-sm
+ * - Base Text MUST be Dark: text-slate-900 for primary text, text-slate-500 for secondary text
+ * - Zero muddy grays: No bg-gray-*, bg-slate-500, bg-slate-600, bg-slate-800, or bg-black/20
+ * - Dark Mode Strictly Preserved: All dark: classes remain untouched
+ */
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/auth";
@@ -50,99 +61,85 @@ export function LedgerPage() {
   const gaps = gapsData ?? [];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto w-full">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Claim Ledger & Reconstruction</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Reconstructed project knowledge with deterministic quote verification, honesty state badges, and Gap identification.
-        </p>
-      </div>
-
-      {/* Reconstruction Action Bar */}
+    <div className="space-y-6 max-w-7xl mx-auto w-full pb-12 animate-in fade-in duration-300">
+      {/* Reconstruction Action Bar (The Reconstruct Project State Header) */}
       <ReconstructBar onComplete={handleReconstructComplete} />
 
       {/* Access Control Notice if Items Are Hidden */}
       {hiddenCount > 0 && (
         <div
           role="status"
-          className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 text-xs text-amber-900 flex items-center gap-2 shadow-xs"
+          className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 flex items-center gap-2.5 shadow-sm dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-200"
         >
-          <span aria-hidden="true">🔒</span>
+          <span aria-hidden="true" className="text-amber-700 dark:text-amber-400 font-bold text-sm">🔒</span>
           <span>
-            <strong>Access notice:</strong> {hiddenCount} restricted claim{hiddenCount > 1 ? "s are" : " is"} hidden for your role ({user?.role}). In accordance with Baton's access rules, restricted facts arrive as a count only.
+            <strong className="text-amber-950 dark:text-amber-300">Access notice:</strong> {hiddenCount} sensitive project detail{hiddenCount > 1 ? "s are" : " is"} hidden based on your team role ({user?.role}). In accordance with Baton's access rules, restricted facts arrive as a count only.
           </span>
         </div>
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 text-xs font-semibold">
+      <div className="flex items-center gap-6 border-b border-slate-200 text-sm font-semibold pt-2 dark:border-white/10">
         <button
           type="button"
           onClick={() => setActiveTab("claims")}
-          className={`border-b-2 px-4 py-2.5 transition-colors cursor-pointer ${
+          className={`pb-3 -mb-px transition-all cursor-pointer font-bold ${
             activeTab === "claims"
-              ? "border-indigo-600 text-indigo-600 font-bold"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-b-2 border-purple-600 text-purple-700 dark:text-purple-300"
+              : "border-b-2 border-transparent text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white"
           }`}
         >
-          Claim Ledger ({claims.length})
+          Project Facts ({claims.length})
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("gaps")}
-          className={`border-b-2 px-4 py-2.5 transition-colors cursor-pointer ${
+          className={`pb-3 -mb-px transition-all cursor-pointer font-bold ${
             activeTab === "gaps"
-              ? "border-indigo-600 text-indigo-600 font-bold"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-b-2 border-purple-600 text-purple-700 dark:text-purple-300"
+              : "border-b-2 border-transparent text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white"
           }`}
         >
-          Knowledge Gaps ({gaps.length})
+          Open Questions ({gaps.length})
         </button>
       </div>
 
-      {/* Main Tab Content */}
-      {activeTab === "claims" ? (
+      {/* Tab Content */}
+      {activeTab === "claims" && (
         <div>
-          {isClaimsLoading && <Loading label="Loading claim ledger" />}
+          {isClaimsLoading && <Loading label="Loading project facts..." />}
           {claimsError && (
             <ErrorState
-              title="Could not load claims"
+              title="Unable to load project facts"
               detail={(claimsError as Error).message}
-              onRetry={() => void refetchClaims()}
+              onRetry={() => refetchClaims()}
             />
           )}
           {!isClaimsLoading && !claimsError && (
             <ClaimsList
               claims={claims}
-              onSelectClaim={(claim) => setSelectedClaim(claim)}
+              onSelectClaim={setSelectedClaim}
               onOpenSource={handleOpenSource}
-            />
-          )}
-        </div>
-      ) : (
-        <div>
-          {isGapsLoading && <Loading label="Loading knowledge gaps" />}
-          {gapsError && (
-            <ErrorState
-              title="Could not load gaps"
-              detail={(gapsError as Error).message}
-              onRetry={() => void refetchGaps()}
-            />
-          )}
-          {!isGapsLoading && !gapsError && (
-            <GapsList
-              gaps={gaps}
-              onSelectClaim={(claimId) => {
-                const found = claims.find((c) => c.claim_id === claimId);
-                if (found) setSelectedClaim(found);
-              }}
             />
           )}
         </div>
       )}
 
-      {/* Claim Detail Modal */}
+      {activeTab === "gaps" && (
+        <div>
+          {isGapsLoading && <Loading label="Checking for open questions..." />}
+          {gapsError && (
+            <ErrorState
+              title="Unable to load open questions"
+              detail={(gapsError as Error).message}
+              onRetry={() => refetchGaps()}
+            />
+          )}
+          {!isGapsLoading && !gapsError && <GapsList gaps={gaps} />}
+        </div>
+      )}
+
+      {/* Modals & Drawers */}
       {selectedClaim && (
         <ClaimDetailModal
           claim={selectedClaim}
@@ -151,7 +148,6 @@ export function LedgerPage() {
         />
       )}
 
-      {/* Source Drawer with Highlighted Verbatim Quote */}
       {inspectSource && (
         <SourceDrawer
           chunkId={inspectSource.chunkId}
@@ -162,3 +158,5 @@ export function LedgerPage() {
     </div>
   );
 }
+
+export default LedgerPage;
