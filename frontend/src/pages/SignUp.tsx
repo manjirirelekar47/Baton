@@ -13,7 +13,7 @@
  * - 1-Click Demo Mode button for instant exploratory access.
  */
 
-import React, { useState, useMemo, useEffect, type FormEvent } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef, type FormEvent } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/app/auth";
 import { useTheme } from "@/context/ThemeContext";
+import { isSupabaseConfigured, supabase } from "@/features/auth/supabase";
 
 // ---------------------------------------------------------------------------
 // 1. Kinetic Particle Field Generator
@@ -249,25 +250,93 @@ export function SignUp() {
 
   // 1. Toggle State: false = Registration (Sign Up), true = Login
   const [isLogin, setIsLogin] = useState<boolean>(location.pathname === "/login");
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isRecovery, setIsRecovery] = useState(
+    () => new URLSearchParams(location.search).get("recovery") === "1",
+  );
 
   // Keep state synchronized if URL route shifts
   useEffect(() => {
     setIsLogin(location.pathname === "/login");
-  }, [location.pathname]);
+    if (new URLSearchParams(location.search).get("recovery") === "1") {
+      setIsRecovery(true);
+      setIsForgotPassword(false);
+    }
+  }, [location.pathname, location.search]);
 
   // Form States
-  const [name, setName] = useState("Aarav Mehta");
-  const [email, setEmail] = useState("aarav.mehta@acme-corp.com");
-  const [password, setPassword] = useState("••••••••••••");
-  const [repeatPassword, setRepeatPassword] = useState("••••••••••••");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(true);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const isRegistration = !isLogin && !isRecovery && !isForgotPassword;
 
   // Active Focus Trackers for Animated Underlines
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const completingLogin = useRef(false);
+
+  const completeAuthenticatedLogin = useCallback(async () => {
+    if (completingLogin.current) return;
+    completingLogin.current = true;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await loginDemo("approver");
+      navigate("/dashboard", { replace: true });
+    } catch (cause) {
+      completingLogin.current = false;
+      setError(cause instanceof Error ? cause.message : "Signed in, but Baton could not open your workspace.");
+    } finally {
+      setSubmitting(false);
+    }
+  }, [loginDemo, navigate]);
+
+  function changeAuthPage(nextIsLogin: boolean) {
+    setIsLogin(nextIsLogin);
+    setIsForgotPassword(false);
+    setIsRecovery(false);
+    setError(null);
+    setNotice(null);
+    setPassword("");
+    setRepeatPassword("");
+    navigate(nextIsLogin ? "/login" : "/signup", { replace: true });
+  }
+
+  useEffect(() => {
+    if (!supabase) return;
+    let active = true;
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsLogin(true);
+        setIsRecovery(true);
+        setIsForgotPassword(false);
+        setNotice("Choose a new password for your account.");
+        return;
+      }
+      if (event === "SIGNED_IN" && session && !isRecovery) {
+        window.setTimeout(() => {
+          if (active) void completeAuthenticatedLogin();
+        }, 0);
+      }
+    });
+
+    void supabase.auth.getSession().then(({ data: sessionData, error: sessionError }) => {
+      if (!active) return;
+      if (sessionError) setError(sessionError.message);
+      else if (sessionData.session && !isRecovery) void completeAuthenticatedLogin();
+    });
+
+    return () => {
+      active = false;
+      data.subscription.unsubscribe();
+    };
+  }, [completeAuthenticatedLogin, isRecovery]);
 
   // Password Strength Calculation (relevant for registration)
   const passwordStrength = useMemo(() => {
@@ -289,13 +358,18 @@ export function SignUp() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setNotice(null);
 
-    if (!isLogin) {
-      if (password !== repeatPassword) {
-        setError("Passwords do not match. Please verify.");
-        return;
-      }
+    if (!supabase) {
+      setError("Supabase sign-in is not configured for this deployment.");
+      return;
+    }
 
+    if ((!isLogin || isRecovery) && password !== repeatPassword) {
+      setError("Those passwords do not match.");
+      return;
+    }
+    if (!isLogin && !isRecovery) {
       if (!agreeTerms) {
         setError("Please accept Baton's terms and privacy policy to continue.");
         return;
@@ -304,27 +378,58 @@ export function SignUp() {
 
     setSubmitting(true);
     try {
-      if (isLogin) {
-        // Authenticate existing workspace session
-        if (loginDemo) {
-          await loginDemo("approver");
-        } else {
-          await switchRole("approver");
-        }
+      if (isRecovery) {
+        const { error: updateError } = await supabase.auth.updateUser({ password });
+        if (updateError) throw updateError;
+        setIsRecovery(false);
+        setNotice("Password updated. Opening your Baton workspace…");
+        await completeAuthenticatedLogin();
+      } else if (isForgotPassword) {
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/login?recovery=1`,
+        });
+        if (resetError) throw resetError;
+        setNotice("If an account exists for that address, a password reset link is on its way.");
+      } else if (isLogin) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+        await completeAuthenticatedLogin();
       } else {
-        // Provision persona session for departing lead / maintainer
-        await switchRole("leaver");
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name.trim() },
+            emailRedirectTo: `${window.location.origin}/login`,
+          },
+        });
+        if (signUpError) throw signUpError;
+        if (data.session) await completeAuthenticatedLogin();
+        else setNotice("Check your email for the confirmation link. After confirming, return here to sign in.");
       }
-      navigate("/dashboard");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : isLogin
-          ? "Failed to sign in. Please verify your credentials."
-          : "Failed to create account."
-      );
+      setError(err instanceof Error ? err.message : "We couldn’t complete that request. Please try again.");
     } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleOAuth = async (provider: "google" | "github") => {
+    if (!supabase) {
+      setError("Supabase sign-in is not configured for this deployment.");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/login` },
+      });
+      if (oauthError) throw oauthError;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not start social sign-in.");
       setSubmitting(false);
     }
   };
@@ -340,8 +445,8 @@ export function SignUp() {
         await switchRole("approver");
       }
       navigate("/dashboard");
-    } catch {
-      navigate("/dashboard");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not open the demo workspace.");
     } finally {
       setSubmitting(false);
     }
@@ -424,7 +529,7 @@ export function SignUp() {
             <span>{isLogin ? "Don't have an account?" : "Already have an account?"}</span>
             <button
               type="button"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => changeAuthPage(!isLogin)}
               className="font-bold text-indigo-500 hover:text-indigo-400 hover:underline transition-colors cursor-pointer"
             >
               {isLogin ? "Sign up here" : "Sign in here"}
@@ -532,14 +637,30 @@ export function SignUp() {
                     isDark ? "text-white" : "text-slate-900"
                   }`}
                 >
-                  {isLogin ? "Welcome Back" : "Create Your Account"}
+                  {isRecovery ? "Choose a new password" : isForgotPassword ? "Reset your password" : isLogin ? "Welcome Back" : "Create Your Account"}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                  {isLogin
+                  {isRecovery
+                    ? "Set a new password to finish recovering your account."
+                    : isForgotPassword
+                    ? "Enter your email and we’ll send you a password reset link."
+                    : isLogin
                     ? "Sign in to access your verified handovers."
                     : "Join enterprise engineering teams powering verified handovers."}
                 </p>
               </div>
+
+              {!isSupabaseConfigured && (
+                <div className="mb-5 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-200 text-xs font-medium">
+                  Supabase is not configured for this site. Email sign-in and account creation are unavailable.
+                </div>
+              )}
+
+              {notice && (
+                <div role="status" className="mb-5 p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200 text-xs font-medium">
+                  {notice}
+                </div>
+              )}
 
               {/* Error Notice */}
               {error && (
@@ -553,7 +674,7 @@ export function SignUp() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <AnimatePresence initial={false}>
                   {/* 1. Name Field (Sign Up Only) */}
-                  {!isLogin && (
+                  {isRegistration && (
                     <motion.div
                       key="signup-name-field"
                       initial={{ opacity: 0, height: 0 }}
@@ -577,7 +698,7 @@ export function SignUp() {
                         <input
                           id="signup-name"
                           type="text"
-                          required={!isLogin}
+                          required={isRegistration}
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           onFocus={() => setFocusedField("name")}
@@ -603,7 +724,7 @@ export function SignUp() {
                 </AnimatePresence>
 
                 {/* 2. Work Email Field (Always Shown) */}
-                <div className="relative">
+                {!isRecovery && <div className="relative">
                   <label
                     htmlFor="signup-email"
                     className={`block text-[11px] font-bold uppercase tracking-wider mb-1 transition-colors ${
@@ -620,6 +741,7 @@ export function SignUp() {
                       id="signup-email"
                       type="email"
                       required
+                      minLength={isLogin && !isRecovery ? undefined : 8}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       onFocus={() => setFocusedField("email")}
@@ -640,10 +762,10 @@ export function SignUp() {
                       style={{ originX: 0 }}
                     />
                   </div>
-                </div>
+                </div>}
 
                 {/* 3. Password Field (Always Shown) */}
-                <div className="relative">
+                {!isForgotPassword && <div className="relative">
                   <label
                     htmlFor="signup-password"
                     className={`block text-[11px] font-bold uppercase tracking-wider mb-1 transition-colors ${
@@ -652,7 +774,7 @@ export function SignUp() {
                         : "text-slate-500 dark:text-slate-400"
                     }`}
                   >
-                    {isLogin ? "Password" : "Create Password"}
+                    {isRecovery ? "New Password" : isLogin ? "Password" : "Create Password"}
                   </label>
                   <div className="relative flex items-center">
                     <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500 mr-2 flex-shrink-0" />
@@ -664,7 +786,7 @@ export function SignUp() {
                       onChange={(e) => setPassword(e.target.value)}
                       onFocus={() => setFocusedField("password")}
                       onBlur={() => setFocusedField(null)}
-                      placeholder={isLogin ? "Enter your password" : "At least 8 characters"}
+                      placeholder={isLogin && !isRecovery ? "Enter your password" : "At least 8 characters"}
                       className={`w-full bg-transparent py-2.5 pr-8 pl-0 text-sm font-medium focus:outline-none placeholder:text-slate-400 border-b transition-colors ${
                         isDark
                           ? "text-white border-white/10"
@@ -690,7 +812,7 @@ export function SignUp() {
                   </div>
 
                   {/* Password Strength Indicator Bar (Sign Up Only) */}
-                  {!isLogin && password && (
+                  {isRegistration && password && (
                     <div className="mt-2 space-y-1">
                       <div className="w-full bg-slate-200 dark:bg-white/10 h-1 rounded-full overflow-hidden">
                         <motion.div
@@ -722,11 +844,11 @@ export function SignUp() {
                       </div>
                     </div>
                   )}
-                </div>
+                </div>}
 
                 <AnimatePresence initial={false}>
                   {/* 4. Repeat Password Field (Sign Up Only) */}
-                  {!isLogin && (
+                  {(isRegistration || isRecovery) && (
                     <motion.div
                       key="signup-repeat-password-field"
                       initial={{ opacity: 0, height: 0 }}
@@ -743,14 +865,14 @@ export function SignUp() {
                             : "text-slate-500 dark:text-slate-400"
                         }`}
                       >
-                        Repeat Password
+                        {isRecovery ? "Confirm New Password" : "Repeat Password"}
                       </label>
                       <div className="relative flex items-center">
                         <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500 mr-2 flex-shrink-0" />
                         <input
                           id="signup-repeat-password"
                           type={showRepeatPassword ? "text" : "password"}
-                          required={!isLogin}
+                          required
                           value={repeatPassword}
                           onChange={(e) => setRepeatPassword(e.target.value)}
                           onFocus={() => setFocusedField("repeatPassword")}
@@ -799,7 +921,7 @@ export function SignUp() {
                 </AnimatePresence>
 
                 {/* Terms Agreement Checkbox (Sign Up Only) */}
-                {!isLogin && (
+                {isRegistration && (
                   <div className="flex items-start pt-1">
                     <input
                       id="agree-terms"
@@ -825,6 +947,18 @@ export function SignUp() {
                   </div>
                 )}
 
+                {!isRecovery && isLogin && !isForgotPassword && (
+                  <div className="-mt-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => { setIsForgotPassword(true); setError(null); setNotice(null); }}
+                      className="text-xs font-semibold text-indigo-500 hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
+
                 {/* Dynamic Submit Button */}
                 <motion.button
                   type="submit"
@@ -835,19 +969,15 @@ export function SignUp() {
                 >
                   <span>
                     {submitting
-                      ? isLogin
-                        ? "Signing In..."
-                        : "Provisioning Workspace..."
-                      : isLogin
-                      ? "Sign In to Baton →"
-                      : "Get Started with Baton →"}
+                      ? isRecovery ? "Updating password…" : isForgotPassword ? "Sending reset link…" : isLogin ? "Signing in…" : "Creating account…"
+                      : isRecovery ? "Update Password →" : isForgotPassword ? "Send Reset Link →" : isLogin ? "Sign In to Baton →" : "Create Account →"}
                   </span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </motion.button>
               </form>
 
               {/* Or Divider */}
-              <div className="relative my-6 text-center">
+              {!isForgotPassword && !isRecovery && <div className="relative my-6 text-center">
                 <div aria-hidden="true" className="absolute inset-0 flex items-center">
                   <div
                     className={`w-full border-t ${
@@ -864,16 +994,14 @@ export function SignUp() {
                     {isLogin ? "Or continue with" : "Or register with"}
                   </span>
                 </div>
-              </div>
+              </div>}
 
               {/* SSO / Social Fast Auth Buttons */}
-              <div className="grid grid-cols-2 gap-3">
+              {!isForgotPassword && !isRecovery && <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => {
-                    void switchRole("incoming_maintainer");
-                    navigate("/dashboard");
-                  }}
+                  onClick={() => void handleOAuth("github")}
+                  disabled={submitting}
                   className={`py-2.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition cursor-pointer ${
                     isDark
                       ? "bg-white/5 border-white/10 text-slate-200 hover:bg-white/10"
@@ -892,10 +1020,8 @@ export function SignUp() {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    void switchRole("approver");
-                    navigate("/dashboard");
-                  }}
+                  onClick={() => void handleOAuth("google")}
+                  disabled={submitting}
                   className={`py-2.5 px-3 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold transition cursor-pointer ${
                     isDark
                       ? "bg-white/5 border-white/10 text-slate-200 hover:bg-white/10"
@@ -922,10 +1048,10 @@ export function SignUp() {
                   </svg>
                   <span>Google</span>
                 </button>
-              </div>
+              </div>}
 
               {/* 1-Click Demo Workspace Option */}
-              <div className="mt-5 pt-4 border-t border-dashed border-indigo-400/25 text-center">
+              {!isForgotPassword && !isRecovery && <div className="mt-5 pt-4 border-t border-dashed border-indigo-400/25 text-center">
                 <button
                   type="button"
                   onClick={handleDemoLogin}
@@ -942,7 +1068,7 @@ export function SignUp() {
                 <p className={`text-[11px] mt-1.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                   Explore preloaded project state, claims ledger, and risk radar.
                 </p>
-              </div>
+              </div>}
 
               {/* Bottom Mode Toggle Link Button */}
               <div
@@ -952,13 +1078,13 @@ export function SignUp() {
                     : "border-slate-100 text-slate-500"
                 }`}
               >
-                <span>{isLogin ? "Don't have an account? " : "Already have an account? "}</span>
+                <span>{isForgotPassword || isRecovery ? "Remembered your password? " : isLogin ? "Don't have an account? " : "Already have an account? "}</span>
                 <button
                   type="button"
-                  onClick={() => setIsLogin(!isLogin)}
+                  onClick={() => changeAuthPage(true)}
                   className="font-bold text-indigo-500 hover:text-indigo-400 hover:underline transition-colors cursor-pointer"
                 >
-                  {isLogin ? "Sign up here" : "Sign in here"}
+                  {isForgotPassword || isRecovery ? "Sign in here" : isLogin ? "Sign up here" : "Sign in here"}
                 </button>
               </div>
             </div>

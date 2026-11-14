@@ -352,8 +352,8 @@ export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    logout();
+                  onClick={async () => {
+                    await logout();
                     setProfileDropdownOpen(false);
                   }}
                   className="text-rose-600 hover:text-rose-700 font-medium px-2 py-1 rounded hover:bg-rose-50 transition-colors"
