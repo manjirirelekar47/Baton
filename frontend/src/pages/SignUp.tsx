@@ -34,6 +34,14 @@ import { useAuth } from "@/app/auth";
 import { useTheme } from "@/context/ThemeContext";
 import { isSupabaseConfigured, supabase } from "@/features/auth/supabase";
 
+function isPasswordRecoveryLocation(search: string, hash: string) {
+  const hashParams = new URLSearchParams(hash.replace(/^#/, ""));
+  return (
+    new URLSearchParams(search).get("recovery") === "1" ||
+    hashParams.get("type") === "recovery"
+  );
+}
+
 // ---------------------------------------------------------------------------
 // 1. Kinetic Particle Field Generator
 // ---------------------------------------------------------------------------
@@ -252,15 +260,20 @@ export function SignUp() {
   const [isLogin, setIsLogin] = useState<boolean>(location.pathname === "/login");
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [isRecovery, setIsRecovery] = useState(
-    () => new URLSearchParams(location.search).get("recovery") === "1",
+    () => isPasswordRecoveryLocation(location.search, window.location.hash),
   );
+  const recoveryMode = useRef(isRecovery);
 
   // Keep state synchronized if URL route shifts
   useEffect(() => {
     setIsLogin(location.pathname === "/login");
-    if (new URLSearchParams(location.search).get("recovery") === "1") {
+    const isRecoveryRedirect = isPasswordRecoveryLocation(location.search, window.location.hash);
+    recoveryMode.current = isRecoveryRedirect;
+    if (isRecoveryRedirect) {
       setIsRecovery(true);
       setIsForgotPassword(false);
+    } else {
+      setIsRecovery(false);
     }
   }, [location.pathname, location.search]);
 
@@ -299,6 +312,7 @@ export function SignUp() {
   }, [loginDemo, navigate]);
 
   function changeAuthPage(nextIsLogin: boolean) {
+    recoveryMode.current = false;
     setIsLogin(nextIsLogin);
     setIsForgotPassword(false);
     setIsRecovery(false);
@@ -314,14 +328,16 @@ export function SignUp() {
     let active = true;
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") {
+        recoveryMode.current = true;
         setIsLogin(true);
         setIsRecovery(true);
         setIsForgotPassword(false);
         setNotice("Choose a new password for your account.");
+        navigate("/login?recovery=1", { replace: true });
         return;
       }
-      if (event === "SIGNED_IN" && signupInProgress.current) return;
-      if (event === "SIGNED_IN" && session && !isRecovery) {
+      if (event === "SIGNED_IN" && (signupInProgress.current || recoveryMode.current)) return;
+      if (event === "SIGNED_IN" && session && !recoveryMode.current) {
         window.setTimeout(() => {
           if (active) void completeAuthenticatedLogin();
         }, 0);
@@ -331,7 +347,7 @@ export function SignUp() {
     void supabase.auth.getSession().then(({ data: sessionData, error: sessionError }) => {
       if (!active) return;
       if (sessionError) setError(sessionError.message);
-      else if (sessionData.session && !isRecovery && !signupInProgress.current) void completeAuthenticatedLogin();
+      else if (sessionData.session && !recoveryMode.current && !signupInProgress.current) void completeAuthenticatedLogin();
     });
 
     return () => {
@@ -383,6 +399,7 @@ export function SignUp() {
       if (isRecovery) {
         const { error: updateError } = await supabase.auth.updateUser({ password });
         if (updateError) throw updateError;
+        recoveryMode.current = false;
         setIsRecovery(false);
         setNotice("Password updated. Opening your Baton workspace…");
         await completeAuthenticatedLogin();

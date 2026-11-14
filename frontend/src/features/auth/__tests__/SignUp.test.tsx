@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SignUp } from "@/pages/SignUp";
@@ -111,6 +111,30 @@ describe("Supabase sign-in page", () => {
     await waitFor(() => expect(resetPasswordForEmail).toHaveBeenCalled());
     expect(loginDemo).not.toHaveBeenCalled();
     expect(await screen.findByRole("status")).toHaveTextContent(/reset link is on its way/i);
+  });
+
+  it("keeps a password recovery callback on the reset form instead of opening the app", async () => {
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<SignUp />} />
+          <Route path="/dashboard" element={<div>Dashboard</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const authStateChangeHandler = onAuthStateChange.mock.calls[0][0];
+    const recoverySession = { user: { id: "user-1" } };
+    act(() => {
+      authStateChangeHandler("PASSWORD_RECOVERY", recoverySession);
+      authStateChangeHandler("SIGNED_IN", recoverySession);
+    });
+
+    expect(await screen.findByRole("heading", { name: "Choose a new password" })).toBeInTheDocument();
+    expect(screen.getByLabelText("New Password")).toBeInTheDocument();
+    expect(screen.getByLabelText("Confirm New Password")).toBeInTheDocument();
+    expect(loginDemo).not.toHaveBeenCalled();
+    expect(screen.queryByText("Dashboard")).not.toBeInTheDocument();
   });
 
   it("returns to sign-in after a new account is created and asks for email confirmation", async () => {
