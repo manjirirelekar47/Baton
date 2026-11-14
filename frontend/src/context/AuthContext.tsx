@@ -68,7 +68,10 @@ export const ROLE_DETAILS: Record<Role, { title: string; email: string; avatarTe
   },
 };
 
-function formatUser(rawUser: UserProfile): ExtendedUser {
+export function formatUser(
+  rawUser: UserProfile,
+  authenticatedEmail?: string | null,
+): ExtendedUser {
   const meta = ROLE_DETAILS[rawUser.role] || {
     title: "Project Member",
     email: `${rawUser.id}@baton.internal`,
@@ -86,9 +89,15 @@ function formatUser(rawUser: UserProfile): ExtendedUser {
     ...rawUser,
     firstName,
     initials,
-    email: rawUser.email || meta.email,
+    email: authenticatedEmail || rawUser.email || meta.email,
     displayRole: meta.title,
   };
+}
+
+async function getAuthenticatedEmail(): Promise<string | undefined> {
+  if (!supabase) return undefined;
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user.email || undefined;
 }
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -105,7 +114,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const response = await batonApi.demoLogin(role);
       setStoredToken(response.token);
-      setUser(formatUser(response.user));
+      setUser(formatUser(response.user, await getAuthenticatedEmail()));
     } catch (err: unknown) {
       const message = err instanceof ApiError ? err.message : "Failed to sign in via demo role";
       setError(message);
@@ -126,8 +135,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      const rawUser = await batonApi.getMe();
-      setUser(formatUser(rawUser));
+      const [rawUser, authenticatedEmail] = await Promise.all([
+        batonApi.getMe(),
+        getAuthenticatedEmail(),
+      ]);
+      setUser(formatUser(rawUser, authenticatedEmail));
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         setStoredToken(null);
@@ -150,8 +162,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const token = getStoredToken();
         if (token) {
           try {
-            const raw = await batonApi.getMe();
-            if (isMounted) setUser(formatUser(raw));
+            const [raw, authenticatedEmail] = await Promise.all([
+              batonApi.getMe(),
+              getAuthenticatedEmail(),
+            ]);
+            if (isMounted) setUser(formatUser(raw, authenticatedEmail));
             return;
           } catch (e) {
             setStoredToken(null);
