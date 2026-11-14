@@ -1,8 +1,8 @@
 import type { FeatureModule } from "@/shared/types";
-import { DashboardPage } from "./pages/DashboardPage";
+import { Dashboard } from "@/pages/Dashboard";
 
 const feature: FeatureModule = {
-  routes: [{ path: "dashboard", element: <DashboardPage /> }],
+  routes: [{ path: "dashboard", element: <Dashboard /> }],
   nav: [{ label: "Dashboard", to: "/dashboard", order: 5 }],
 };
 export const routes = feature.routes;
