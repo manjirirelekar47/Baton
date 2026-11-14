@@ -277,6 +277,35 @@ export function SignUp() {
     }
   }, [location.pathname, location.search]);
 
+  useEffect(() => {
+    // Supabase sends OAuth callback failures back to the redirect URL. Show
+    // the reason on the auth screen instead of silently looking like a loop.
+    const query = new URLSearchParams(location.search);
+    const fragment = new URLSearchParams(location.hash.replace(/^#/, ""));
+    const errorCode = query.get("error_code") ?? fragment.get("error_code") ?? query.get("error") ?? fragment.get("error");
+    const description = query.get("error_description") ?? fragment.get("error_description");
+    if (!errorCode && !description) return;
+
+    const message = `${errorCode ?? ""} ${description ?? ""}`.toLowerCase();
+    if (message.includes("multiple accounts") || message.includes("same email address")) {
+      setError(
+        "Supabase found more than one account for this email, so GitHub sign-in could not finish. Sign in with your existing Google or email account, then choose Link GitHub account from the profile menu. If linking is disabled, turn on Allow manual linking in Supabase Auth → Sign In / Providers. No account was deleted.",
+      );
+    } else {
+      setError(description || "Social sign-in did not finish. Please try again.");
+    }
+
+    query.delete("error");
+    query.delete("error_code");
+    query.delete("error_description");
+    fragment.delete("error");
+    fragment.delete("error_code");
+    fragment.delete("error_description");
+    const search = query.toString();
+    const hash = fragment.toString();
+    navigate(`${location.pathname}${search ? `?${search}` : ""}${hash ? `#${hash}` : ""}`, { replace: true });
+  }, [location.hash, location.pathname, location.search, navigate]);
+
   // Form States
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

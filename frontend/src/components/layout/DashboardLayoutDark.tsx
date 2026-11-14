@@ -34,6 +34,8 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { batonApi } from "../../api/client";
+import { isSupabaseConfigured } from "../../features/auth/supabase";
+import { linkGithubIdentity } from "../../features/auth/linkGithubIdentity";
 
 interface DashboardLayoutDarkProps {
   children?: ReactNode;
@@ -341,6 +343,22 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
                 ))}
               </div>
 
+              {isSupabaseConfigured && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await linkGithubIdentity();
+                      setProfileDropdownOpen(false);
+                    } catch (linkError) {
+                      window.alert(linkError instanceof Error ? linkError.message : "Could not link your GitHub account.");
+                    }
+                  }}
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-gray-300 hover:bg-white/10 transition-colors"
+                >
+                  Link GitHub account
+                </button>
+              )}
               <div className="pt-1.5 mt-1 border-t border-white/10 flex items-center justify-between px-1">
                 <button
                   type="button"
