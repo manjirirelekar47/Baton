@@ -92,6 +92,38 @@ describe("Supabase sign-in page", () => {
     expect(screen.getByLabelText("Repeat Password")).toBeInTheDocument();
   });
 
+  it("shows and hides both password fields when their visibility buttons are clicked", () => {
+    render(
+      <MemoryRouter initialEntries={["/signup"]}>
+        <Routes>
+          <Route path="/login" element={<SignUp />} />
+          <Route path="/signup" element={<SignUp />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const password = screen.getByLabelText("Create Password");
+    const repeatPassword = screen.getByLabelText("Repeat Password");
+    expect(password).toHaveAttribute("type", "password");
+    expect(repeatPassword).toHaveAttribute("type", "password");
+
+    fireEvent.change(password, { target: { value: "StrongPass123!" } });
+    fireEvent.change(repeatPassword, { target: { value: "StrongPass123!" } });
+    fireEvent.click(screen.getByRole("button", { name: "Show password" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show repeat password" }));
+
+    expect(screen.getByLabelText("Create Password")).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText("Repeat Password")).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText("Create Password")).toHaveValue("StrongPass123!");
+    expect(screen.getByLabelText("Repeat Password")).toHaveValue("StrongPass123!");
+
+    fireEvent.click(screen.getByRole("button", { name: "Hide password" }));
+    fireEvent.click(screen.getByRole("button", { name: "Hide repeat password" }));
+
+    expect(screen.getByLabelText("Create Password")).toHaveAttribute("type", "password");
+    expect(screen.getByLabelText("Repeat Password")).toHaveAttribute("type", "password");
+  });
+
   it("starts Supabase password recovery instead of a demo login", async () => {
     render(
       <MemoryRouter initialEntries={["/login"]}>

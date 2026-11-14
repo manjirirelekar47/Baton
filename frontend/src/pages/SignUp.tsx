@@ -271,6 +271,8 @@ export function SignUp() {
   const [repeatPassword, setRepeatPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const repeatPasswordInputRef = useRef<HTMLInputElement>(null);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const isRegistration = !isLogin && !isRecovery && !isForgotPassword;
 
@@ -818,8 +820,11 @@ export function SignUp() {
                   <div className="relative flex items-center">
                     <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500 mr-2 flex-shrink-0" />
                     <input
+                      key={showPassword ? "password-visible" : "password-hidden"}
+                      ref={passwordInputRef}
                       id="signup-password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete={isLogin ? "current-password" : "new-password"}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -834,9 +839,13 @@ export function SignUp() {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => {
+                        if (passwordInputRef.current) setPassword(passwordInputRef.current.value);
+                        setShowPassword((visible) => !visible);
+                      }}
                       className="absolute right-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none"
-                      aria-label="Toggle password visibility"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showPassword}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -909,8 +918,11 @@ export function SignUp() {
                       <div className="relative flex items-center">
                         <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500 mr-2 flex-shrink-0" />
                         <input
+                          key={showRepeatPassword ? "repeat-password-visible" : "repeat-password-hidden"}
+                          ref={repeatPasswordInputRef}
                           id="signup-repeat-password"
                           type={showRepeatPassword ? "text" : "password"}
+                          autoComplete="new-password"
                           required
                           value={repeatPassword}
                           onChange={(e) => setRepeatPassword(e.target.value)}
@@ -925,9 +937,13 @@ export function SignUp() {
                         />
                         <button
                           type="button"
-                          onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                          onClick={() => {
+                            if (repeatPasswordInputRef.current) setRepeatPassword(repeatPasswordInputRef.current.value);
+                            setShowRepeatPassword((visible) => !visible);
+                          }}
                           className="absolute right-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none"
-                          aria-label="Toggle repeat password visibility"
+                          aria-label={showRepeatPassword ? "Hide repeat password" : "Show repeat password"}
+                          aria-pressed={showRepeatPassword}
                         >
                           {showRepeatPassword ? (
                             <EyeOff className="w-4 h-4" />
