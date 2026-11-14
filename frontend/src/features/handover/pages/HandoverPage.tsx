@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/app/auth";
 import { useLatestVersion } from "@/features/review/public";
 import { SourceDrawer } from "@/features/sources/public";
@@ -13,6 +14,7 @@ type Tab = "handover" | "plan";
 
 export function HandoverPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { version, isLoading: versionLoading, error: versionError, refetch } = useLatestVersion();
   const [tab, setTab] = useState<Tab>("handover");
@@ -51,22 +53,38 @@ export function HandoverPage() {
 
   const mutationError = (ack.error ?? respond.error) as Error | null;
   return (
-    <div className="space-y-6 max-w-7xl mx-auto w-full pb-12">
-      <header>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Handover for Campus Event Portal</h1>
-        <p className="mt-1 text-sm text-gray-300">
-          Version {version.version_id}, approved {version.approved_at ? new Date(version.approved_at).toLocaleDateString() : "recently"}
-          {version.snapshot_hash ? `, snapshot ${version.snapshot_hash.replace("sha256:", "").slice(0, 10)}` : ""}.
-          Every claim links to its source quote.
-        </p>
-        {view.data && !view.data.can_acknowledge && (
-          <p className="mt-3 text-xs font-medium text-purple-200 bg-purple-950/40 border border-purple-500/30 p-3.5 rounded-2xl shadow-lg backdrop-blur-xl">
-            You are previewing this as the approver. Receipts and owner responses belong to the incoming person.
+    <div className="space-y-6 max-w-7xl mx-auto w-full pb-12 animate-in fade-in duration-300">
+      {/* Header with Back Navigation and High-Contrast Typography */}
+      <header className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 shadow-sm transition-all dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:hover:bg-white/10 cursor-pointer"
+          aria-label="Go back"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+            Handover for Campus Event Portal
+          </h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-gray-300">
+            Version {version.version_id}, approved {version.approved_at ? new Date(version.approved_at).toLocaleDateString() : "recently"}
+            {version.snapshot_hash ? `, snapshot ${version.snapshot_hash.replace("sha256:", "").slice(0, 10)}` : ""}.
+            Every claim links to its source quote.
           </p>
-        )}
+        </div>
       </header>
 
-      <div role="tablist" aria-label="Handover views" className="flex gap-4 border-b border-white/10 text-sm font-semibold pt-2">
+      {view.data && !view.data.can_acknowledge && (
+        <p className="text-xs font-medium text-purple-900 dark:text-purple-200 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30 p-3.5 rounded-2xl shadow-sm dark:shadow-lg backdrop-blur-xl">
+          You are previewing this as the approver. Receipts and owner responses belong to the incoming person.
+        </p>
+      )}
+
+      <div role="tablist" aria-label="Handover views" className="flex gap-4 border-b border-slate-200 dark:border-white/10 text-sm font-semibold pt-2">
         {(["handover", "plan"] as Tab[]).map((t) => (
           <button
             key={t}
@@ -76,8 +94,8 @@ export function HandoverPage() {
             onClick={() => setTab(t)}
             className={`pb-3 -mb-px transition cursor-pointer font-bold ${
               tab === t
-                ? "border-b-2 border-indigo-500 text-white shadow-[0_4px_12px_rgba(99,102,241,0.25)]"
-                : "border-b-2 border-transparent text-gray-400 hover:text-gray-200"
+                ? "border-b-2 border-indigo-600 text-indigo-700 dark:text-white dark:border-indigo-500 shadow-[0_4px_12px_rgba(99,102,241,0.25)]"
+                : "border-b-2 border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-gray-200"
             }`}
           >
             {t === "handover" ? "Handover Package" : "Day 1, Week 1, Month 1 Action Plan"}

@@ -39,13 +39,17 @@ export const SettingsPageLight: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-purple-50 border border-purple-100 shadow-xs">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 shadow-sm transition-all cursor-pointer"
+                aria-label="Go back"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
+              </button>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight font-display">
                 Project Settings
               </h1>
             </div>
@@ -57,12 +61,13 @@ export const SettingsPageLight: React.FC = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-            <Link
-              to="/dashboard"
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl btn-glow-purple font-semibold text-xs shadow-md transition-all cursor-pointer"
             >
-              <span>← Back to Dashboard</span>
-            </Link>
+              <span>← Back</span>
+            </button>
 
             <button
               type="button"

@@ -10,6 +10,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import { api } from "@/app/api";
 import { useAuth } from "@/app/auth";
@@ -36,6 +37,7 @@ function DarkPanel({ title, children }: { title: string; children: ReactNode }) 
 }
 
 export function RiskPageDark() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const queryKey = ["risk", user?.id];
   const radar = useQuery({ queryKey: [...queryKey, "radar"], queryFn: () => api<RiskSignal[]>("/risk-radar") });
@@ -51,9 +53,21 @@ export function RiskPageDark() {
   return (
     <section className="space-y-6 max-w-7xl mx-auto w-full pb-12 animate-in fade-in duration-300">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Project Timeline & Risk Warnings</h1>
-          <p className="mt-1 text-sm text-slate-400">Track potential gaps, bottlenecks, and timeline events across project modules before handover.</p>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="p-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-gray-200 shadow-sm transition-all cursor-pointer"
+            aria-label="Go back"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Project Timeline & Risk Warnings</h1>
+            <p className="mt-1 text-sm text-slate-400">Track potential gaps, bottlenecks, and timeline events across project modules before handover.</p>
+          </div>
         </div>
         <Button variant="quiet" onClick={refresh} className="text-slate-200 border-white/10 hover:border-purple-400">
           Refresh Status

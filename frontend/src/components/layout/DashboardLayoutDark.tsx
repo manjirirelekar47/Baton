@@ -28,6 +28,8 @@ import {
   Search,
   Sun,
   Bell,
+  Plus,
+  Download,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -109,10 +111,12 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
 
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "Add Source", path: "/sources", icon: Plus },
     { name: "Claim Ledger", path: "/ledger", icon: FileText },
     { name: "Knowledge Graph", path: "/graph", icon: Share2 },
     { name: "Risk Radar", path: "/risk", icon: Compass },
     { name: "Review Queue", path: "/review", badge: pendingReviewCount, icon: CheckSquare },
+    { name: "Export Plan", path: "/handover", icon: Download },
     { name: "Access Control", path: "/access", icon: ShieldCheck },
     { name: "Audit Logs", path: "/audit", icon: History },
     { name: "Settings", path: "/settings", icon: Settings },
@@ -515,6 +519,19 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
               <div
                 onClick={() => {
                   setSearchModalOpen(false);
+                  window.location.assign("/sources");
+                }}
+                className="p-2.5 rounded-xl hover:bg-white/5 cursor-pointer flex items-center justify-between border border-transparent hover:border-purple-500/30 transition-colors"
+              >
+                <div>
+                  <p className="font-semibold text-white">Add Source</p>
+                  <p className="text-gray-400 text-[11px]">Connect GitHub, Jira, Slack & Confluence</p>
+                </div>
+                <span className="text-[10px] font-bold text-purple-400">Connect →</span>
+              </div>
+              <div
+                onClick={() => {
+                  setSearchModalOpen(false);
                   window.location.assign("/ledger");
                 }}
                 className="p-2.5 rounded-xl hover:bg-white/5 cursor-pointer flex items-center justify-between border border-transparent hover:border-purple-500/30 transition-colors"
@@ -537,6 +554,19 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
                   <p className="text-gray-400 text-[11px]">3 pending items requiring human decision</p>
                 </div>
                 <span className="text-[10px] font-bold text-purple-400">Review →</span>
+              </div>
+              <div
+                onClick={() => {
+                  setSearchModalOpen(false);
+                  window.location.assign("/handover");
+                }}
+                className="p-2.5 rounded-xl hover:bg-white/5 cursor-pointer flex items-center justify-between border border-transparent hover:border-purple-500/30 transition-colors"
+              >
+                <div>
+                  <p className="font-semibold text-white">Export Plan</p>
+                  <p className="text-gray-400 text-[11px]">Download verified handover package & checklist</p>
+                </div>
+                <span className="text-[10px] font-bold text-purple-400">Export →</span>
               </div>
             </div>
           </div>

@@ -23,7 +23,7 @@ import {
 import { DashboardLayoutLight } from "../components/layout/DashboardLayoutLight";
 import { ThreeHeroNode, FallbackHero } from "../components/hero/ThreeHeroNode";
 import { DocumentUploader } from "../components/upload/DocumentUploader";
-import { CloudUpload, X } from "lucide-react";
+import { CloudUpload, X, Plus, RotateCcw, Download, ShieldCheck } from "lucide-react";
 
 export const DashboardLight: React.FC<{ withLayout?: boolean }> = ({ withLayout = false }) => {
   const { user } = useAuth();
@@ -691,49 +691,25 @@ export const DashboardLight: React.FC<{ withLayout?: boolean }> = ({ withLayout 
           </div>
 
           <div className="grid grid-cols-4 gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => navigate("/sources")}
-              className="p-2 rounded-xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-200 flex flex-col items-center gap-1 text-slate-700 hover:text-purple-700 transition-all group cursor-pointer"
-            >
-              <svg className="w-4 h-4 text-purple-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-              </svg>
-              <span className="text-[10px] font-bold">Add Source</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate("/ledger")}
-              className="p-2 rounded-xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-200 flex flex-col items-center gap-1 text-slate-700 hover:text-purple-700 transition-all group cursor-pointer"
-            >
-              <svg className="w-4 h-4 text-purple-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-              </svg>
-              <span className="text-[10px] font-bold">Reconstruct</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate("/handover")}
-              className="p-2 rounded-xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-200 flex flex-col items-center gap-1 text-slate-700 hover:text-purple-700 transition-all group cursor-pointer"
-            >
-              <svg className="w-4 h-4 text-purple-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              <span className="text-[10px] font-bold">Export Plan</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => navigate("/access")}
-              className="p-2 rounded-xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-200 flex flex-col items-center gap-1 text-slate-700 hover:text-purple-700 transition-all group cursor-pointer"
-            >
-              <svg className="w-4 h-4 text-purple-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              <span className="text-[10px] font-bold">Access ACL</span>
-            </button>
+            {[
+              { name: "Add Source", path: "/sources", icon: Plus },
+              { name: "Reconstruct", path: "/ledger", icon: RotateCcw },
+              { name: "Export Plan", path: "/handover", icon: Download },
+              { name: "Access ACL", path: "/access", icon: ShieldCheck },
+            ].map((action) => {
+              const ActionIcon = action.icon;
+              return (
+                <button
+                  key={action.name}
+                  type="button"
+                  onClick={() => navigate(action.path)}
+                  className="p-2 rounded-xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-200 flex flex-col items-center gap-1 text-slate-700 hover:text-purple-700 transition-all group cursor-pointer"
+                >
+                  <ActionIcon className="w-4 h-4 text-purple-600 group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-bold">{action.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>

@@ -10,6 +10,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import { api } from "@/app/api";
 import { useAuth } from "@/app/auth";
@@ -36,6 +37,7 @@ function LightPanel({ title, children }: { title: string; children: ReactNode })
 }
 
 export function RiskPageLight() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const queryKey = ["risk", user?.id];
   const radar = useQuery({ queryKey: [...queryKey, "radar"], queryFn: () => api<RiskSignal[]>("/risk-radar") });
@@ -52,13 +54,25 @@ export function RiskPageLight() {
     <section className="space-y-6 max-w-7xl mx-auto w-full pb-12 animate-in fade-in duration-300">
       {/* Page Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-display">
-            Project Timeline & Risk Warnings
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 font-medium">
-            Track potential gaps, bottlenecks, and timeline events across project modules before handover.
-          </p>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 shadow-sm transition-all cursor-pointer"
+            aria-label="Go back"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight font-display">
+              Project Timeline & Risk Warnings
+            </h1>
+            <p className="mt-1 text-sm text-slate-500 font-medium">
+              Track potential gaps, bottlenecks, and timeline events across project modules before handover.
+            </p>
+          </div>
         </div>
         <Button variant="quiet" onClick={refresh} className="shadow-xs hover:border-purple-300 text-slate-700 bg-white border border-slate-200">
           Refresh Status

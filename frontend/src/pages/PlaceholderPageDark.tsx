@@ -160,10 +160,17 @@ export const PlaceholderPageDark: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 shadow-xs">
-                {config.icon}
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-display">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="p-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-gray-200 shadow-sm transition-all cursor-pointer"
+                aria-label="Go back"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight font-display">
                 {config.title}
               </h1>
             </div>
@@ -173,12 +180,13 @@ export const PlaceholderPageDark: React.FC = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-            <Link
-              to="/dashboard"
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl btn-glow-purple font-semibold text-xs text-white shadow-lg transition-all cursor-pointer"
             >
-              <span>← Back to Dashboard</span>
-            </Link>
+              <span>← Back</span>
+            </button>
 
             {location.pathname === "/settings" && (
               <button

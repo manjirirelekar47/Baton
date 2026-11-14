@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/app/auth";
 import { Button, EmptyState, ErrorState, Loading } from "@/shared/ui";
 import { SourceDrawer } from "@/features/sources/public";
@@ -27,6 +27,7 @@ type FilterTab = "all" | "pending" | "conflicts" | "inferred" | "decided";
 
 export function ReviewPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   // Dialog & drawer states
@@ -188,11 +189,23 @@ export function ReviewPage() {
     <section className="space-y-6 max-w-7xl mx-auto w-full pb-12">
       {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Handover Checklist & Review</h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-gray-300">
-            Review project facts sorted by priority. Fix disagreements, review citations, and finalize a secure handover record.
-          </p>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 shadow-sm transition-all dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:hover:bg-white/10 cursor-pointer"
+            aria-label="Go back"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Handover Checklist & Review</h1>
+            <p className="mt-1 text-sm text-slate-600 dark:text-gray-300">
+              Review project facts sorted by priority. Fix disagreements, review citations, and finalize a secure handover record.
+            </p>
+          </div>
         </div>
       </div>
 
