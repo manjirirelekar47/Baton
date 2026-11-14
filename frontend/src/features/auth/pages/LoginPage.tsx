@@ -18,7 +18,7 @@ export function LoginPage() {
     setError(null);
     try {
       await switchRole(roleToLogin);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to sign in");
     } finally {
@@ -422,14 +422,23 @@ export function LoginPage() {
               </div>
 
               {/* Card Footer */}
-              <div className="mt-6 pt-5 border-t border-slate-100 text-center">
+              <div className="mt-6 pt-5 border-t border-slate-100 text-center space-y-2">
                 <p className="text-xs text-slate-500">
                   New to Baton?{" "}
+                  <Link
+                    to="/signup"
+                    className="font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-all"
+                  >
+                    Create an account
+                  </Link>
+                </p>
+                <p className="text-[11px] text-slate-400">
+                  Or{" "}
                   <button
                     onClick={() => void handleLogin("approver")}
-                    className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline transition-all"
+                    className="font-semibold text-purple-600 hover:text-purple-700 hover:underline transition-all cursor-pointer"
                   >
-                    Explore Demo Workspace
+                    launch demo workspace
                   </button>
                 </p>
               </div>
