@@ -302,24 +302,147 @@ def build_risk_radar(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(rows, key=lambda row: (not row["flagged"], -row["exclusivity"], row["module"]))
 
 
+def _timeline_pr_metadata(content: str) -> dict[str, Any]:
+    """Extract compact PR/issue metadata from Git export text without exposing raw JSON."""
+    for field in ("pull_request", "pr", "issue"):
+        match = re.search(rf"\b{field}\s*[:=]\s*(\{{[^}}]*\}})", content, re.IGNORECASE)
+        if not match:
+            continue
+        try:
+            value = json.loads(match.group(1))
+        except json.JSONDecodeError:
+            continue
+        if isinstance(value, dict):
+            return {"kind": "issue" if field == "issue" else "pull_request", **value}
+    return {}
+
+
+def _timeline_event_details(chunk: dict[str, Any]) -> dict[str, Any]:
+    """Turn imported provider records into readable titles, modules and activity badges."""
+    content = str(chunk.get("text", "")).strip()
+    source_type = str(chunk.get("source_type") or "activity")
+    author = str(chunk.get("author") or "Unknown").strip() or "Unknown"
+    module = _module_from_chunk(chunk)
+
+    payload: dict[str, Any] = {}
+    if content.startswith("{"):
+        try:
+            parsed = json.loads(content)
+            if isinstance(parsed, dict):
+                payload = parsed
+        except json.JSONDecodeError:
+            pass
+
+    metadata = _timeline_pr_metadata(content)
+    nested_pr = payload.get("pull_request") or payload.get("pr")
+    nested_issue = payload.get("issue")
+    if isinstance(nested_pr, dict):
+        metadata = {"kind": "pull_request", **nested_pr}
+    elif isinstance(nested_issue, dict):
+        metadata = {"kind": "issue", **nested_issue}
+
+    module = (
+        str(payload.get("module") or payload.get("directory") or payload.get("component") or "").strip()
+        or module
+    )
+    module = module or "Unassigned module"
+
+    number = metadata.get("number") or payload.get("number")
+    state = str(metadata.get("state") or payload.get("state") or "").strip().lower()
+    if metadata.get("merged_at") or payload.get("merged_at"):
+        state = "merged"
+
+    kind = str(metadata.get("kind") or "").lower()
+    title = str(payload.get("message") or payload.get("title") or "").strip()
+
+    pr_match = re.search(r"GitHub pull request #([0-9]+):\s*([^\n]+)", content, re.IGNORECASE)
+    issue_match = re.search(r"GitHub issue #([0-9]+):\s*([^\n]+)", content, re.IGNORECASE)
+    commit_match = re.search(r"GitHub commit [^\n:]+:\s*([^\n]+)", content, re.IGNORECASE)
+
+    if pr_match:
+        kind = "pull_request"
+        number = number or pr_match.group(1)
+        title = title or pr_match.group(2).strip()
+        state_match = re.search(r"\bState:\s*([A-Za-z_-]+)", content, re.IGNORECASE)
+        state = state or (state_match.group(1).lower() if state_match else "")
+    elif issue_match:
+        kind = "issue"
+        number = number or issue_match.group(1)
+        title = title or issue_match.group(2).strip()
+        state_match = re.search(r"\bState:\s*([A-Za-z_-]+)", content, re.IGNORECASE)
+        state = state or (state_match.group(1).lower() if state_match else "")
+    elif commit_match:
+        kind = kind or "commit"
+        title = title or commit_match.group(1).strip()
+
+    if not title and source_type == "git":
+        parts = [part.strip() for part in content.split("|")]
+        if len(parts) > 1 and re.match(r"commit\s+[A-Fa-f0-9]+", parts[0]):
+            title = parts[1]
+        elif parts:
+            title = parts[0]
+    if not title and payload:
+        title = str(payload.get("summary") or payload.get("name") or "").strip()
+    if not title:
+        title = content.splitlines()[0].strip() if content else ""
+    title = re.sub(r"\s+", " ", title).strip(" \t|")[:180]
+    if not title or title.startswith("{") or title.startswith("["):
+        title = str(chunk.get("source_title") or "Project activity")
+
+    if not kind:
+        if source_type == "git":
+            kind = "commit"
+        elif source_type == "task_csv":
+            kind = "task"
+        else:
+            kind = "activity"
+
+    status_label = None
+    if number is not None and kind == "pull_request":
+        if state == "merged":
+            status_label = f"Merged PR #{number}"
+        elif state in {"open", "draft", "pending"}:
+            status_label = f"{'Draft' if state == 'draft' else 'Open'} PR #{number}"
+        elif state == "closed":
+            status_label = f"Closed PR #{number}"
+        else:
+            status_label = f"PR #{number}"
+    elif number is not None and kind == "issue":
+        if state in {"open", "closed"}:
+            status_label = f"{state.title()} issue #{number}"
+        else:
+            status_label = f"Issue #{number}"
+
+    return {
+        "event_type": kind,
+        "display_title": title,
+        "module": module,
+        "author": author,
+        "status_label": status_label,
+        "source_url": payload.get("html_url") or payload.get("url") or chunk.get("source_url"),
+    }
+
+
 def build_timeline(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Return only events with an actual source event-time, sorted chronologically."""
+    """Return readable, ACL-filtered activity events with stable source traceability."""
     events = []
     for chunk in chunks:
         event_time = chunk.get("event_time")
         if not event_time or str(event_time).startswith("1970-01-01"):
             continue
+        details = _timeline_event_details(chunk)
         events.append(
             {
                 "event_time": event_time,
-                "text": str(chunk.get("text", ""))[:240],
+                # Keep the legacy field, but never send raw JSON/provider payloads to the UI.
+                "text": details["display_title"],
+                **details,
                 "chunk_id": chunk["chunk_id"],
                 "source_title": chunk.get("source_title", "Source"),
                 "acl_label": chunk.get("acl_label", "L4"),
             }
         )
     return sorted(events, key=lambda event: (event["event_time"], event["chunk_id"]))
-
 
 def build_delivery_status(chunks: list[dict[str, Any]], *, today: date | None = None) -> list[dict[str, Any]]:
     """Find active overdue/blocked tasks and preserve the downstream blocked-by chain."""

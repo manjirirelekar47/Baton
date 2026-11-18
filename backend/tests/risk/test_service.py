@@ -202,3 +202,56 @@ def test_knowledge_graph_structure_types_and_traceability():
     assert supported_edge["evidence_chunk_id"] == "git-1"
     assert supported_edge["evidence_quote"] == "payments module commit"
 
+def test_timeline_formats_git_export_metadata_as_clean_activity_badges():
+    result = build_timeline([
+        chunk(
+            "pr-50",
+            'commit abc123 | add webhook retry handling | module: payments | '
+            'pull_request: {"number": 50, "state": "merged"}',
+            author="Samiksha",
+            source_type="git",
+        ),
+        chunk(
+            "pr-51",
+            'commit def456 | add settlement reconciliation | module: payments | '
+            'pull_request: {"number": 51, "state": "open"}',
+            author="Aarav",
+            source_type="git",
+        ),
+    ])
+
+    merged, opened = result
+    assert merged["event_type"] == "pull_request"
+    assert merged["display_title"] == "add webhook retry handling"
+    assert merged["module"] == "payments"
+    assert merged["author"] == "Samiksha"
+    assert merged["status_label"] == "Merged PR #50"
+    assert "pull_request" not in merged["text"]
+    assert opened["status_label"] == "Open PR #51"
+
+
+def test_timeline_normalizes_github_connector_pr_and_commit_records():
+    result = build_timeline([
+        chunk(
+            "pr-12",
+            "GitHub pull request #12: Add provider sync\n"
+            "State: closed | Author: Meera | Updated: 2026-10-01T00:00:00+00:00",
+            author="Meera",
+        ),
+        chunk(
+            "commit-1",
+            "GitHub commit abc123 by Aarav:\nAdd retry handling",
+            author="Aarav",
+        ),
+    ])
+
+    # build_timeline intentionally sorts chronologically, then by stable chunk ID.
+    # Resolve records by ID rather than relying on the order they were supplied.
+    events_by_id = {event["chunk_id"]: event for event in result}
+    pr = events_by_id["pr-12"]
+    commit = events_by_id["commit-1"]
+
+    assert pr["status_label"] == "Closed PR #12"
+    assert pr["display_title"] == "Add provider sync"
+    assert commit["event_type"] == "commit"
+    assert commit["display_title"] == "Add retry handling"

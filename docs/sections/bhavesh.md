@@ -1,4 +1,5 @@
 # Bhavesh — Sources and Risk implementation
+- Risk timeline events are normalized into readable commit/PR/issue activity with module and author labels, searchable filters and 10-item pagination in both themes.
 
 Owned modules: ingestion (F1/F2), risk (F6), Sources and Risk frontend features, ingestion/risk tests, source fixtures, and SQL migrations `20_ingestion.sql` / `30_risk.sql`.
 
