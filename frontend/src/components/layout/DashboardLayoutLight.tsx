@@ -34,6 +34,10 @@ import {
 import { useAuth, formatUserDropdownRole } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { batonApi } from "../../api/client";
+import { isSupabaseConfigured } from "../../features/auth/supabase";
+import { linkGithubIdentity } from "../../features/auth/linkGithubIdentity";
+import { ConfirmModal } from "../../shared/ui";
+import { ProjectSwitcher } from "./ProjectSwitcher";
 import { NotificationsMenu } from "./NotificationsMenu";
 
 interface DashboardLayoutLightProps {
