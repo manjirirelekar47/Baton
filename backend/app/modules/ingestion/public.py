@@ -91,6 +91,10 @@ def sync_connection(project_id: str, connection_id: str, session: Session) -> di
 
 
 def reset_demo(session: Session) -> None:
+    session.execute(text(
+        "delete from source_provenance where source_id in "
+        "(select id from sources where project_id = 'proj-campus-event-portal' and id not like 'S%')"
+    ))
     session.execute(text("delete from source_sync_records where project_id = 'proj-campus-event-portal'"))
     session.execute(text("delete from connection_credentials where project_id = 'proj-campus-event-portal'"))
     session.execute(text("delete from oauth_states where project_id = 'proj-campus-event-portal'"))

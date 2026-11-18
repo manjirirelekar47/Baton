@@ -5,12 +5,13 @@ from app.modules.ingestion.service import ParsedRecord
 from tests.conftest import login
 
 
-def _record(text: str, external_id: str) -> ParsedRecord:
+def _record(text: str, external_id: str, external_url: str | None = None) -> ParsedRecord:
     return ParsedRecord(
         text=text,
         author="Baton Test User",
         event_time=datetime(2026, 11, 15, 10, 0, tzinfo=UTC),
         external_id=external_id,
+        external_url=external_url,
     )
 
 
@@ -46,11 +47,11 @@ def test_source_connections_lifecycle(client, monkeypatch):
     assert res.status_code == 403
 
     github_batches = [
-        [_record("Initial commit summary", "commit:abc123")],
-        [_record("Initial commit summary", "commit:abc123")],
-        [_record("Updated commit summary", "commit:abc123")],
+        [_record("Initial commit summary", "commit:abc123", "https://github.com/manjirirelekar47/Baton/commit/abc123")],
+        [_record("Initial commit summary", "commit:abc123", "https://github.com/manjirirelekar47/Baton/commit/abc123")],
+        [_record("Updated commit summary", "commit:abc123", "https://github.com/manjirirelekar47/Baton/commit/abc123")],
     ]
-    jira_batches = [[_record("CAMPUS-101: Transfer project ownership", "jira:CAMPUS-101")]]
+    jira_batches = [[_record("CAMPUS-101: Transfer project ownership", "jira:CAMPUS-101", "https://example.atlassian.net/browse/CAMPUS-101")]]
 
     def fake_github_fetch(self, checkpoint_cursor=None):
         return github_batches.pop(0), "2026-11-16T10:00:00+00:00"
@@ -125,11 +126,21 @@ def test_source_connections_lifecycle(client, monkeypatch):
     titles = [source["title"] for source in sources]
     assert any("GitHub: manjirirelekar47/Baton" in title for title in titles)
     assert any("Jira: CAMPUS" in title for title in titles)
+    github_source = next(source for source in sources if source["title"].startswith("GitHub:"))
+    jira_source = next(source for source in sources if source["title"].startswith("Jira:"))
+    assert github_source["external_id"] == "commit:abc123"
+    assert github_source["source_url"] == "https://github.com/manjirirelekar47/Baton/commit/abc123"
+    assert len(github_source["source_hash"]) == 64
+    assert jira_source["source_url"] == "https://example.atlassian.net/browse/CAMPUS-101"
 
     contributor_sources = client.get("/sources", headers=contributor).json()
     contributor_titles = [source["title"] for source in contributor_sources]
     assert any("Jira: CAMPUS" in title for title in contributor_titles)
     assert not any("GitHub: manjirirelekar47/Baton" in title for title in contributor_titles)
+    assert not any(
+        source.get("source_url") == "https://github.com/manjirirelekar47/Baton/commit/abc123"
+        for source in contributor_sources
+    )
 
     deleted = client.delete(f"/sources/connections/{conn_id}", headers=approver)
     assert deleted.status_code == 200

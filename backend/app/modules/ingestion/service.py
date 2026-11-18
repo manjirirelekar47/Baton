@@ -48,6 +48,7 @@ class ParsedRecord:
     event_time: datetime = datetime(1970, 1, 1, tzinfo=UTC)
     external_id: str | None = None
     title: str | None = None
+    external_url: str | None = None
 
 
 def redact_text(value: str) -> str:
@@ -374,8 +375,11 @@ def _demo_fixture_sources(project_id: str) -> list[dict[str, Any]]:
 
 
 def list_sources(session: Session, project_id: str) -> list[dict[str, Any]]:
-    rows = session.execute(text("""select id as source_id, project_id, title, type, acl_label, consent, status, chunks, note, created_at
-        from sources where project_id = :project_id order by created_at desc, id"""), {"project_id": project_id}).mappings()
+    rows = session.execute(text("""select s.id as source_id, s.project_id, s.title, s.type, s.acl_label, s.consent,
+        s.status, s.chunks, s.note, s.created_at, p.provider, p.external_id, p.external_url as source_url,
+        p.source_hash, p.provider_updated_at
+        from sources s left join source_provenance p on p.source_id = s.id
+        where s.project_id = :project_id order by s.created_at desc, s.id"""), {"project_id": project_id}).mappings()
     persisted = [dict(row) for row in rows]
     # The demo's original handover claims cite these preloaded source IDs. Keep them visible
     # alongside uploads until the project owner imports an equivalent persistent fixture set.
@@ -388,9 +392,12 @@ def list_sources(session: Session, project_id: str) -> list[dict[str, Any]]:
 
 
 def get_chunk(session: Session, project_id: str, chunk_id: str) -> dict[str, Any] | None:
-    row = session.execute(text("""select id as chunk_id, project_id, source_id, source_type, source_title, author, event_time,
-        acl_label, content_hash, char_start, char_end, content from source_chunks
-        where id = :chunk_id and project_id = :project_id"""), {"chunk_id": chunk_id, "project_id": project_id}).mappings().first()
+    row = session.execute(text("""select c.id as chunk_id, c.project_id, c.source_id, c.source_type, c.source_title, c.author,
+        c.event_time, c.acl_label, c.content_hash, c.char_start, c.char_end, c.content,
+        p.provider, p.external_id, p.external_url as source_url, p.source_hash, p.provider_updated_at
+        from source_chunks c left join source_provenance p on p.source_id = c.source_id
+        where c.id = :chunk_id and c.project_id = :project_id"""),
+        {"chunk_id": chunk_id, "project_id": project_id}).mappings().first()
     if row is None:
         demo_chunks = _demo_sample_chunks(project_id) + _demo_fixture_chunks(project_id)
         return next((chunk for chunk in demo_chunks if chunk.get("chunk_id") == chunk_id), None)
@@ -401,8 +408,11 @@ def get_chunk(session: Session, project_id: str, chunk_id: str) -> dict[str, Any
 
 
 def list_chunks(session: Session, project_id: str) -> list[dict[str, Any]]:
-    rows = session.execute(text("""select id as chunk_id, project_id, source_id, source_type, source_title, author, event_time,
-        acl_label, content_hash, char_start, char_end, content from source_chunks where project_id = :project_id"""), {"project_id": project_id}).mappings()
+    rows = session.execute(text("""select c.id as chunk_id, c.project_id, c.source_id, c.source_type, c.source_title,
+        c.author, c.event_time, c.acl_label, c.content_hash, c.char_start, c.char_end, c.content,
+        p.provider, p.external_id, p.external_url as source_url, p.source_hash, p.provider_updated_at
+        from source_chunks c left join source_provenance p on p.source_id = c.source_id
+        where c.project_id = :project_id"""), {"project_id": project_id}).mappings()
     output=[]
     for row in rows:
         chunk = dict(row)
@@ -722,7 +732,7 @@ def persist_provider_records(
         event_time = _parse_datetime(record.event_time)
         author = (record.author or "Unknown").strip() or "Unknown"
         fingerprint_payload = json.dumps(
-            [safe_text, author, event_time.isoformat(), source_type, acl_label],
+            [safe_text, author, event_time.isoformat(), source_type, acl_label, record.external_url],
             ensure_ascii=False,
             separators=(",", ":"),
         )
@@ -752,7 +762,7 @@ def persist_provider_records(
         else:
             source_title = source_prefix
 
-        snapshot = ParsedRecord(safe_text, author, event_time, external_id, title=orig_title)
+        snapshot = ParsedRecord(safe_text, author, event_time, external_id, title=orig_title, external_url=record.external_url)
         chunks = chunk_record(
             snapshot,
             project_id=project_id,
@@ -784,6 +794,23 @@ def persist_provider_records(
                 "created_at": created_at,
             },
         )
+        source_hash = hashlib.sha256(safe_text.encode("utf-8")).hexdigest()
+        session.execute(
+            text(
+                "insert into source_provenance "
+                "(source_id, provider, external_id, external_url, source_hash, provider_updated_at) "
+                "values (:source_id, :provider, :external_id, :external_url, :source_hash, :provider_updated_at)"
+            ),
+            {
+                "source_id": source_id,
+                "provider": provider,
+                "external_id": external_id,
+                "external_url": record.external_url,
+                "source_hash": source_hash,
+                "provider_updated_at": event_time.isoformat(),
+            },
+        )
+
         for chunk in chunks:
             session.execute(
                 text(

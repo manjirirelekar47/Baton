@@ -28,6 +28,11 @@ interface Source {
   chunks: number;
   note?: string | null;
   created_at?: string | null;
+  provider?: "github" | "jira" | null;
+  external_id?: string | null;
+  source_url?: string | null;
+  source_hash?: string | null;
+  provider_updated_at?: string | null;
 }
 
 interface DriftAlert {
@@ -867,6 +872,7 @@ export function SourcesPage() {
                   <th className="px-4 py-3">Type</th>
                   <th className="px-4 py-3">Access</th>
                   <th className="px-4 py-3">Chunks</th>
+                  <th className="px-4 py-3">Original source</th>
                   <th className="px-4 py-3">Status</th>
                 </tr>
               </thead>
@@ -881,6 +887,15 @@ export function SourcesPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 tabular-nums text-slate-500 dark:text-slate-400 font-mono">{source.chunks}</td>
+                    <td className="px-4 py-3">
+                      {source.source_url ? (
+                        <a href={source.source_url} target="_blank" rel="noopener noreferrer" className="font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-200">
+                          Open source ↗
+                        </a>
+                      ) : (
+                        <span className="text-slate-400">Not available</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 font-semibold text-[10px]">
                         {source.status}

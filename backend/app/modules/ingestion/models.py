@@ -24,6 +24,11 @@ class SourceOut(BaseModel):
     chunks: int
     note: str | None = None
     created_at: datetime | None = None
+    provider: str | None = None
+    external_id: str | None = None
+    source_url: str | None = None
+    source_hash: str | None = None
+    provider_updated_at: datetime | None = None
 
 
 class ChunkOut(BaseModel):
@@ -38,6 +43,11 @@ class ChunkOut(BaseModel):
     content_hash: str
     char_span: tuple[int, int]
     text: str
+    provider: str | None = None
+    external_id: str | None = None
+    source_url: str | None = None
+    source_hash: str | None = None
+    provider_updated_at: datetime | None = None
 
 
 class SourceCreateMetadata(BaseModel):

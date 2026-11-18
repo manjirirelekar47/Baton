@@ -68,6 +68,14 @@ def test_persist_source_is_project_scoped_and_chunk_can_be_loaded(tmp_path):
         conn.exec_driver_sql("insert into projects values ('p1','Project','2026-01-01T00:00:00Z')")
         conn.exec_driver_sql("""create table sources (id text primary key, project_id text, title text, type text, acl_label text, consent integer, status text, chunks integer, note text, created_at text)""")
         conn.exec_driver_sql("""create table source_chunks (id text primary key, project_id text, source_id text, source_type text, source_title text, author text, event_time text, acl_label text, content_hash text, char_start integer, char_end integer, content text)""")
+        conn.exec_driver_sql("""create table source_provenance (
+            source_id text primary key,
+            provider text not null,
+            external_id text not null,
+            external_url text,
+            source_hash text not null,
+            provider_updated_at text
+        )""")
     with Session(engine) as session:
         item = service.persist_source(session, project_id="p1", filename="readme.md", source_type="document", acl_label="L1",
                                       records=[service.ParsedRecord("Payments remain in test mode until finance approves.", "Aarav", datetime(2026,9,1,tzinfo=UTC))])

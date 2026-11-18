@@ -168,7 +168,7 @@ class GitHubConnector:
             event_time = _parse_datetime(stamp)
             first_line = message.splitlines()[0].strip()
             body = f"GitHub commit {sha[:12]} by {name}:\n{message}"
-            return ParsedRecord(body, name, event_time, f"commit:{sha}", title=first_line)
+            return ParsedRecord(body, name, event_time, f"commit:{sha}", title=first_line, external_url=f"https://github.com/{owner}/{repo}/commit/{sha}")
 
         def pull_record(item: dict[str, Any]) -> ParsedRecord | None:
             number = item.get("number")
@@ -185,7 +185,7 @@ class GitHubConnector:
             )
             if body_text:
                 text += f"\nDescription:\n{body_text}"
-            return ParsedRecord(text, author, event_time, f"pull:{number}", title=title)
+            return ParsedRecord(text, author, event_time, f"pull:{number}", title=title, external_url=f"https://github.com/{owner}/{repo}/pull/{number}")
 
         def issue_record(item: dict[str, Any]) -> ParsedRecord | None:
             # The issues endpoint also returns PR-shaped issues; those are imported by /pulls.
@@ -207,7 +207,7 @@ class GitHubConnector:
             )
             if body_text:
                 text += f"\nDescription:\n{body_text}"
-            return ParsedRecord(text, author, event_time, f"issue:{number}", title=title)
+            return ParsedRecord(text, author, event_time, f"issue:{number}", title=title, external_url=f"https://github.com/{owner}/{repo}/issues/{number}")
 
         commits_params = {"since": since} if since else {}
         pull_params = {"state": "all", "sort": "updated", "direction": "desc"}
@@ -331,7 +331,7 @@ class JiraConnector:
                 )
                 if description:
                     text += f"\nDescription:\n{description}"
-                records.append(ParsedRecord(text, author, event_time, f"jira:{key}", title=summary))
+                records.append(ParsedRecord(text, author, event_time, f"jira:{key}", title=summary, external_url=f"{self.base_url}/browse/{urllib.parse.quote(key)}"))
 
             next_token = response.get("nextPageToken")
             if response.get("isLast") is True or not next_token:

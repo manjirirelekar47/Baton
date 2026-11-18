@@ -95,3 +95,16 @@ create table if not exists source_sync_records (
 );
 
 create index if not exists idx_source_sync_records_project on source_sync_records (project_id);
+
+
+-- Original provider provenance for each immutable imported source snapshot.
+create table if not exists source_provenance (
+  source_id text primary key references sources(id),
+  provider text not null check (provider in ('github', 'jira')),
+  external_id text not null,
+  external_url text,
+  source_hash text not null,
+  provider_updated_at text
+);
+
+create index if not exists idx_source_provenance_external_id on source_provenance (provider, external_id);
