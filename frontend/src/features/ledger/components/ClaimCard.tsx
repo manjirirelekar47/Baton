@@ -30,7 +30,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
 
   return (
     <article
-      className={`rounded-2xl border p-6 transition-all shadow-sm ${
+      className={`rounded-2xl border p-4 sm:p-6 transition-all shadow-sm ${
         isConflicting
           ? "border-red-200 bg-red-50 text-red-900 dark:border-rose-500/40 dark:bg-rose-950/20 dark:shadow-[0_0_15px_rgba(244,63,94,0.15)]"
           : "border-slate-200 bg-white hover:shadow-md transition-shadow dark:border-white/10 dark:bg-black/40 dark:backdrop-blur-xl dark:shadow-2xl"
@@ -38,7 +38,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
     >
       {/* Card Header: State Badge, Type, Entity, and View Details Button */}
       <div
-        className={`flex flex-wrap items-center justify-between gap-3 pb-3 border-b ${
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b ${
           isConflicting
             ? "border-red-200/80 dark:border-white/10"
             : "border-slate-100 dark:border-white/10"
@@ -46,6 +46,20 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
       >
         <div className="flex flex-wrap items-center gap-2.5">
           <StateBadge state={claim.state} />
+          {claim.confidence_grade && (
+            <span
+              title={claim.confidence_reason || `Confidence Grade: ${claim.confidence_grade}`}
+              className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${
+                claim.confidence_grade === "Strong"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/20"
+                  : claim.confidence_grade === "Partial"
+                  ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-500/20"
+                  : "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-500/20"
+              }`}
+            >
+              {claim.confidence_grade} Confidence
+            </span>
+          )}
           <span className="rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-white/5 dark:text-gray-300 dark:border-white/10">
             {claim.type}
           </span>
@@ -59,7 +73,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
         <button
           type="button"
           onClick={() => onSelectClaim(claim)}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 shadow-xs transition-colors cursor-pointer dark:border-white/15 dark:bg-white/5 dark:text-gray-200 dark:hover:bg-white/10 dark:hover:text-white"
+          className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 shadow-xs transition-colors cursor-pointer dark:border-white/15 dark:bg-white/5 dark:text-gray-200 dark:hover:bg-white/10 dark:hover:text-white"
         >
           <span>View Details</span>
           <span aria-hidden="true">→</span>

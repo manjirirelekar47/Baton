@@ -32,3 +32,66 @@ create table if not exists source_chunks (
 create index if not exists idx_chunks_project_acl on source_chunks (project_id, acl_label);
 create index if not exists idx_chunks_source on source_chunks (source_id);
 create index if not exists idx_chunks_event_time on source_chunks (project_id, event_time);
+
+create table if not exists source_connections (
+  id text primary key,
+  project_id text not null references projects(id),
+  provider text not null check (provider in ('github', 'jira')),
+  target_name text not null,
+  acl_label text not null check (acl_label in ('L1', 'L2', 'L3')),
+  status text not null check (status in ('connected', 'needs_attention', 'revoked', 'syncing', 'succeeded', 'partial', 'failed')),
+  auth_status text not null default 'connected' check (auth_status in ('connected', 'needs_attention', 'revoked')),
+  last_synced_at text,
+  checkpoint_cursor text,
+  records_added integer not null default 0,
+  records_updated integer not null default 0,
+  records_skipped integer not null default 0,
+  error_message text,
+  created_at text not null,
+  updated_at text not null
+);
+
+create index if not exists idx_connections_project on source_connections (project_id);
+
+create table if not exists connection_credentials (
+  connection_id text primary key references source_connections(id) on delete cascade,
+  project_id text not null references projects(id),
+  encrypted_access_token text not null,
+  encrypted_refresh_token text,
+  token_expires_at text,
+  scopes text,
+  external_account text,
+  created_at text not null,
+  updated_at text not null
+);
+
+create index if not exists idx_connection_creds_project on connection_credentials (project_id);
+
+create table if not exists oauth_states (
+  state text primary key,
+  project_id text not null references projects(id),
+  user_id text not null,
+  provider text not null check (provider in ('github', 'jira')),
+  target_name text,
+  acl_label text not null default 'L1',
+  redirect_uri text,
+  created_at text not null,
+  expires_at text not null,
+  used integer not null default 0
+);
+
+create index if not exists idx_oauth_states_expires on oauth_states (expires_at);
+
+
+-- Maps provider items to their latest immutable evidence snapshots for idempotent sync.
+create table if not exists source_sync_records (
+  id text primary key,
+  project_id text not null references projects(id),
+  connection_id text not null references source_connections(id),
+  external_id text not null,
+  source_id text not null references sources(id),
+  content_fingerprint text not null,
+  unique (connection_id, external_id)
+);
+
+create index if not exists idx_source_sync_records_project on source_sync_records (project_id);

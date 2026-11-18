@@ -48,6 +48,9 @@ describe("DashboardPage", () => {
     expect(screen.getByText("Payments Service")).toBeInTheDocument();
     expect(screen.getByText("Evidence Explorer")).toBeInTheDocument();
     expect(screen.getByText("Handover Workspace")).toBeInTheDocument();
+
+    // Approver actions
+    expect(screen.getByTestId("invite-member-btn")).toBeInTheDocument();
   });
 });
 

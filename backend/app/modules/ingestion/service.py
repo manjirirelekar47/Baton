@@ -5,16 +5,19 @@ import csv
 import hashlib
 import io
 import json
+import logging
 import os
 import re
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+
+log = logging.getLogger(__name__)
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 CHUNK_CHARS = 1200
@@ -43,6 +46,8 @@ class ParsedRecord:
     text: str
     author: str = "Unknown"
     event_time: datetime = datetime(1970, 1, 1, tzinfo=UTC)
+    external_id: str | None = None
+    title: str | None = None
 
 
 def redact_text(value: str) -> str:
@@ -408,3 +413,579 @@ def list_chunks(session: Session, project_id: str) -> list[dict[str, Any]]:
     demo_chunks = _demo_sample_chunks(project_id) + _demo_fixture_chunks(project_id)
     output.extend(chunk for chunk in demo_chunks if chunk.get("chunk_id") not in known_ids)
     return output
+
+
+def _ensure_connection_schema(session: Session) -> None:
+    try:
+        session.execute(text("alter table source_connections add column auth_status text not null default 'connected'"))
+        session.commit()
+    except Exception:
+        session.rollback()
+
+
+def list_connections(session: Session, project_id: str) -> list[dict[str, Any]]:
+    _ensure_connection_schema(session)
+    rows = session.execute(
+        text("""
+            select id, project_id, provider, target_name, acl_label, status,
+                   coalesce(auth_status, 'connected') as auth_status,
+                   last_synced_at, checkpoint_cursor, records_added, records_updated,
+                   records_skipped, error_message, created_at, updated_at
+            from source_connections where project_id = :p order by created_at desc
+        """),
+        {"p": project_id},
+    ).mappings().all()
+    return [dict(r) for r in rows]
+
+
+def get_connection(session: Session, project_id: str, connection_id: str) -> dict[str, Any] | None:
+    _ensure_connection_schema(session)
+    row = session.execute(
+        text("""
+            select id, project_id, provider, target_name, acl_label, status,
+                   coalesce(auth_status, 'connected') as auth_status,
+                   last_synced_at, checkpoint_cursor, records_added, records_updated,
+                   records_skipped, error_message, created_at, updated_at
+            from source_connections where id = :id and project_id = :p
+        """),
+        {"id": connection_id, "p": project_id},
+    ).mappings().first()
+    return dict(row) if row else None
+
+
+def create_connection(
+    session: Session,
+    project_id: str,
+    provider: str,
+    target_name: str,
+    acl_label: str,
+    auth_status: str = "connected",
+) -> dict[str, Any]:
+    _ensure_connection_schema(session)
+    conn_id = f"conn-{uuid.uuid4().hex[:10]}"
+    now = datetime.now(UTC).isoformat()
+    session.execute(
+        text("""
+            insert into source_connections
+            (id, project_id, provider, target_name, acl_label, status, auth_status, last_synced_at,
+             checkpoint_cursor, records_added, records_updated, records_skipped,
+             error_message, created_at, updated_at)
+            values (:id, :p, :prov, :target, :acl, :status, :auth_status, null, null, 0, 0, 0, null, :now, :now)
+        """),
+        {
+            "id": conn_id,
+            "p": project_id,
+            "prov": provider,
+            "target": target_name,
+            "acl": acl_label,
+            "status": "connected" if auth_status == "connected" else auth_status,
+            "auth_status": auth_status,
+            "now": now,
+        },
+    )
+    session.commit()
+    return get_connection(session, project_id, conn_id)  # type: ignore
+
+
+def delete_connection(session: Session, project_id: str, connection_id: str) -> bool:
+    # Keep already-ingested evidence immutable, but remove credentials and records
+    session.execute(
+        text("delete from connection_credentials where connection_id = :id and project_id = :p"),
+        {"id": connection_id, "p": project_id},
+    )
+    session.execute(
+        text("delete from source_sync_records where connection_id = :id and project_id = :p"),
+        {"id": connection_id, "p": project_id},
+    )
+    res = session.execute(
+        text("delete from source_connections where id = :id and project_id = :p"),
+        {"id": connection_id, "p": project_id},
+    )
+    session.commit()
+    return res.rowcount > 0
+
+
+def revoke_connection(session: Session, project_id: str, connection_id: str) -> dict[str, Any]:
+    """Revoke credentials for a connection and set auth_status to 'revoked'."""
+    _ensure_connection_schema(session)
+    from app.modules.ingestion import crypto
+    crypto.revoke_connection_credentials(session, project_id, connection_id)
+    conn = get_connection(session, project_id, connection_id)
+    if not conn:
+        raise ValueError("Source connection not found.")
+    return conn
+
+
+def reauthorize_connection(
+    session: Session,
+    project_id: str,
+    user_id: str,
+    connection_id: str,
+    redirect_uri: str | None = None,
+) -> dict[str, Any]:
+    """Generate a signed OAuth state and authorization URL to reauthorize an existing connection."""
+    _ensure_connection_schema(session)
+    conn = get_connection(session, project_id, connection_id)
+    if not conn:
+        raise ValueError("Source connection not found.")
+
+    from app.modules.ingestion import crypto
+    provider = conn["provider"]
+    target_name = conn["target_name"]
+    acl_label = conn["acl_label"]
+
+    state = crypto.generate_oauth_state(
+        session,
+        project_id=project_id,
+        user_id=user_id,
+        provider=provider,
+        target_name=target_name,
+        acl_label=acl_label,
+        redirect_uri=redirect_uri,
+    )
+    if provider == "github":
+        auth_url = crypto.build_github_authorize_url(state, redirect_uri or "")
+    elif provider == "jira":
+        auth_url = crypto.build_jira_authorize_url(state, redirect_uri or "")
+    else:
+        raise ValueError(f"Unsupported provider: {provider}")
+
+    return {
+        "authorization_url": auth_url,
+        "state": state,
+        "provider": provider,
+    }
+
+
+def complete_oauth_flow(
+    session: Session,
+    provider: str,
+    code: str,
+    state_token: str,
+    callback_redirect_uri: str | None = None,
+) -> dict[str, Any]:
+    """Verify signed state, exchange code for tokens, encrypt at rest, and create/update connection."""
+    _ensure_connection_schema(session)
+    from app.modules.ingestion import crypto
+
+    state_data = crypto.verify_and_consume_oauth_state(session, state_token, expected_provider=provider)
+    project_id = state_data["project_id"]
+    user_id = state_data.get("user_id")
+    if user_id:
+        has_pm = session.execute(
+            text("select 1 from project_memberships where user_id = :uid limit 1"),
+            {"uid": user_id},
+        ).scalar() is not None
+
+        if has_pm:
+            approver_check = session.execute(
+                text("""
+                    select 1 from project_memberships
+                    where user_id = :uid and project_id = :pid and role = 'approver' and active = 1
+                """),
+                {"uid": user_id, "pid": project_id},
+            ).first()
+        else:
+            approver_check = session.execute(
+                text("""
+                    select 1 from members
+                    where id = :uid and project_id = :pid and role = 'approver' and active = 1
+                """),
+                {"uid": user_id, "pid": project_id},
+            ).first()
+        if not approver_check:
+            raise crypto.OAuthStateError("The user who initiated this OAuth connection is no longer an active Approver.")
+
+    target_name = state_data.get("target_name") or f"{provider}-connected"
+    acl_label = state_data.get("acl_label") or "L1"
+
+    effective_redirect_uri = callback_redirect_uri or state_data.get("redirect_uri") or ""
+
+    if provider == "github":
+        token_data = crypto.exchange_github_code(code, effective_redirect_uri)
+    elif provider == "jira":
+        token_data = crypto.exchange_jira_code(code, effective_redirect_uri)
+    else:
+        raise ValueError(f"Unsupported provider: {provider}")
+
+    existing = session.execute(
+        text("""
+            select id from source_connections
+            where project_id = :p and provider = :prov and target_name = :target
+        """),
+        {"p": project_id, "prov": provider, "target": target_name},
+    ).mappings().first()
+
+    now = datetime.now(UTC).isoformat()
+    if existing:
+        conn_id = existing["id"]
+        session.execute(
+            text("""
+                update source_connections
+                set status = 'connected',
+                    auth_status = 'connected',
+                    error_message = null,
+                    updated_at = :now
+                where id = :id and project_id = :p
+            """),
+            {"id": conn_id, "p": project_id, "now": now},
+        )
+        session.commit()
+    else:
+        conn_id = f"conn-{uuid.uuid4().hex[:10]}"
+        session.execute(
+            text("""
+                insert into source_connections
+                (id, project_id, provider, target_name, acl_label, status, auth_status,
+                 last_synced_at, checkpoint_cursor, records_added, records_updated,
+                 records_skipped, error_message, created_at, updated_at)
+                values (:id, :p, :prov, :target, :acl, 'connected', 'connected',
+                        null, null, 0, 0, 0, null, :now, :now)
+            """),
+            {
+                "id": conn_id,
+                "p": project_id,
+                "prov": provider,
+                "target": target_name,
+                "acl": acl_label,
+                "now": now,
+            },
+        )
+        session.commit()
+
+    crypto.save_connection_credentials(
+        session,
+        connection_id=conn_id,
+        project_id=project_id,
+        access_token=token_data["access_token"],
+        refresh_token=token_data.get("refresh_token"),
+        token_expires_at=token_data.get("token_expires_at"),
+        scopes=token_data.get("scopes"),
+        external_account=token_data.get("external_account"),
+    )
+
+    conn = get_connection(session, project_id, conn_id)
+    return {
+        "status": "connected",
+        "connection_id": conn_id,
+        "provider": provider,
+        "target_name": target_name,
+        "auth_status": "connected",
+        "redirect_uri": state_data.get("redirect_uri"),
+        "connection": conn,
+    }
+
+
+def _format_provider_display(provider: str) -> str:
+    p = provider.strip()
+    mapping = {
+        "github": "GitHub",
+        "jira": "Jira",
+        "slack": "Slack",
+        "confluence": "Confluence",
+        "notion": "Notion",
+    }
+    return mapping.get(p.lower(), p.title())
+
+
+def persist_provider_records(
+    session: Session,
+    *,
+    project_id: str,
+    connection_id: str,
+    provider: str,
+    target_name: str,
+    source_type: str,
+    acl_label: str,
+    records: list[ParsedRecord],
+) -> tuple[int, int, int]:
+    """Persist provider records as immutable versions and deduplicate by provider identity.
+
+    A changed provider item creates a new source/chunk snapshot; the sync index points
+    to the latest snapshot. Previous evidence remains available for audit and citations.
+    Returns (added, updated, skipped).
+    """
+    added = updated = skipped = 0
+    provider_display = "GitHub" if provider.lower() == "github" else ("Jira" if provider.lower() == "jira" else provider.title())
+    source_prefix = f"{provider_display}: {target_name}"
+
+    for record in records:
+        safe_text = redact_text(record.text).strip()
+        if not safe_text:
+            skipped += 1
+            continue
+
+        external_id = str(record.external_id or "").strip()
+        if not external_id:
+            external_id = "content:" + hashlib.sha256(safe_text.encode("utf-8")).hexdigest()
+        external_id = external_id[:255]
+        event_time = _parse_datetime(record.event_time)
+        author = (record.author or "Unknown").strip() or "Unknown"
+        fingerprint_payload = json.dumps(
+            [safe_text, author, event_time.isoformat(), source_type, acl_label],
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+        fingerprint = hashlib.sha256(fingerprint_payload.encode("utf-8")).hexdigest()
+
+        current = session.execute(
+            text(
+                "select source_id, content_fingerprint from source_sync_records "
+                "where connection_id = :connection_id and external_id = :external_id"
+            ),
+            {"connection_id": connection_id, "external_id": external_id},
+        ).mappings().first()
+        if current and current["content_fingerprint"] == fingerprint:
+            skipped += 1
+            continue
+
+        source_id = f"src-{uuid.uuid4().hex[:12]}"
+        orig_title = (
+            getattr(record, "title", None)
+            or (safe_text.splitlines()[0].strip() if safe_text else "")
+            or external_id
+        )
+        if orig_title.lower().startswith(source_prefix.lower()):
+            source_title = f"{source_prefix}{orig_title[len(source_prefix):]}"
+        elif orig_title:
+            source_title = f"{source_prefix} - {orig_title}"
+        else:
+            source_title = source_prefix
+
+        snapshot = ParsedRecord(safe_text, author, event_time, external_id, title=orig_title)
+        chunks = chunk_record(
+            snapshot,
+            project_id=project_id,
+            source_id=source_id,
+            source_type=source_type,
+            source_title=source_title,
+            acl_label=acl_label,
+        )
+        if not chunks:
+            skipped += 1
+            continue
+
+        created_at = datetime.now(UTC).isoformat()
+        note = "New immutable provider snapshot; an earlier version is retained." if current else None
+        session.execute(
+            text(
+                "insert into sources "
+                "(id, project_id, title, type, acl_label, consent, status, chunks, note, created_at) "
+                "values (:id, :project_id, :title, :type, :acl_label, 1, 'parsed', :chunks, :note, :created_at)"
+            ),
+            {
+                "id": source_id,
+                "project_id": project_id,
+                "title": source_title,
+                "type": source_type,
+                "acl_label": acl_label,
+                "chunks": len(chunks),
+                "note": note,
+                "created_at": created_at,
+            },
+        )
+        for chunk in chunks:
+            session.execute(
+                text(
+                    "insert into source_chunks "
+                    "(id, project_id, source_id, source_type, source_title, author, event_time, acl_label, "
+                    "content_hash, char_start, char_end, content) "
+                    "values (:id, :project_id, :source_id, :source_type, :source_title, :author, :event_time, "
+                    ":acl_label, :content_hash, :char_start, :char_end, :content)"
+                ),
+                {
+                    "id": chunk["chunk_id"],
+                    "project_id": project_id,
+                    "source_id": source_id,
+                    "source_type": source_type,
+                    "source_title": source_title,
+                    "author": chunk["author"],
+                    "event_time": chunk["event_time"],
+                    "acl_label": acl_label,
+                    "content_hash": chunk["content_hash"],
+                    "char_start": chunk["char_span"][0],
+                    "char_end": chunk["char_span"][1],
+                    "content": chunk["text"],
+                },
+            )
+
+        if current:
+            session.execute(
+                text(
+                    "update source_sync_records set source_id = :source_id, "
+                    "content_fingerprint = :fingerprint "
+                    "where connection_id = :connection_id and external_id = :external_id"
+                ),
+                {
+                    "source_id": source_id,
+                    "fingerprint": fingerprint,
+                    "connection_id": connection_id,
+                    "external_id": external_id,
+                },
+            )
+            updated += 1
+        else:
+            session.execute(
+                text(
+                    "insert into source_sync_records "
+                    "(id, project_id, connection_id, external_id, source_id, content_fingerprint) "
+                    "values (:id, :project_id, :connection_id, :external_id, :source_id, :fingerprint)"
+                ),
+                {
+                    "id": uuid.uuid4().hex,
+                    "project_id": project_id,
+                    "connection_id": connection_id,
+                    "external_id": external_id,
+                    "source_id": source_id,
+                    "fingerprint": fingerprint,
+                },
+            )
+            added += 1
+
+    return added, updated, skipped
+
+
+def sync_connection(session: Session, project_id: str, connection_id: str) -> dict[str, Any]:
+    _ensure_connection_schema(session)
+    conn = get_connection(session, project_id, connection_id)
+    if not conn:
+        raise ValueError("Source connection not found.")
+
+    if conn.get("auth_status") == "revoked":
+        err_msg = "This connection has been revoked. Reauthorize the connection to resume syncing."
+        now = datetime.now(UTC).isoformat()
+        session.execute(
+            text("""
+                update source_connections
+                set status = 'failed',
+                    error_message = :err,
+                    updated_at = :now
+                where id = :id
+            """),
+            {"id": connection_id, "err": err_msg, "now": now},
+        )
+        session.commit()
+        return get_connection(session, project_id, connection_id)  # type: ignore
+
+    from app.modules.ingestion import crypto
+    from app.modules.ingestion.connectors import GitHubConnector, JiraConnector
+
+    provider = conn["provider"]
+    target = conn["target_name"]
+    cursor = conn.get("checkpoint_cursor")
+    acl_label = conn["acl_label"]
+
+    # Retrieve per-connection decrypted credentials if available
+    token = None
+    cloud_id = None
+    creds = crypto.get_connection_credentials(session, connection_id)
+    if creds:
+        # Check token expiration and attempt refresh if within 5 minutes of expiry
+        expires_at_str = creds.get("token_expires_at")
+        if expires_at_str and creds.get("refresh_token"):
+            try:
+                expires_at = datetime.fromisoformat(expires_at_str.replace("Z", "+00:00"))
+                if expires_at.tzinfo is None:
+                    expires_at = expires_at.replace(tzinfo=UTC)
+                if datetime.now(UTC) >= expires_at - timedelta(minutes=5):
+                    refreshed = crypto.refresh_connection_token(session, project_id, connection_id)
+                    if refreshed:
+                        creds = crypto.get_connection_credentials(session, connection_id)
+            except Exception as e:
+                log.warning("Token auto-refresh check failed: %s", e)
+
+        if creds:
+            token = creds.get("access_token")
+            cloud_id = creds.get("external_account")
+
+    now = datetime.now(UTC).isoformat()
+    session.execute(
+        text("update source_connections set status = 'syncing', updated_at = :now where id = :id and project_id = :p"),
+        {"id": connection_id, "p": project_id, "now": now},
+    )
+    session.commit()
+
+    try:
+        if provider == "github":
+            connector = GitHubConnector(target, token=token)
+            source_type = "git"
+        elif provider == "jira":
+            is_oauth = bool(token and (cloud_id or not os.environ.get("JIRA_USER_EMAIL")))
+            connector = JiraConnector(target, token=token, is_oauth=is_oauth, cloud_id=cloud_id)
+            source_type = "task_csv"
+        else:
+            raise ValueError(f"Unsupported provider: {provider}")
+
+        records, new_cursor = connector.fetch_records(checkpoint_cursor=cursor)
+        added, updated, skipped = persist_provider_records(
+            session,
+            project_id=project_id,
+            connection_id=connection_id,
+            provider=provider,
+            target_name=target,
+            source_type=source_type,
+            acl_label=acl_label,
+            records=records,
+        )
+
+        session.execute(
+            text("""
+                update source_connections
+                set status = 'succeeded',
+                    auth_status = 'connected',
+                    last_synced_at = :now,
+                    checkpoint_cursor = :cursor,
+                    records_added = records_added + :added,
+                    records_updated = records_updated + :updated,
+                    records_skipped = records_skipped + :skipped,
+                    error_message = null,
+                    updated_at = :now
+                where id = :id
+            """),
+            {
+                "id": connection_id,
+                "now": now,
+                "cursor": new_cursor,
+                "added": added,
+                "updated": updated,
+                "skipped": skipped,
+            },
+        )
+        session.commit()
+    except Exception as exc:
+        session.rollback()
+        err_msg = str(exc) or "Provider sync failed."
+        for secret_name in (
+            "GITHUB_SYNC_TOKEN",
+            "GITHUB_TOKEN",
+            "JIRA_API_TOKEN",
+            "GITHUB_CLIENT_SECRET",
+            "JIRA_CLIENT_SECRET",
+        ):
+            secret = os.environ.get(secret_name)
+            if secret:
+                err_msg = err_msg.replace(secret, "[REDACTED]")
+        if token:
+            err_msg = err_msg.replace(token, "[REDACTED]")
+        err_msg = err_msg[:300]
+
+        err_lower = err_msg.lower()
+        if any(w in err_lower for w in ("authentication", "permission", "rejected", "401", "403", "unauthorized", "token")):
+            new_auth = "needs_attention"
+        else:
+            new_auth = conn.get("auth_status") or "connected"
+
+        session.execute(
+            text("""
+                update source_connections
+                set status = 'failed',
+                    auth_status = :auth_status,
+                    error_message = :err,
+                    updated_at = :now
+                where id = :id
+            """),
+            {"id": connection_id, "auth_status": new_auth, "err": err_msg, "now": datetime.now(UTC).isoformat()},
+        )
+        session.commit()
+
+    return get_connection(session, project_id, connection_id)  # type: ignore

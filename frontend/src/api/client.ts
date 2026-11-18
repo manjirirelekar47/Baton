@@ -9,9 +9,41 @@ const defaultHost =
     ? window.location.hostname
     : "localhost";
 
-export const API_BASE_URL = (
+let activeApiBaseUrl: string = (
   import.meta.env.VITE_API_URL ?? `http://${defaultHost}:8000`
 ).replace(/\/$/, "");
+
+export function getApiBaseUrl(): string {
+  return activeApiBaseUrl;
+}
+
+export function setApiBaseUrl(url: string): void {
+  activeApiBaseUrl = url.replace(/\/$/, "");
+}
+
+export const API_BASE_URL = activeApiBaseUrl;
+
+function getAlternativeUrl(url: string): string | null {
+  if (url.includes("//localhost:8000")) {
+    return url.replace("//localhost:8000", "//127.0.0.1:8000");
+  }
+  if (url.includes("//127.0.0.1:8000")) {
+    return url.replace("//127.0.0.1:8000", "//127.0.0.1:8001");
+  }
+  if (url.includes("//localhost:8001")) {
+    return url.replace("//localhost:8001", "//127.0.0.1:8001");
+  }
+  if (url.includes("//127.0.0.1:8001")) {
+    return url.replace("//127.0.0.1:8001", "//127.0.0.1:8000");
+  }
+  if (url.includes("//localhost:")) {
+    return url.replace("//localhost:", "//127.0.0.1:");
+  }
+  if (url.includes("//127.0.0.1:")) {
+    return url.replace("//127.0.0.1:", "//localhost:");
+  }
+  return null;
+}
 
 export const TOKEN_STORAGE_KEY = "baton.token";
 
@@ -41,12 +73,80 @@ export interface UserProfile {
   role: Role;
   project_id: string;
   email?: string;
+  is_demo?: boolean;
   avatar_url?: string;
+}
+
+export interface RegisterPayload {
+  user_id?: string;
+  email: string;
+  name: string;
+  role: Role;
+  invitation_code?: string;
+  project_id?: string;
+  supabase_token?: string;
+}
+
+export interface SessionSyncPayload {
+  user_id: string;
+  email: string;
+  name?: string;
+  project_id?: string;
+  supabase_token?: string;
+}
+
+export interface SessionSyncResponse {
+  registered: boolean;
+  requires_role?: boolean;
+  has_projects?: boolean;
+  requires_project?: boolean;
+  token?: string;
+  user?: UserProfile;
+  user_id?: string;
+  email?: string;
+  projects?: ProjectItem[];
+  active_project_id?: string;
+}
+
+export interface ProjectItem {
+  id: string;
+  name: string;
+  role: Role;
+  owner_id?: string;
+  active?: boolean;
+}
+
+export interface SwitchProjectResponse {
+  token: string;
+  user: UserProfile;
+  project: ProjectItem;
+}
+
+export interface ValidateInvitationResponse {
+  valid: boolean;
+  role?: Role;
+  email?: string;
+  detail?: string;
+}
+
+export interface InvitationItem {
+  id: string;
+  project_id: string;
+  code: string;
+  role: Role;
+  email?: string | null;
+  status: "active" | "redeemed" | "used" | "revoked" | string;
+  created_at: string;
+  used_by?: string | null;
+  used_by_name?: string | null;
+  used_at?: string | null;
 }
 
 export interface DemoLoginResponse {
   token: string;
   user: UserProfile;
+  projects?: ProjectItem[];
+  active_project_id?: string;
 }
 
 export interface EvidenceItem {
@@ -156,6 +256,52 @@ export interface ReviewActionPayload {
   chosen_claim_id?: string;
 }
 
+export interface GraphNode {
+  id: string;
+  label: string;
+  type: "person" | "module" | "task" | "claim" | "source";
+  metadata?: {
+    status?: string;
+    state?: string;
+    confidence?: string;
+    statement?: string;
+    entity_key?: string;
+    attribute?: string;
+    source_type?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface GraphEvidence {
+  chunk_id?: string;
+  quote?: string;
+  source_id?: string;
+  source_title?: string;
+}
+
+export interface GraphEdge {
+  id: string;
+  source: string;
+  target: string;
+  relation: "OWNS" | "AUTHORED" | "REVIEWED" | "IMPORTS" | "BLOCKS" | "SUPPORTED BY" | string;
+  count?: number;
+  evidence?: GraphEvidence[];
+  evidence_chunk_id?: string;
+  evidence_quote?: string;
+  source_title?: string;
+  source_id?: string;
+}
+
+export interface KnowledgeGraphData {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  summary: {
+    total_nodes: number;
+    connections: number;
+    people: number;
+  };
+}
+
 /* =========================================================================
    Token Management
    ========================================================================= */
@@ -209,7 +355,8 @@ interface RequestOptions extends RequestInit {
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { params, timeoutMs = 12000, headers = {}, ...customConfig } = options;
 
-  let url = `${API_BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+  const currentBase = getApiBaseUrl();
+  let url = `${currentBase}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
   if (params) {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, val]) => {
@@ -224,9 +371,10 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   }
 
   const token = getStoredToken();
+  const isBodyAllowed = customConfig.method && !["GET", "HEAD"].includes(customConfig.method.toUpperCase());
   const requestHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
     Accept: "application/json",
+    ...(isBodyAllowed && customConfig.body ? { "Content-Type": "application/json" } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(headers as Record<string, string>),
   };
@@ -236,11 +384,36 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
   let response: Response;
   try {
-    response = await fetch(url, {
-      ...customConfig,
-      headers: requestHeaders,
-      signal: controller.signal,
-    });
+    try {
+      response = await fetch(url, {
+        ...customConfig,
+        headers: requestHeaders,
+        signal: controller.signal,
+      });
+    } catch (primaryErr: unknown) {
+      if (primaryErr instanceof Error && primaryErr.name === "AbortError") {
+        throw primaryErr;
+      }
+      const altUrl = getAlternativeUrl(url);
+      if (altUrl) {
+        response = await fetch(altUrl, {
+          ...customConfig,
+          headers: requestHeaders,
+          signal: controller.signal,
+        });
+        if (altUrl.includes("//127.0.0.1:8000")) {
+          setApiBaseUrl(activeApiBaseUrl.replace(/\/\/(localhost|127\.0\.0\.1):(8000|8001)/, "//127.0.0.1:8000"));
+        } else if (altUrl.includes("//127.0.0.1:8001")) {
+          setApiBaseUrl(activeApiBaseUrl.replace(/\/\/(localhost|127\.0\.0\.1):(8000|8001)/, "//127.0.0.1:8001"));
+        } else if (altUrl.includes("//localhost:8000")) {
+          setApiBaseUrl(activeApiBaseUrl.replace(/\/\/(localhost|127\.0\.0\.1):(8000|8001)/, "//localhost:8000"));
+        } else if (altUrl.includes("//localhost:8001")) {
+          setApiBaseUrl(activeApiBaseUrl.replace(/\/\/(localhost|127\.0\.0\.1):(8000|8001)/, "//localhost:8001"));
+        }
+      } else {
+        throw primaryErr;
+      }
+    }
   } catch (err: unknown) {
     clearTimeout(timeoutId);
     if (err instanceof Error && err.name === "AbortError") {
@@ -248,7 +421,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     }
     throw new ApiError(
       0,
-      "Cannot connect to Baton API. Verify backend is running on " + API_BASE_URL
+      "Cannot connect to Baton API. Verify backend is running on " + getApiBaseUrl()
     );
   } finally {
     clearTimeout(timeoutId);
@@ -315,11 +488,48 @@ export const apiClient = {
 export const batonApi = {
   // Core & Auth
   getHealth: () => apiClient.get<{ status: string }>("/health"),
+  checkHealth: async (): Promise<{ ok: boolean; status?: string; url: string }> => {
+    try {
+      const res = await apiClient.get<{ status: string }>("/health", { timeoutMs: 3000 });
+      return { ok: true, status: res.status, url: getApiBaseUrl() };
+    } catch {
+      return { ok: false, url: getApiBaseUrl() };
+    }
+  },
   getMe: () => apiClient.get<UserProfile>("/me"),
   demoLogin: (role: Role) =>
     apiClient.post<DemoLoginResponse>("/auth/demo-login", { role }),
+  register: (payload: RegisterPayload) =>
+    apiClient.post<{ token: string; user: UserProfile }>(
+      "/auth/register",
+      payload,
+      payload.supabase_token ? { headers: { Authorization: `Bearer ${payload.supabase_token}` } } : undefined
+    ),
+  syncSession: (payload: SessionSyncPayload) =>
+    apiClient.post<SessionSyncResponse>(
+      "/auth/session",
+      payload,
+      payload.supabase_token ? { headers: { Authorization: `Bearer ${payload.supabase_token}` } } : undefined
+    ),
+  validateInvitation: (code: string) =>
+    apiClient.get<ValidateInvitationResponse>(`/auth/invitations/validate?code=${encodeURIComponent(code)}`),
+  createInvitation: (role: Role = "approver", email?: string, projectId?: string) =>
+    apiClient.post<InvitationItem>(projectId ? `/projects/${projectId}/invitations` : "/auth/invitations", { role, email }),
+  getInvitations: (projectId?: string) =>
+    apiClient.get<InvitationItem[]>(projectId ? `/projects/${projectId}/invitations` : "/auth/invitations"),
+  revokeInvitation: (id: string) =>
+    apiClient.post<{ status: string; id: string }>(`/auth/invitations/${id}/revoke`),
   demoReset: () =>
     apiClient.post<{ status: string; project_id: string }>("/demo/reset"),
+
+  // Projects & Multi-Project
+  getProjects: () => apiClient.get<ProjectItem[]>("/projects"),
+  createProject: (name: string) =>
+    apiClient.post<{ project: ProjectItem; token: string; user: UserProfile }>("/projects", { name }),
+  joinProject: (invitation_code: string) =>
+    apiClient.post<{ project: ProjectItem; token: string; user: UserProfile }>("/projects/join", { invitation_code }),
+  switchProject: (project_id: string) =>
+    apiClient.post<SwitchProjectResponse>("/auth/switch-project", { project_id }),
 
   // Claims & Ledger
   getClaims: () => apiClient.get<ClaimsListResponse>("/claims"),
@@ -338,6 +548,7 @@ export const batonApi = {
   getRiskRadar: () => apiClient.get<RiskModule[]>("/risk-radar"),
   getTimeline: () => apiClient.get<TimelineEvent[]>("/timeline"),
   getDeliveryStatus: () => apiClient.get<DeliveryStatusItem[]>("/delivery-status"),
+  getKnowledgeGraph: () => apiClient.get<KnowledgeGraphData>("/graph"),
 
   // Live Ping helper for status indicators
   measureLatency: async (): Promise<number> => {

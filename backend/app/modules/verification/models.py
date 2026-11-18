@@ -20,6 +20,7 @@ ClaimType = Literal[
 
 ClaimState = Literal["verified", "inferred", "conflicting", "missing", "attested"]
 AclLabel = Literal["L1", "L2", "L3", "L4"]
+ConfidenceGrade = Literal["Strong", "Partial", "Weak"]
 
 
 class EvidenceIn(BaseModel):
@@ -67,6 +68,8 @@ class ClaimOut(BaseModel):
     blocked_by: list[str] = Field(default_factory=list)
     attested_by: str | None = None
     conflict_with: list[str] = Field(default_factory=list)
+    confidence_grade: ConfidenceGrade | None = None
+    confidence_reason: str | None = None
     evidence: list[EvidenceOut] = Field(default_factory=list)
 
 

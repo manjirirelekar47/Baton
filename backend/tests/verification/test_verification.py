@@ -265,3 +265,58 @@ def test_gaps_server_side_acl_filtering():
     # Approver: sees L1, L2, L3
     appr_visible = [g for g in gaps if acl.can_read("approver", g["acl_label"])]
     assert len(appr_visible) == 3
+
+
+def test_confidence_grades_deterministic():
+    """Verify deterministic assignment of Strong, Partial, and Weak confidence grades."""
+    # 1. Strong: verified claim with valid citation
+    claim_verified = {
+        "claim_id": "c-strong",
+        "state": "verified",
+        "evidence": [{"chunk_id": "ch-1", "source_id": "s-1", "quote": "Payment gateway enabled"}],
+    }
+    grade, reason = service.compute_confidence_grade(claim_verified)
+    assert grade == "Strong"
+    assert "Directly verified" in reason
+
+    # 2. Strong: human attested
+    claim_attested = {
+        "claim_id": "c-attested",
+        "state": "attested",
+        "attested_by": "Rohan",
+        "evidence": [],
+    }
+    grade, reason = service.compute_confidence_grade(claim_attested)
+    assert grade == "Strong"
+    assert "Direct human attestation" in reason
+
+    # 3. Partial: inferred claim
+    claim_inferred = {
+        "claim_id": "c-partial",
+        "state": "inferred",
+        "evidence": [{"chunk_id": "ch-2", "quote": "Probably uses Redis"}],
+    }
+    grade, reason = service.compute_confidence_grade(claim_inferred)
+    assert grade == "Partial"
+    assert "Inferred claim" in reason
+
+    # 4. Weak: conflicting claim
+    claim_conflicting = {
+        "claim_id": "c-weak-1",
+        "state": "conflicting",
+        "conflict_with": ["c-weak-2"],
+        "evidence": [{"chunk_id": "ch-3", "quote": "Conflicting claim text"}],
+    }
+    grade, reason = service.compute_confidence_grade(claim_conflicting)
+    assert grade == "Weak"
+    assert "Contradiction detected" in reason
+
+    # 5. Weak: missing evidence
+    claim_missing = {
+        "claim_id": "c-weak-2",
+        "state": "missing",
+        "evidence": [],
+    }
+    grade, reason = service.compute_confidence_grade(claim_missing)
+    assert grade == "Weak"
+    assert "No verified supporting evidence" in reason

@@ -13,6 +13,10 @@ components:
 paths:
   /health: {get: {tags: [core], security: [], summary: Liveness check, responses: {"200": {description: ok}}}}
   /auth/demo-login: {post: {tags: [core], security: [], summary: "One-click demo login. Body {role}", responses: {"200": {description: token and user}}}}
+  /auth/register: {post: {tags: [core], security: [], summary: "Role-based signup with invitation verification for approver", responses: {"200": {description: token and user}, "403": {description: invitation required}}}}
+  /auth/session: {post: {tags: [core], security: [], summary: "Sync Supabase authenticated session with Baton role", responses: {"200": {description: registered status, token and user}}}}
+  /auth/invitations/validate: {get: {tags: [core], security: [], summary: "Validate invitation code", responses: {"200": {description: valid status}}}}
+  /auth/invitations: {post: {tags: [core], summary: "Create invitation (approver only)", responses: {"200": {description: invitation created}, "403": {description: forbidden}}}}
   /me: {get: {tags: [core], summary: Current user, responses: {"200": {description: user}}}}
   /demo/reset: {post: {tags: [core], summary: Restore the demo project, responses: {"200": {description: reset}}}}
   /sources: {get: {tags: [ingestion], summary: Source inventory, responses: {"200": {description: list}}}, post: {tags: [ingestion], summary: Upload a source, responses: {"200": {description: created}}}}

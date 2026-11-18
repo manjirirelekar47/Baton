@@ -5,13 +5,21 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      api_url:
+        description: "API URL override for release smoke test (defaults to repo variable API_URL)"
+        required: false
+        type: string
 jobs:
   smoke:
-    if: ${{ vars.API_URL != '' }}
+    if: ${{ (inputs.api_url != '') || (vars.API_URL != '') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: sleep 180   # give Render time to redeploy
-      - run: python infra/smoke_test.py "${{ vars.API_URL }}"
+      - name: Wait for deployment to stabilize on push
+        if: github.event_name == 'push'
+        run: sleep 180   # give Render time to redeploy
+      - name: Run release smoke test
+        run: python infra/smoke_test.py "${{ inputs.api_url || vars.API_URL }}"

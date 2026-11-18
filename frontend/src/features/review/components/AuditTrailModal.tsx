@@ -78,11 +78,56 @@ export function AuditTrailModal({ onClose }: AuditTrailModalProps) {
                   </span>
                 </div>
 
-                {entry.detail && Object.keys(entry.detail).length > 0 && (
-                  <div className="mt-1 rounded bg-card p-2 text-[11px] font-mono text-muted overflow-x-auto">
-                    {JSON.stringify(entry.detail, null, 2)}
-                  </div>
-                )}
+                {(() => {
+                  const detail = (entry.detail || {}) as Record<string, unknown>;
+                  const priorState = detail.prior_state ?? detail.before;
+                  const newState = detail.new_state ?? detail.after;
+                  const rationale = detail.rationale || detail.note;
+                  const evidenceList = (detail.linked_evidence ?? detail.evidence) as unknown[];
+
+                  if (entry.event_type.startsWith("review.") && (priorState !== undefined || newState !== undefined || detail.action)) {
+                    return (
+                      <div className="mt-2 space-y-2 rounded bg-card p-2 text-[11px] text-muted">
+                        <p><span className="font-semibold text-ink">Decision:</span> {String(detail.action ?? entry.event_type.slice("review.".length))}</p>
+                        <p><span className="font-semibold text-ink">Rationale:</span> {rationale ? String(rationale) : "Not provided"}</p>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div><span className="font-semibold text-ink">Prior state:</span> <pre className="mt-1 whitespace-pre-wrap font-mono">{JSON.stringify(priorState ?? {}, null, 2)}</pre></div>
+                          <div><span className="font-semibold text-ink">New state:</span> <pre className="mt-1 whitespace-pre-wrap font-mono">{JSON.stringify(newState ?? {}, null, 2)}</pre></div>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-ink">Linked evidence:</span>
+                          {Array.isArray(evidenceList) && evidenceList.length > 0 ? (
+                            <ul className="mt-1 list-inside list-disc font-mono">
+                              {evidenceList.map((evidence, index) => {
+                                if (typeof evidence === "string") {
+                                  return <li key={`${evidence}-${index}`}>{evidence}</li>;
+                                }
+                                const item = (evidence || {}) as Record<string, unknown>;
+                                return (
+                                  <li key={`${String(item.chunk_id ?? index)}-${index}`}>
+                                    {String(item.chunk_id ?? "unknown")}
+                                    {item.source_id ? ` · ${String(item.source_id)}` : ""}
+                                    {item.source_title ? ` · ${String(item.source_title)}` : ""}
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          ) : <span> None recorded.</span>}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (entry.detail && Object.keys(entry.detail).length > 0) {
+                    return (
+                      <div className="mt-1 rounded bg-card p-2 text-[11px] font-mono text-muted overflow-x-auto">
+                        {JSON.stringify(entry.detail, null, 2)}
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })()}
               </div>
             ))}
         </div>

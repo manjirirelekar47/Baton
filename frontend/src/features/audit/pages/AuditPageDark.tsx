@@ -8,11 +8,9 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { apiClient } from "@/api/client";
 
 export const AuditPageDark: React.FC = () => {
-  const navigate = useNavigate();
   const [auditEntries, setAuditEntries] = useState<Record<string, any>[]>([]);
 
   useEffect(() => {
@@ -36,17 +34,7 @@ export const AuditPageDark: React.FC = () => {
               <span>Secure Activity Trail</span>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="p-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-gray-200 shadow-sm transition-all cursor-pointer"
-                aria-label="Go back"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
+            <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight font-display">
                 Audit Logs & History
               </h1>
@@ -58,16 +46,6 @@ export const AuditPageDark: React.FC = () => {
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
               Every review decision (confirming facts, fixing disagreements, or editing details) is automatically recorded with team member attribution and timestamp.
             </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl btn-glow-purple font-semibold text-xs text-white shadow-lg transition-all cursor-pointer"
-            >
-              <span>← Back</span>
-            </button>
           </div>
         </div>
       </div>

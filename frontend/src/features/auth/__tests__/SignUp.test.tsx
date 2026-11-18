@@ -73,6 +73,20 @@ describe("Supabase sign-in page", () => {
     expect(screen.queryByText("Dashboard")).not.toBeInTheDocument();
   });
 
+  it("explains the Supabase duplicate-account OAuth callback error", async () => {
+    render(
+      <MemoryRouter initialEntries={["/login?error=server_error&error_description=Multiple%20accounts%20with%20the%20same%20email%20address"]}>
+        <Routes>
+          <Route path="/login" element={<SignUp />} />
+          <Route path="/dashboard" element={<div>Dashboard</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/Supabase found more than one account/i)).toBeInTheDocument();
+    expect(screen.getByText(/Link GitHub account from the profile menu/i)).toBeInTheDocument();
+  });
+
   it("opens account creation from the sign-in footer link", async () => {
     render(
       <MemoryRouter initialEntries={["/login"]}>
@@ -90,6 +104,38 @@ describe("Supabase sign-in page", () => {
     expect(await screen.findByRole("heading", { name: "Create Your Account" })).toBeInTheDocument();
     expect(screen.getByLabelText("Your Name")).toBeInTheDocument();
     expect(screen.getByLabelText("Repeat Password")).toBeInTheDocument();
+  });
+
+  it("shows and hides both password fields when their visibility buttons are clicked", () => {
+    render(
+      <MemoryRouter initialEntries={["/signup"]}>
+        <Routes>
+          <Route path="/login" element={<SignUp />} />
+          <Route path="/signup" element={<SignUp />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const password = screen.getByLabelText("Create Password");
+    const repeatPassword = screen.getByLabelText("Repeat Password");
+    expect(password).toHaveAttribute("type", "password");
+    expect(repeatPassword).toHaveAttribute("type", "password");
+
+    fireEvent.change(password, { target: { value: "StrongPass123!" } });
+    fireEvent.change(repeatPassword, { target: { value: "StrongPass123!" } });
+    fireEvent.click(screen.getByRole("button", { name: "Show password" }));
+    fireEvent.click(screen.getByRole("button", { name: "Show repeat password" }));
+
+    expect(screen.getByLabelText("Create Password")).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText("Repeat Password")).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText("Create Password")).toHaveValue("StrongPass123!");
+    expect(screen.getByLabelText("Repeat Password")).toHaveValue("StrongPass123!");
+
+    fireEvent.click(screen.getByRole("button", { name: "Hide password" }));
+    fireEvent.click(screen.getByRole("button", { name: "Hide repeat password" }));
+
+    expect(screen.getByLabelText("Create Password")).toHaveAttribute("type", "password");
+    expect(screen.getByLabelText("Repeat Password")).toHaveAttribute("type", "password");
   });
 
   it("starts Supabase password recovery instead of a demo login", async () => {
@@ -157,6 +203,7 @@ describe("Supabase sign-in page", () => {
     fireEvent.change(screen.getByLabelText("Work Email"), { target: { value: "person@example.com" } });
     fireEvent.change(screen.getByLabelText("Create Password"), { target: { value: "StrongPass123!" } });
     fireEvent.change(screen.getByLabelText("Repeat Password"), { target: { value: "StrongPass123!" } });
+    fireEvent.click(screen.getByText("Incoming Maintainer"));
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: /create account/i }));
 
@@ -187,6 +234,7 @@ describe("Supabase sign-in page", () => {
     fireEvent.change(screen.getByLabelText("Work Email"), { target: { value: "person@example.com" } });
     fireEvent.change(screen.getByLabelText("Create Password"), { target: { value: "StrongPass123!" } });
     fireEvent.change(screen.getByLabelText("Repeat Password"), { target: { value: "StrongPass123!" } });
+    fireEvent.click(screen.getByText("Incoming Maintainer"));
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: /create account/i }));
 
@@ -215,6 +263,7 @@ describe("Supabase sign-in page", () => {
     fireEvent.change(screen.getByLabelText("Work Email"), { target: { value: "person@example.com" } });
     fireEvent.change(screen.getByLabelText("Create Password"), { target: { value: "StrongPass123!" } });
     fireEvent.change(screen.getByLabelText("Repeat Password"), { target: { value: "StrongPass123!" } });
+    fireEvent.click(screen.getByText("Incoming Maintainer"));
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: /create account/i }));
 

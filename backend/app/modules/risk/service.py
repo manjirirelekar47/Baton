@@ -366,3 +366,157 @@ def build_delivery_status(chunks: list[dict[str, Any]], *, today: date | None = 
         )
 
     return sorted(results, key=lambda item: (item["due"] or "9999-99-99", item["task"]))
+
+
+def build_knowledge_graph(
+    chunks: list[dict[str, Any]],
+    claims: list[dict[str, Any]] | None = None,
+    sources: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Assemble a typed, evidence-backed knowledge graph for visualization.
+
+    Connects People, Modules, Tasks, Claims, and Sources using clear relations:
+    OWNS, AUTHORED, REVIEWED, IMPORTS, BLOCKS, and SUPPORTED BY.
+    """
+    nodes: dict[str, dict[str, Any]] = {}
+    edge_map: dict[tuple[str, str, str], dict[str, Any]] = {}
+
+    def add_node(nid: str, label: str, ntype: str, metadata: dict[str, Any] | None = None) -> None:
+        if nid not in nodes:
+            nodes[nid] = {"id": nid, "label": label, "type": ntype, "metadata": metadata or {}}
+
+    def add_edge(
+        src: str,
+        tgt: str,
+        rel: str,
+        chunk_id: str | None = None,
+        source_id: str | None = None,
+        quote: str | None = None,
+        source_title: str | None = None,
+    ) -> None:
+        if not src or not tgt:
+            return
+        key = (src, tgt, rel)
+        if key not in edge_map:
+            edge_map[key] = {
+                "id": f"e_{src}_{rel}_{tgt}".replace(":", "_").replace("-", "_"),
+                "source": src,
+                "target": tgt,
+                "relation": rel,
+                "count": 0,
+                "evidence": [],
+            }
+        edge_map[key]["count"] += 1
+        if chunk_id or quote:
+            edge_map[key]["evidence"].append({
+                "chunk_id": chunk_id,
+                "quote": quote,
+                "source_id": source_id,
+                "source_title": source_title,
+            })
+
+    # Sources
+    for s in (sources or []):
+        sid = str(s.get("source_id") or s.get("id") or "")
+        if sid:
+            add_node(f"source:{sid}", s.get("title") or sid, "source", {"source_type": s.get("type")})
+
+    # Chunks (git and tasks)
+    for c in chunks:
+        cid = str(c.get("chunk_id", ""))
+        text = str(c.get("text", ""))
+        stype = c.get("source_type")
+        stitle = str(c.get("source_title") or "Repository")
+        if stype == "git":
+            mod = _module_from_chunk(c)
+            author = str(c.get("author") or "").strip()
+            if mod:
+                add_node(f"module:{mod}", mod.capitalize(), "module")
+            if author and author.lower() != "unknown":
+                add_node(f"person:{author}", author, "person")
+                if mod:
+                    add_edge(f"person:{author}", f"module:{mod}", "AUTHORED", chunk_id=cid, quote=text[:140], source_title=stitle)
+            for rev in _reviewers(text):
+                if rev and rev.lower() != "unknown":
+                    add_node(f"person:{rev}", rev, "person")
+                    if mod:
+                        add_edge(f"person:{rev}", f"module:{mod}", "REVIEWED", chunk_id=cid, quote=text[:140], source_title=stitle)
+            if mod:
+                for target in sorted(_import_targets(c)):
+                    if target.lower() != mod.lower():
+                        add_node(f"module:{target.lower()}", target.capitalize(), "module")
+                        add_edge(f"module:{mod}", f"module:{target.lower()}", "IMPORTS", chunk_id=cid, quote=text[:140], source_title=stitle)
+
+        elif stype == "task_csv":
+            task = _parse_task(c)
+            if task:
+                tid = task["id"]
+                title = task.get("title", tid)
+                owner = task.get("owner")
+                add_node(f"task:{tid}", f"{tid}: {title}", "task", {"status": task.get("status")})
+                if owner and owner.lower() not in {"unassigned", "unknown", "none"}:
+                    add_node(f"person:{owner}", owner, "person")
+                    add_edge(f"person:{owner}", f"task:{tid}", "OWNS", chunk_id=cid, quote=text[:140], source_title=stitle)
+                for blk in task.get("blocked_by", []):
+                    if blk:
+                        add_node(f"task:{blk}", blk, "task")
+                        add_edge(f"task:{blk}", f"task:{tid}", "BLOCKS", chunk_id=cid, quote=text[:140], source_title=stitle)
+
+    # Claims
+    for clm in (claims or []):
+        cid = str(clm.get("claim_id") or clm.get("id") or "")
+        if not cid:
+            continue
+        ent = str(clm.get("entity_key") or "").replace("module:", "").strip()
+        attr = str(clm.get("attribute") or "").strip()
+        stmt = str(clm.get("statement") or f"{ent} {attr}").strip()
+        owner = str(clm.get("owner") or "").strip()
+        add_node(f"claim:{cid}", f"{ent}: {attr}" if (ent and attr) else stmt, "claim", {
+            "state": clm.get("state"),
+            "confidence": clm.get("confidence_grade"),
+            "statement": stmt,
+            "entity_key": ent,
+            "attribute": attr,
+        })
+        if ent:
+            add_node(f"module:{ent.lower()}", ent.capitalize(), "module")
+            add_edge(f"claim:{cid}", f"module:{ent.lower()}", "IMPORTS" if attr == "dependency" else "OWNS", quote=stmt)
+        if owner and owner.lower() not in {"unassigned", "unknown", "none"}:
+            add_node(f"person:{owner}", owner, "person")
+            if ent and attr == "owner":
+                add_edge(f"person:{owner}", f"module:{ent.lower()}", "OWNS", quote=stmt)
+        for ev in clm.get("evidence", []):
+            sid = str(ev.get("source_id") or "")
+            ev_cid = str(ev.get("chunk_id") or "")
+            quote = str(ev.get("quote") or "")
+            stitle = str(ev.get("source_title") or sid)
+            target_source_id = sid or ev_cid
+            if target_source_id:
+                add_node(f"source:{target_source_id}", stitle, "source")
+                add_edge(f"claim:{cid}", f"source:{target_source_id}", "SUPPORTED BY", chunk_id=ev_cid, quote=quote, source_id=sid, source_title=stitle)
+
+    valid_edges = [
+        e for e in edge_map.values()
+        if e["source"] in nodes and e["target"] in nodes
+    ]
+
+    for e in valid_edges:
+        if e["evidence"]:
+            e["evidence_chunk_id"] = e["evidence"][0].get("chunk_id")
+            e["evidence_quote"] = e["evidence"][0].get("quote")
+            e["source_title"] = e["evidence"][0].get("source_title")
+            e["source_id"] = e["evidence"][0].get("source_id")
+
+    node_list = list(nodes.values())
+    people_count = sum(1 for n in node_list if n["type"] == "person")
+
+    return {
+        "nodes": node_list,
+        "edges": valid_edges,
+        "summary": {
+            "total_nodes": len(node_list),
+            "connections": len(valid_edges),
+            "people": people_count,
+        },
+    }
+

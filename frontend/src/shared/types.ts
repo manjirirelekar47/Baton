@@ -24,7 +24,7 @@ export interface FeatureModule {
 
 export const ROLE_LABELS: Record<Role, string> = {
   approver: "Approver",
-  leaver: "Leaver (Aarav)",
-  incoming_maintainer: "Incoming Maintainer (Meera)",
+  leaver: "Aarav (Departing Lead)",
+  incoming_maintainer: "Meera (Incoming Maintainer)",
   incoming_contributor: "Incoming Contributor",
 };

@@ -7,21 +7,22 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { ConfirmModal } from "@/shared/ui";
 
 export const SettingsPageLight: React.FC = () => {
   const navigate = useNavigate();
   const { resetDemo } = useAuth();
   const [resetting, setResetting] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
-  const handleReset = async () => {
-    if (window.confirm("Restore sample demo project data in backend?")) {
-      setResetting(true);
-      try {
-        await resetDemo();
-        navigate("/dashboard");
-      } finally {
-        setResetting(false);
-      }
+  const handleConfirmReset = async () => {
+    setResetting(true);
+    try {
+      await resetDemo();
+      setIsResetModalOpen(false);
+      navigate("/dashboard");
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -38,17 +39,7 @@ export const SettingsPageLight: React.FC = () => {
               <span>Environment Config</span>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 shadow-sm transition-all cursor-pointer"
-                aria-label="Go back"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
+            <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight font-display">
                 Project Settings
               </h1>
@@ -63,17 +54,9 @@ export const SettingsPageLight: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
             <button
               type="button"
-              onClick={() => navigate(-1)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl btn-glow-purple font-semibold text-xs shadow-md transition-all cursor-pointer"
-            >
-              <span>← Back</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleReset}
+              onClick={() => setIsResetModalOpen(true)}
               disabled={resetting}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs shadow-xs transition-all cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 font-semibold text-xs shadow-xs active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer"
             >
               <span>{resetting ? "Resetting..." : "Reset Demo Data"}</span>
             </button>
@@ -98,6 +81,18 @@ export const SettingsPageLight: React.FC = () => {
           <p className="text-xs text-purple-700 font-medium mt-1">Offline verified</p>
         </div>
       </div>
+
+      {/* Confirmation Modal for Reset Demo */}
+      <ConfirmModal
+        isOpen={isResetModalOpen}
+        title="Reset Demo Data"
+        message="Restore sample demo project data in backend? This will reinitialize claims, sources, and review tasks."
+        confirmLabel={resetting ? "Resetting..." : "Reset Data"}
+        confirmVariant="danger"
+        isLoading={resetting}
+        onConfirm={handleConfirmReset}
+        onCancel={() => setIsResetModalOpen(false)}
+      />
     </div>
   );
 };

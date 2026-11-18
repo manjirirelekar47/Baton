@@ -133,3 +133,72 @@ def test_graph_edges_cover_authorship_reviews_imports_ownership_and_blockers():
     assert ("imports", "payments", "queue") in relations
     assert ("owns", "Meera", "T-52") in relations
     assert ("blocks", "T-49", "T-52") in relations
+
+
+def test_knowledge_graph_structure_types_and_traceability():
+    from app.modules.risk.service import build_knowledge_graph
+
+    chunks = [
+        chunk(
+            "git-1",
+            'module: payments | imports: ["queue"] | reviewers: ["Meera"]',
+            author="Aarav",
+        ),
+        chunk(
+            "task-1",
+            "id: T-52 | task: Publish portal | owner: Meera | status: open | blocked_by: T-49",
+            source_type="task_csv",
+        ),
+    ]
+    claims = [
+        {
+            "claim_id": "c1",
+            "entity_key": "module:payments",
+            "attribute": "owner",
+            "statement": "payments owner is Rohan",
+            "state": "verified",
+            "confidence_grade": "A",
+            "owner": "Rohan",
+            "evidence": [
+                {
+                    "chunk_id": "git-1",
+                    "source_id": "s-git",
+                    "source_title": "Git Log",
+                    "quote": "payments module commit",
+                }
+            ],
+        }
+    ]
+    sources = [{"source_id": "s-git", "title": "Git Log", "type": "git"}]
+
+    graph = build_knowledge_graph(chunks, claims, sources)
+
+    # 1. Summary cards: total_nodes, connections, people (no density!)
+    summary = graph["summary"]
+    assert "total_nodes" in summary
+    assert "connections" in summary
+    assert "people" in summary
+    assert "density" not in summary
+
+    # 2. Node types: person, module, task, claim, source
+    types = {n["type"] for n in graph["nodes"]}
+    assert "person" in types
+    assert "module" in types
+    assert "task" in types
+    assert "claim" in types
+    assert "source" in types
+
+    # 3. Relationships: OWNS, AUTHORED, REVIEWED, IMPORTS, BLOCKS, SUPPORTED BY
+    edge_relations = {e["relation"] for e in graph["edges"]}
+    assert "AUTHORED" in edge_relations
+    assert "REVIEWED" in edge_relations
+    assert "IMPORTS" in edge_relations
+    assert "OWNS" in edge_relations
+    assert "BLOCKS" in edge_relations
+    assert "SUPPORTED BY" in edge_relations
+
+    # 4. Evidence traceability
+    supported_edge = next(e for e in graph["edges"] if e["relation"] == "SUPPORTED BY")
+    assert supported_edge["evidence_chunk_id"] == "git-1"
+    assert supported_edge["evidence_quote"] == "payments module commit"
+

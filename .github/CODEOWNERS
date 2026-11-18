@@ -1,5 +1,4 @@
 # Last matching pattern wins. Every path has exactly one owner.
-# TODO: replace the three placeholder handles before enabling "Require review from Code Owners".
 * @manjirirelekar47
 
 /.github/ @manjirirelekar47
@@ -23,38 +22,38 @@
 /docs/sections/manjiri.md @manjirirelekar47
 
 # Bhavesh: Sources and Risk (D1 capture reserved)
-/backend/app/modules/ingestion/ @BHAVESH_GITHUB_HANDLE
-/backend/app/modules/risk/ @BHAVESH_GITHUB_HANDLE
-/backend/app/modules/capture/ @BHAVESH_GITHUB_HANDLE
-/backend/tests/ingestion/ @BHAVESH_GITHUB_HANDLE
-/backend/tests/risk/ @BHAVESH_GITHUB_HANDLE
-/backend/tests/capture/ @BHAVESH_GITHUB_HANDLE
-/frontend/src/features/sources/ @BHAVESH_GITHUB_HANDLE
-/frontend/src/features/risk/ @BHAVESH_GITHUB_HANDLE
-/fixtures/sources/ @BHAVESH_GITHUB_HANDLE
-/db/schema/20_ingestion.sql @BHAVESH_GITHUB_HANDLE
-/db/schema/30_risk.sql @BHAVESH_GITHUB_HANDLE
-/docs/sections/bhavesh.md @BHAVESH_GITHUB_HANDLE
+/backend/app/modules/ingestion/ @bhavesh-patil2007
+/backend/app/modules/risk/ @bhavesh-patil2007
+/backend/app/modules/capture/ @bhavesh-patil2007
+/backend/tests/ingestion/ @bhavesh-patil2007
+/backend/tests/risk/ @bhavesh-patil2007
+/backend/tests/capture/ @bhavesh-patil2007
+/frontend/src/features/sources/ @bhavesh-patil2007
+/frontend/src/features/risk/ @bhavesh-patil2007
+/fixtures/sources/ @bhavesh-patil2007
+/db/schema/20_ingestion.sql @bhavesh-patil2007
+/db/schema/30_risk.sql @bhavesh-patil2007
+/docs/sections/bhavesh.md @bhavesh-patil2007
 
 # Samiksha: Reconstruct and Verify (D2 ask reserved)
-/backend/app/modules/extraction/ @SAMIKSHA_GITHUB_HANDLE
-/backend/app/modules/verification/ @SAMIKSHA_GITHUB_HANDLE
-/backend/app/modules/ask/ @SAMIKSHA_GITHUB_HANDLE
-/backend/tests/extraction/ @SAMIKSHA_GITHUB_HANDLE
-/backend/tests/verification/ @SAMIKSHA_GITHUB_HANDLE
-/backend/tests/ask/ @SAMIKSHA_GITHUB_HANDLE
-/frontend/src/features/ledger/ @SAMIKSHA_GITHUB_HANDLE
-/fixtures/expected/ @SAMIKSHA_GITHUB_HANDLE
-/fixtures/replay/ @SAMIKSHA_GITHUB_HANDLE
-/db/schema/40_claims.sql @SAMIKSHA_GITHUB_HANDLE
-/docs/sections/samiksha.md @SAMIKSHA_GITHUB_HANDLE
+/backend/app/modules/extraction/ @samiksha1986
+/backend/app/modules/verification/ @samiksha1986
+/backend/app/modules/ask/ @samiksha1986
+/backend/tests/extraction/ @samiksha1986
+/backend/tests/verification/ @samiksha1986
+/backend/tests/ask/ @samiksha1986
+/frontend/src/features/ledger/ @samiksha1986
+/fixtures/expected/ @samiksha1986
+/fixtures/replay/ @samiksha1986
+/db/schema/40_claims.sql @samiksha1986
+/docs/sections/samiksha.md @samiksha1986
 
 # Samruddhi: Review and Quality (D3 drift reserved)
-/backend/app/modules/review/ @SAMRUDDHI_GITHUB_HANDLE
-/backend/app/modules/drift/ @SAMRUDDHI_GITHUB_HANDLE
-/backend/tests/review/ @SAMRUDDHI_GITHUB_HANDLE
-/backend/tests/drift/ @SAMRUDDHI_GITHUB_HANDLE
-/frontend/src/features/review/ @SAMRUDDHI_GITHUB_HANDLE
-/tests/e2e/ @SAMRUDDHI_GITHUB_HANDLE
-/db/schema/50_review.sql @SAMRUDDHI_GITHUB_HANDLE
-/docs/sections/samruddhi.md @SAMRUDDHI_GITHUB_HANDLE
+/backend/app/modules/review/ @samruddhigangane17
+/backend/app/modules/drift/ @samruddhigangane17
+/backend/tests/review/ @samruddhigangane17
+/backend/tests/drift/ @samruddhigangane17
+/frontend/src/features/review/ @samruddhigangane17
+/tests/e2e/ @samruddhigangane17
+/db/schema/50_review.sql @samruddhigangane17
+/docs/sections/samruddhi.md @samruddhigangane17

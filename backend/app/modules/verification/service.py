@@ -85,6 +85,37 @@ def sanitize_text(val: str) -> str:
     return sanitized
 
 
+def compute_confidence_grade(claim: dict[str, Any]) -> tuple[str, str]:
+    """Deterministically assign explainable confidence grade (Strong, Partial, Weak) and reason.
+
+    Grading Rules:
+    - Weak: Conflicting state, missing evidence, or statement with zero verified quotes.
+    - Strong: Verified or attested state with exact/normalized quote matches and verified sources.
+    - Partial: Inferred state, fuzzy matches, or partial citations requiring reviewer check.
+    """
+    state = claim.get("state")
+    evidence = claim.get("evidence", [])
+
+    if state == "conflicting":
+        conflicts = claim.get("conflict_with", [])
+        return "Weak", f"Contradiction detected: conflicts with {', '.join(conflicts) if conflicts else 'another claim'}."
+
+    if state == "attested":
+        return "Strong", f"Direct human attestation provided by {claim.get('attested_by', 'authorized reviewer')}."
+
+    if state == "missing" or not evidence:
+        return "Weak", "No verified supporting evidence exists in ingested sources."
+
+    if state == "verified":
+        has_sources = all(e.get("source_id") or e.get("chunk_id") for e in evidence)
+        if has_sources:
+            return "Strong", "Directly verified against source records with exact verbatim citation match."
+        return "Partial", "Verified against source chunks, but source title/id metadata is incomplete."
+
+    # Inferred or other states
+    return "Partial", "Inferred claim based on contextual source signals; manual review recommended."
+
+
 def get_aliases_map(session: Session, project_id: str) -> dict[str, str]:
     """Load canonical aliases map for a project."""
     rows = session.execute(
@@ -137,6 +168,9 @@ def detect_conflicts(claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     if other_id != c.get("claim_id"):
                         current_conflicts.add(other_id)
                 c["conflict_with"] = sorted(list(current_conflicts))
+                grade, reason = compute_confidence_grade(c)
+                c["confidence_grade"] = grade
+                c["confidence_reason"] = reason
 
     return claims
 
@@ -241,6 +275,10 @@ def verify_single_claim(
     claim_acl = updated.get("acl_label") or "L1"
     for g in generated_gaps:
         g.setdefault("acl_label", claim_acl)
+
+    grade, reason = compute_confidence_grade(updated)
+    updated["confidence_grade"] = grade
+    updated["confidence_reason"] = reason
 
     return updated, generated_gaps
 
@@ -389,7 +427,13 @@ def list_claims(session: Session, project_id: str) -> list[dict[str, Any]]:
     if not rows:
         if project_id == DEMO_PROJECT_ID:
             # Fall back to sample claims if database has not been seeded / reconstructed yet
-            return load_sample("claims")
+            samples = load_sample("claims")
+            for c in samples:
+                if "confidence_grade" not in c:
+                    g, r = compute_confidence_grade(c)
+                    c["confidence_grade"] = g
+                    c["confidence_reason"] = r
+            return samples
         return []
 
     ev_rows = session.execute(
@@ -431,6 +475,9 @@ def list_claims(session: Session, project_id: str) -> list[dict[str, Any]]:
             "conflict_with": json.loads(r["conflict_with_json"] or "[]"),
             "evidence": ev_by_claim.get(cid, []),
         }
+        grade, reason = compute_confidence_grade(c_dict)
+        c_dict["confidence_grade"] = grade
+        c_dict["confidence_reason"] = reason
         result.append(c_dict)
     return result
 

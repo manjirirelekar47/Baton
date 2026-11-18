@@ -10,7 +10,7 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: process.env.BASE_URL || "http://localhost:5173",
+    baseURL: process.env.BASE_URL || "http://127.0.0.1:5173",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -24,14 +24,14 @@ export default defineConfig({
     {
       command: "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
       cwd: "../../backend",
-      port: 8000,
+      url: "http://127.0.0.1:8000/health",
       reuseExistingServer: !process.env.CI,
       timeout: 30000,
     },
     {
       command: "npm run dev -- --host 127.0.0.1 --port 5173",
       cwd: "../../frontend",
-      port: 5173,
+      url: "http://127.0.0.1:5173",
       reuseExistingServer: !process.env.CI,
       timeout: 30000,
     },

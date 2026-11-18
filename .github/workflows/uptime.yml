@@ -4,9 +4,14 @@ name: Uptime ping
 on:
   schedule: [{cron: "*/5 * * * *"}]
   workflow_dispatch:
+    inputs:
+      api_url:
+        description: "API URL override to ping (defaults to repo variable API_URL)"
+        required: false
+        type: string
 jobs:
   ping:
-    if: ${{ vars.API_URL != '' }}
+    if: ${{ (inputs.api_url != '') || (vars.API_URL != '') }}
     runs-on: ubuntu-latest
     steps:
-      - run: curl --fail --max-time 60 "${{ vars.API_URL }}/health"
+      - run: curl --fail --max-time 60 "${{ inputs.api_url || vars.API_URL }}/health"

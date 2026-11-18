@@ -131,4 +131,12 @@ All 6 planted conflict pairs from the master guide were identified, extracted fr
 ## 6. Known Limitations & Round 3 Handoff
 
 1. **In-Process Job Queue:** The background reconstruction worker runs as an in-process thread rather than an external queue (e.g. Celery/Redis). This was a deliberate architectural decision for Round 2 to keep the stack zero-dependency and portable.
-2. **Round 3 Scope Boundaries:** Feature D2 (*Ask Baton: question answering from approved claims*) is reserved for Round 3 under `modules/ask/` and was deliberately not implemented in this phase.
+2. **Round 3 Scope:** Feature D2 (*Ask Baton: question answering from approved claims*) has now been delivered under `modules/ask/`; see the implementation and limits below.
+
+## 7. Round 3 — Ask Baton
+
+- `POST /ask` searches only the latest approved handover snapshot and only verified claims.
+- Claim and evidence visibility is filtered by the viewer's existing L1–L4 role policy before ranking. The endpoint does not expose hidden claim counts or text.
+- Deterministic token-set ranking returns up to five matching claims with source title, chunk ID and quote. If there is no approved snapshot or no relevant visible claim, the endpoint abstains with an explanatory message.
+- No free-form model generation is used in this feature, so answer text cannot invent facts beyond the returned claims.
+- Tests cover role filtering, source citations, no-snapshot abstention, unauthenticated access and invalid requests.

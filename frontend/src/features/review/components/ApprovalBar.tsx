@@ -140,6 +140,7 @@ export function ApprovalBar({
         <div
           role="dialog"
           aria-modal="true"
+          aria-label="Approve Version & Publish"
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in dark:bg-black/70"
         >
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl text-slate-900 dark:border-white/15 dark:bg-slate-950 dark:text-white">

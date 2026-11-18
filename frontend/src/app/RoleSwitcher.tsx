@@ -3,6 +3,18 @@ import { useAuth } from "./auth";
 
 export function RoleSwitcher() {
   const { user, switchRole } = useAuth();
+
+  if (!user?.is_demo) {
+    return (
+      <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 select-none">
+        <span className="text-slate-400 font-semibold uppercase text-[10px]">Role:</span>
+        <span className="font-semibold text-slate-800 dark:text-slate-100">
+          {user ? ROLE_LABELS[user.role] : "Member"}
+        </span>
+      </div>
+    );
+  }
+
   return (
     <label className="flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-100/90 hover:bg-slate-100 border border-slate-200/80 rounded-xl px-2.5 py-1.5 transition cursor-pointer">
       <span className="text-slate-400 font-semibold uppercase text-[10px]">Role:</span>

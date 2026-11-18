@@ -26,6 +26,8 @@ export interface Claim {
   blocked_by?: string[];
   attested_by?: string | null;
   conflict_with?: string[];
+  confidence_grade?: "Strong" | "Partial" | "Weak";
+  confidence_reason?: string;
   evidence: EvidenceItem[];
 }
 

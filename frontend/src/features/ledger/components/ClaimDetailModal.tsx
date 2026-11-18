@@ -25,9 +25,9 @@ export function ClaimDetailModal({ claim, onClose, onOpenSource }: ClaimDetailMo
       role="dialog"
       aria-modal="true"
       aria-labelledby="claim-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-200"
     >
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-2xl text-slate-900">
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-4 sm:p-8 shadow-2xl text-slate-900">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -42,7 +42,7 @@ export function ClaimDetailModal({ claim, onClose, onOpenSource }: ClaimDetailMo
                 {claim.acl_label}
               </span>
             </div>
-            <h2 id="claim-modal-title" className="text-xl font-bold text-slate-900 mt-2.5 leading-snug">
+            <h2 id="claim-modal-title" className="text-lg sm:text-xl font-bold text-slate-900 mt-2.5 leading-snug">
               {claim.statement}
             </h2>
           </div>
@@ -50,11 +50,33 @@ export function ClaimDetailModal({ claim, onClose, onOpenSource }: ClaimDetailMo
             ref={closeBtnRef}
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
+            className="rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer flex-shrink-0"
           >
             Close
           </button>
         </div>
+
+        {claim.confidence_grade && (
+          <div className={`my-3 rounded-xl border p-3.5 text-xs ${
+            claim.confidence_grade === "Strong"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+              : claim.confidence_grade === "Partial"
+              ? "bg-amber-50 border-amber-200 text-amber-900"
+              : "bg-rose-50 border-rose-200 text-rose-900"
+          }`}>
+            <div className="flex items-center gap-2">
+              <span className="font-bold uppercase tracking-wider text-[11px]">Evidence Confidence:</span>
+              <span className="font-extrabold px-2 py-0.5 rounded-full text-[11px] bg-white border border-current">
+                {claim.confidence_grade}
+              </span>
+            </div>
+            {claim.confidence_reason && (
+              <p className="mt-1 text-slate-700 font-medium">
+                {claim.confidence_reason}
+              </p>
+            )}
+          </div>
+        )}
 
         {claim.state === "conflicting" && (
           <div className="my-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-900 shadow-xs">
@@ -69,7 +91,7 @@ export function ClaimDetailModal({ claim, onClose, onOpenSource }: ClaimDetailMo
         )}
 
         <div className="mt-4 space-y-4 text-sm">
-          <div className="grid grid-cols-2 gap-2.5 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
               <span className="text-slate-500 font-medium">Entity:</span>{" "}
               <code className="font-mono text-slate-900 font-bold">{claim.entity_key}</code>
@@ -95,7 +117,7 @@ export function ClaimDetailModal({ claim, onClose, onOpenSource }: ClaimDetailMo
             )}
             {claim.attested_by && (
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <span className="text-slate-500 font-medium">Attested By:</span> <span className="text-slate-900 font-semibold">{claim.attested_by}</span>
+                <span className="text-slate-500 font-medium">Approved By:</span> <span className="text-slate-900 font-semibold">{claim.attested_by}</span>
               </div>
             )}
           </div>

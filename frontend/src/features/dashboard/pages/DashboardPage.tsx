@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { UserPlus } from "lucide-react";
 import { api } from "@/app/api";
 import { useAuth } from "@/app/auth";
 import { SourceDrawer } from "@/features/sources/public";
+import { InviteMemberModal } from "@/components/invitation/InviteMemberModal";
 import type { RiskSignal } from "@/features/risk/public";
 import type { ReviewQueue, ReadinessReport } from "@/features/review/types";
 
@@ -48,7 +50,7 @@ interface ClaimItem {
 }
 
 export function DashboardPage() {
-  const { user } = useAuth();
+  const { user, activeProject } = useAuth();
   const navigate = useNavigate();
 
   // Queries for live backend data
@@ -92,6 +94,7 @@ export function DashboardPage() {
   const [askAnswer, setAskAnswer] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [day1Checks, setDay1Checks] = useState<Record<number, boolean>>({ 0: true, 1: true, 2: true });
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -274,6 +277,16 @@ export function DashboardPage() {
           <p className="text-sm text-slate-500 mt-0.5">Here's what's happening with your projects today.</p>
         </div>
         <div className="flex items-center gap-2">
+          {user?.role === "approver" && (
+            <button
+              onClick={() => setInviteModalOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-indigo-600 text-white shadow-sm rounded-xl text-xs font-semibold hover:bg-indigo-700 transition"
+              data-testid="invite-member-btn"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Invite Member</span>
+            </button>
+          )}
           <button className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white border border-slate-200 shadow-sm rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
             <span>Last 30 days</span>
             <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1041,6 +1054,14 @@ export function DashboardPage() {
           onClose={() => setSourceViewer(null)}
         />
       )}
+
+      {/* Invite Member Modal */}
+      <InviteMemberModal
+        isOpen={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        projectId={user?.project_id}
+        projectName={activeProject?.name || "Active Project"}
+      />
     </div>
   );
 }

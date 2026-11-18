@@ -73,4 +73,47 @@ describe("ProtectedRoute", () => {
 
     expect(screen.getByText("Secret Dashboard")).toBeInTheDocument();
   });
+
+  it("redirects authenticated user to /dashboard when user role is not allowed", () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: { id: "u-2", name: "Contributor", role: "incoming_contributor" },
+      loading: false,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/review"]}>
+        <Routes>
+          <Route path="/dashboard" element={<div>User Dashboard</div>} />
+          <Route element={<ProtectedRoute allowedRoles={["approver"]} />}>
+            <Route path="/review" element={<div>Review Queue</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("User Dashboard")).toBeInTheDocument();
+    expect(screen.queryByText("Review Queue")).not.toBeInTheDocument();
+  });
+
+  it("renders protected content when user role matches allowedRoles", () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      user: { id: "u-3", name: "Lead Approver", role: "approver" },
+      loading: false,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/review"]}>
+        <Routes>
+          <Route path="/dashboard" element={<div>User Dashboard</div>} />
+          <Route element={<ProtectedRoute allowedRoles={["approver"]} />}>
+            <Route path="/review" element={<div>Review Queue</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("Review Queue")).toBeInTheDocument();
+  });
 });

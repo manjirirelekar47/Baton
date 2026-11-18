@@ -2,6 +2,7 @@
 Walks: demo login, Reconstruct (replay), open a citation, approve, contributor view (leakage check)."""
 import json
 import sys
+import time
 import urllib.error
 import urllib.request
 
@@ -37,10 +38,27 @@ status, body = call("POST", "/auth/demo-login", body={"role": "approver"})
 step("approver login", status == 200, status)
 approver = json.loads(body)["token"]
 
-status, _ = call("POST", "/reconstruct", approver, {})
+status, body = call("POST", "/reconstruct", approver, {})
 step("reconstruct (replay)", status == 200, status)
+job_id = json.loads(body).get("job_id") if status == 200 else None
+if job_id:
+    for _ in range(60):
+        time.sleep(0.5)
+        s, b = call("GET", f"/jobs/{job_id}", approver)
+        if s == 200 and json.loads(b).get("status") in ("done", "failed"):
+            break
+
 status, body = call("GET", "/chunks/S4-212", approver)
 step("open citation", status == 200 and "Rohan took payments over" in body, status)
+
+# Resolve conflicts and confirm verified claims so readiness gate passes
+status, _ = call("POST", "/review/c-009/action", approver, {"action": "resolve_conflict", "chosen_claim_id": "c-009", "note": "smoke test"})
+step("resolve conflict c-009", status == 200, status)
+status, _ = call("POST", "/review/c-018/action", approver, {"action": "resolve_conflict", "chosen_claim_id": "c-018", "note": "smoke test"})
+step("resolve conflict c-018", status == 200, status)
+status, _ = call("POST", "/review/confirm-verified", approver, {})
+step("confirm verified", status == 200, status)
+
 status, _ = call("POST", "/review/approve", approver, {})
 step("approve", status == 200, status)
 status, body = call("GET", "/versions", approver)

@@ -5,10 +5,8 @@
  */
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
 
 export const AccessPageLight: React.FC = () => {
-  const navigate = useNavigate();
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-300">
       <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-200 p-8 shadow-md shadow-slate-200/50">
@@ -22,17 +20,7 @@ export const AccessPageLight: React.FC = () => {
               <span>Team Permissions & Visibility</span>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 shadow-sm transition-all cursor-pointer"
-                aria-label="Go back"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
+            <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight font-display">
                 Access Control & Visibility
               </h1>
@@ -44,16 +32,6 @@ export const AccessPageLight: React.FC = () => {
             <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
               Choose who can see and edit specific project details. Sensitive facts stay protected and hidden based on each person's team role.
             </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl btn-glow-purple font-semibold text-xs shadow-md transition-all cursor-pointer"
-            >
-              <span>← Back</span>
-            </button>
           </div>
         </div>
       </div>

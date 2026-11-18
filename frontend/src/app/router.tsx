@@ -14,6 +14,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { SignUp } from "@/pages/SignUp";
 import { Shell } from "./Shell";
 import { Dashboard } from "@/pages/Dashboard";
+import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PlaceholderPage } from "@/pages/PlaceholderPage";
 import { GraphPage } from "@/features/graph/pages/GraphPage";
 import { AccessPage } from "@/features/access/pages/AccessPage";
@@ -23,6 +24,25 @@ import { RouteErrorBoundary } from "@/components/common/RouteErrorBoundary";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/app/auth";
 import { featureRoutes } from "./features";
+import type { Role } from "@/shared/types";
+
+const roleGuardedFeatureRoutes = featureRoutes
+  .filter((r) => r.path !== "dashboard")
+  .map((route) => {
+    let allowed: Role[] | undefined;
+    if (route.path === "sources") allowed = ["approver"];
+    else if (route.path === "review") allowed = ["approver", "leaver", "incoming_maintainer", "incoming_contributor"];
+    else if (route.path === "handover") allowed = ["approver", "incoming_maintainer", "incoming_contributor"];
+    else if (route.path === "risk") allowed = ["approver", "leaver", "incoming_maintainer"];
+
+    if (allowed) {
+      return {
+        ...route,
+        element: <ProtectedRoute allowedRoles={allowed}>{route.element}</ProtectedRoute>,
+      };
+    }
+    return route;
+  });
 
 /**
  * RootRedirect handles intelligent routing for the root path (/):
@@ -75,17 +95,38 @@ export const router = createBrowserRouter([
     children: [
       { path: "dashboard", element: <Dashboard /> },
 
-      // Feature preview views with pristine Light & Dark mode support
-      { path: "graph", element: <GraphPage /> },
-      { path: "access", element: <AccessPage /> },
-      { path: "audit", element: <AuditPage /> },
+      // Feature preview views with role protections
+      {
+        path: "graph",
+        element: (
+          <ProtectedRoute allowedRoles={["approver", "leaver", "incoming_maintainer", "incoming_contributor"]}>
+            <GraphPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "access",
+        element: (
+          <ProtectedRoute allowedRoles={["approver"]}>
+            <AccessPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "audit",
+        element: (
+          <ProtectedRoute allowedRoles={["approver", "leaver"]}>
+            <AuditPage />
+          </ProtectedRoute>
+        ),
+      },
       { path: "settings", element: <SettingsPage /> },
 
-      // Registered feature routes (ledger, risk, review, handover, sources)
-      ...featureRoutes.filter((r) => r.path !== "dashboard"),
+      // Registered feature routes guarded by role
+      ...roleGuardedFeatureRoutes,
 
-      // Friendly fallback so no route ever triggers an unstyled 404
-      { path: "*", element: <PlaceholderPage /> },
+      // Friendly 404 page for unmatched routes
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);

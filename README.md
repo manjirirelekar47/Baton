@@ -37,11 +37,13 @@ When critical engineering leads and talent transition between teams or companies
 | Feature | Description |
 | :--- | :--- |
 | **🛡️ Evidence-Backed AI Summaries** | **Zero unverified claims.** Every single fact is paired with verbatim quote citations, source chunks, and honesty classifications (`Verified`, `Inferred`, `Conflicting`, `Missing`, `Attested`). |
-| **📡 Risk Radar** | Instant real-time detection of high-risk knowledge concentration, single-owner modules, orphan dependencies, and stalled delivery milestones before offboarding occurs. |
+| **📡 Risk Radar** | Deterministic analysis of knowledge concentration, single-owner modules, dependencies, and stalled delivery milestones from imported project evidence. |
 | **📋 Automated Review & Access** | Interactive review queue featuring side-by-side disagreement resolution, uncertainty acceptance, and a strict Handover Checklist to seal tamper-evident records. |
 | **🔒 Least-Privilege Access Control (L1–L4)** | Tiered row-level security where sensitive credentials and financial details are redacted at ingest, ensuring contributors only see what their clearance permits. |
 | **🗺️ Role-Specific Onboarding Roadmaps** | Automatically generates personalized Day-1, Week-1, and Month-1 execution plans tailored for incoming maintainers, contributors, and engineering leaders. |
 | **📜 Tamper-Evident Audit Trail** | Every review decision (confirming facts, fixing disagreements, editing details) produces an append-only audit event with user and timestamp attribution. |
+| **💬 Ask Baton** | Searches the latest approved handover snapshot for role-visible verified claims and returns source quotes; it abstains when no approved evidence matches. |
+| **📝 Capture and Source Change Alerts** | Approvers can capture redacted notes into the evidence pipeline and compare re-imported sources against their last scanned content. |
 
 ---
 
@@ -56,22 +58,42 @@ When critical engineering leads and talent transition between teams or companies
 - **Icons & Visuals:** Lucide Icons & Custom SVG Glassmorphic UI
 
 ### Backend & Infrastructure
-- **Runtime:** [Python 3.11+](https://www.python.org/)
+- **Runtime:** [Python 3.12](https://www.python.org/)
 - **API Framework:** [FastAPI](https://fastapi.tiangolo.com/) + [Uvicorn](https://www.uvicorn.org/)
 - **Data Validation & Schemas:** [Pydantic v2](https://docs.pydantic.dev/)
 - **Database:** [PostgreSQL](https://www.postgresql.org/) (production) / [SQLite WAL](https://www.sqlite.org/) (instant zero-config local dev)
-- **Authentication:** [Supabase Auth](https://supabase.com/) (OAuth, Email/Password, Sessions) & JWT
+- **Authentication:** [Supabase Auth](https://supabase.com/) (OAuth, Email/Password, Sessions) plus a separate Baton API JWT for the shared seeded demo roles. Supabase identities are not yet mapped to individual Baton roles.
 - **Containerization:** [Docker](https://www.docker.com/) & Docker Compose
 
 ---
+
+## Round 3 delivered scope and current limits
+
+- **Ask Baton** uses deterministic ranked retrieval over the latest approved snapshot. It does not generate free-form LLM answers; each result is a verified claim with source evidence, filtered by the signed-in demo role.
+- **Source change alerts** compare a re-import with the most recently scanned source that has the same name and type. Live GitHub/Jira/Slack connectors and automatic upstream polling are not implemented.
+- **Capture** lets the Approver save a decision or handover note through the same redaction, chunking and source storage path as uploaded documents.
+- The Supabase account still opens the shared seeded role workspace; per-user project membership and authorization mapping remain future work.
+
+## Product roadmap
+
+1. Map Supabase identities to project memberships and enforce per-user permissions.
+2. Add authenticated, read-only source connectors with incremental synchronization.
+3. Move reconstruction and change scans to durable background jobs with visible retry status.
+
+## Verification
+
+- Backend: `ruff check .` and `pytest -q` — **210 tests passed**.
+- Frontend: `npx tsc --noEmit`, `npx vitest run`, `npm run build`, and `npm audit` — **44 tests passed**, production build completed, and **0 npm vulnerabilities**.
+- The 3D hero loads on demand. The initial app bundle is about 477 kB minified (102 kB gzip); the Three.js vendor bundle is about 533 kB minified (133 kB gzip).
+- Remaining test output includes jsdom `scrollTo`, Starlette/httpx deprecation, and short test-JWT-key warnings; these do not fail CI.
 
 ## 🚀 Quick Start Guide
 
 Follow these steps to run Baton locally on your machine in under two minutes.
 
 ### Prerequisites
-- **Node.js** `>= 18.0.0` and **npm** `>= 9.0.0`
-- **Python** `>= 3.11`
+- **Node.js** `>= 20.0.0` and **npm** `>= 9.0.0`
+- **Python** `>= 3.12`
 - **Git**
 
 ---

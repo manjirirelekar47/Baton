@@ -234,17 +234,17 @@ def run_reconstruction_task(job_id: str, project_id: str, mode: str) -> None:
                 text("""
                     update extraction_jobs
                     set status = 'running', progress = 15, updated_at = :now
-                    where id = :id
+                    where id = :id and project_id = :p
                 """),
-                {"id": job_id, "now": now_iso()},
+                {"id": job_id, "p": project_id, "now": now_iso()},
             )
             session.commit()
 
             # 2. Ingested chunks lookup
             chunks = ingestion_public.list_chunks(project_id, "approver", session)
             session.execute(
-                text("update extraction_jobs set progress = 35, updated_at = :now where id = :id"),
-                {"id": job_id, "now": now_iso()},
+                text("update extraction_jobs set progress = 35, updated_at = :now where id = :id and project_id = :p"),
+                {"id": job_id, "p": project_id, "now": now_iso()},
             )
             session.commit()
 
@@ -253,8 +253,8 @@ def run_reconstruction_task(job_id: str, project_id: str, mode: str) -> None:
                 # Labelled replay mode
                 extracted_claims = load_replay_claims()
                 session.execute(
-                    text("update extraction_jobs set progress = 65, updated_at = :now where id = :id"),
-                    {"id": job_id, "now": now_iso()},
+                    text("update extraction_jobs set progress = 65, updated_at = :now where id = :id and project_id = :p"),
+                    {"id": job_id, "p": project_id, "now": now_iso()},
                 )
                 session.commit()
             else:
@@ -269,8 +269,8 @@ def run_reconstruction_task(job_id: str, project_id: str, mode: str) -> None:
                         extracted_claims.extend(claims_for_tier)
 
                 session.execute(
-                    text("update extraction_jobs set progress = 70, updated_at = :now where id = :id"),
-                    {"id": job_id, "now": now_iso()},
+                    text("update extraction_jobs set progress = 70, updated_at = :now where id = :id and project_id = :p"),
+                    {"id": job_id, "p": project_id, "now": now_iso()},
                 )
                 session.commit()
 
@@ -279,8 +279,8 @@ def run_reconstruction_task(job_id: str, project_id: str, mode: str) -> None:
 
             # 4. Deterministic verification, conflict detection, state labelling, and Gap generation
             session.execute(
-                text("update extraction_jobs set progress = 85, updated_at = :now where id = :id"),
-                {"id": job_id, "now": now_iso()},
+                text("update extraction_jobs set progress = 85, updated_at = :now where id = :id and project_id = :p"),
+                {"id": job_id, "p": project_id, "now": now_iso()},
             )
             session.commit()
 
@@ -300,10 +300,11 @@ def run_reconstruction_task(job_id: str, project_id: str, mode: str) -> None:
                     update extraction_jobs
                     set status = 'done', progress = 100, mode = :mode, note = :note,
                         claims_count = :claims_count, gaps_count = :gaps_count, updated_at = :now
-                    where id = :id
+                    where id = :id and project_id = :p
                 """),
                 {
                     "id": job_id,
+                    "p": project_id,
                     "mode": actual_mode,
                     "note": note,
                     "claims_count": len(verified_claims),
@@ -318,9 +319,9 @@ def run_reconstruction_task(job_id: str, project_id: str, mode: str) -> None:
                 text("""
                     update extraction_jobs
                     set status = 'failed', progress = 100, error = :err, updated_at = :now
-                    where id = :id
+                    where id = :id and project_id = :p
                 """),
-                {"id": job_id, "err": str(exc), "now": now_iso()},
+                {"id": job_id, "p": project_id, "err": str(exc), "now": now_iso()},
             )
             session.commit()
 
@@ -360,23 +361,25 @@ def start_reconstruct(project_id: str, mode: str | None = None) -> dict[str, Any
     }
 
 
-def get_job(job_id: str) -> dict[str, Any] | None:
+def get_job(job_id: str, project_id: str | None = None) -> dict[str, Any] | None:
     """Retrieve job status by job_id."""
     engine = get_engine()
     with Session(engine) as session:
-        row = session.execute(
-            text("""
-                select id, project_id, status, mode, progress, note, claims_count, gaps_count, error, created_at, updated_at
-                from extraction_jobs where id = :id
-            """),
-            {"id": job_id},
-        ).mappings().first()
+        query = """
+            select id, project_id, status, mode, progress, note, claims_count, gaps_count, error, created_at, updated_at
+            from extraction_jobs where id = :id
+        """
+        params: dict[str, Any] = {"id": job_id}
+        if project_id:
+            query += " and project_id = :p"
+            params["p"] = project_id
+        row = session.execute(text(query), params).mappings().first()
 
         if row is None:
-            # Fall back to sample job for tests
+            # Fall back to sample job for tests (only for default demo project)
             from app.core.samples import load_sample
             sample = load_sample("jobs")
-            if sample.get("job_id") == job_id or job_id == "job-demo-1":
+            if (sample.get("job_id") == job_id or job_id == "job-demo-1") and (project_id is None or project_id == "proj-campus-event-portal"):
                 return sample
             return None
 

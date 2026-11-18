@@ -19,12 +19,17 @@ import {
   ApiError,
 } from "../api/client";
 import { DashboardLayoutDark } from "../components/layout/DashboardLayoutDark";
-import { ThreeHeroNode, FallbackHero } from "../components/hero/ThreeHeroNode";
+import { FallbackHero } from "../components/hero/FallbackHero";
 import { DocumentUploader } from "../components/upload/DocumentUploader";
-import { CloudUpload, X, Plus, RotateCcw, Download, ShieldCheck } from "lucide-react";
+import { InviteMemberModal } from "../components/invitation/InviteMemberModal";
+import { CloudUpload, X, Plus, RotateCcw, Download, ShieldCheck, Share2, Compass, FileText, UserPlus } from "lucide-react";
+
+const ThreeHeroNode = React.lazy(() =>
+  import("../components/hero/ThreeHeroNode").then(({ ThreeHeroNode }) => ({ default: ThreeHeroNode })),
+);
 
 export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout = false }) => {
-  const { user } = useAuth();
+  const { user, activeProject } = useAuth();
   const navigate = useNavigate();
 
   // Dynamic Live State from Backend APIs
@@ -35,6 +40,7 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState<boolean>(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState<boolean>(false);
 
   // Fetch live backend data concurrently
   const loadDashboardData = async () => {
@@ -113,6 +119,40 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
 
     return { lowPct, medPct, highPct, overallLevel };
   }, [riskModules]);
+
+  // Dynamic Quick Actions per role
+  const roleQuickActions = useMemo(() => {
+    if (user?.role === "approver") {
+      return [
+        { name: "Invite Member", onClick: () => setInviteModalOpen(true), icon: UserPlus },
+        { name: "Sources", path: "/sources", icon: Plus },
+        { name: "Reconstruct", path: "/ledger", icon: RotateCcw },
+        { name: "Access Control", path: "/access", icon: ShieldCheck },
+      ];
+    }
+    if (user?.role === "leaver") {
+      return [
+        { name: "Sources", path: "/sources", icon: Plus },
+        { name: "Handover", path: "/handover", icon: Download },
+        { name: "Knowledge Graph", path: "/graph", icon: Share2 },
+        { name: "Claim Ledger", path: "/ledger", icon: RotateCcw },
+      ];
+    }
+    if (user?.role === "incoming_maintainer") {
+      return [
+        { name: "Handover", path: "/handover", icon: Download },
+        { name: "Knowledge Graph", path: "/graph", icon: Share2 },
+        { name: "Claim Ledger", path: "/ledger", icon: RotateCcw },
+        { name: "Risk Radar", path: "/risk", icon: ShieldCheck },
+      ];
+    }
+    return [
+      { name: "Handover", path: "/handover", icon: Download },
+      { name: "Claim Ledger", path: "/ledger", icon: RotateCcw },
+      { name: "Knowledge Graph", path: "/graph", icon: Share2 },
+      { name: "Overview", path: "/dashboard", icon: Compass },
+    ];
+  }, [user?.role]);
 
   // Dynamic Review Queue list representation
   const displayQueueItems = useMemo(() => {
@@ -215,25 +255,36 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
               onClick={() => navigate("/graph")}
               className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold text-xs sm:text-sm shadow-xs hover:border-purple-400 transition-all cursor-pointer"
             >
-              <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
+              <Share2 className="w-4 h-4 text-purple-400" />
               <span>View Knowledge Graph</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => setUploadModalOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 text-purple-300 font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
-            >
-              <CloudUpload className="w-4 h-4 text-purple-400" />
-              <span>Import Data</span>
-            </button>
+            {user?.role === "approver" && (
+              <button
+                type="button"
+                onClick={() => setInviteModalOpen(true)}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-indigo-950/50 hover:bg-indigo-900/60 border border-indigo-500/40 text-indigo-300 font-semibold text-xs sm:text-sm shadow-xs hover:border-indigo-400 transition-all cursor-pointer"
+              >
+                <UserPlus className="w-4 h-4 text-indigo-400" />
+                <span>Invite Member</span>
+              </button>
+            )}
+
+            {(user?.role === "approver" || user?.role === "leaver") && (
+              <button
+                type="button"
+                onClick={() => setUploadModalOpen(true)}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/30 text-purple-300 font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
+              >
+                <CloudUpload className="w-4 h-4 text-purple-400" />
+                <span>Import Data</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Right 3D Interactive Hero Canvas */}
-        <div className="relative z-10 w-full lg:w-[480px] flex-shrink-0">
+        <div className="relative z-10 w-full lg:w-[480px] h-64 sm:h-72 lg:h-auto flex-shrink-0">
           <Suspense fallback={<FallbackHero isDark />}>
             <ThreeHeroNode />
           </Suspense>
@@ -375,9 +426,20 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10">
-              → 0%
-            </span>
+            {user?.role === "approver" ? (
+              <button
+                type="button"
+                onClick={() => setInviteModalOpen(true)}
+                className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-950/60 text-purple-300 border border-purple-500/40 hover:bg-purple-900/60 transition-colors cursor-pointer"
+              >
+                <UserPlus className="w-3 h-3 text-purple-400" />
+                <span>Invite Member</span>
+              </button>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10">
+                → 0%
+              </span>
+            )}
           </div>
 
           <div className="mt-4">
@@ -478,7 +540,7 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
           </p>
         </div>
 
-        {/* 3.2 REVIEW QUEUE CARD */}
+        {/* 3.2 REVIEW QUEUE / ROLE TRACK CARD */}
         <div className="lg:col-span-4 rounded-3xl bg-black/40 backdrop-blur-xl border border-white/10 p-6 shadow-2xl flex flex-col justify-between">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2">
@@ -487,16 +549,30 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </span>
-              <h2 className="text-sm font-bold text-white">Review Queue</h2>
+              <h2 className="text-sm font-bold text-white">
+                {user?.role === "approver"
+                  ? "Review Queue"
+                  : user?.role === "leaver"
+                  ? "Knowledge Attestations"
+                  : user?.role === "incoming_maintainer"
+                  ? "System Handover"
+                  : "Contributor Onboarding"}
+              </h2>
               <span className="px-2 py-0.5 rounded-full bg-purple-950/60 text-purple-300 text-[10px] font-bold shadow-xs">
-                {pendingQueueCount} Pending
+                {user?.role === "approver"
+                  ? `${pendingQueueCount} Pending`
+                  : user?.role === "leaver"
+                  ? `${metrics.verified} Verified`
+                  : user?.role === "incoming_maintainer"
+                  ? "Ready for Handoff"
+                  : "Onboarding"}
               </span>
             </div>
             <Link
-              to="/review"
+              to={user?.role === "approver" ? "/review" : user?.role === "leaver" ? "/ledger" : "/handover"}
               className="text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 group"
             >
-              <span>View All</span>
+              <span>{user?.role === "approver" ? "View All" : user?.role === "leaver" ? "View Ledger" : "View Plan"}</span>
               <span className="transition-transform group-hover:translate-x-0.5">→</span>
             </Link>
           </div>
@@ -505,7 +581,7 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
             {loading ? (
               <div className="py-8 text-center space-y-2">
                 <div className="w-8 h-8 mx-auto border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                <p className="text-xs text-gray-400">Loading review claims...</p>
+                <p className="text-xs text-gray-400">Loading claims...</p>
               </div>
             ) : (
               displayQueueItems.map((item) => (
@@ -546,10 +622,12 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
 
                   <button
                     type="button"
-                    onClick={() => navigate("/review")}
+                    onClick={() =>
+                      navigate(user?.role === "approver" ? "/review" : user?.role === "leaver" ? "/ledger" : "/handover")
+                    }
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-300 bg-white/10 hover:bg-purple-950/60 border border-white/15 px-2.5 py-1.5 rounded-lg transition-colors flex-shrink-0 cursor-pointer"
                   >
-                    <span>Review</span>
+                    <span>{user?.role === "approver" ? "Review" : user?.role === "leaver" ? "Attest" : "Inspect"}</span>
                     <span>→</span>
                   </button>
                 </div>
@@ -558,7 +636,13 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
           </div>
 
           <p className="text-[11px] text-gray-400 text-center font-medium">
-            Approver must resolve conflicts before handover approval
+            {user?.role === "approver"
+              ? "Approver must resolve conflicts before handover approval"
+              : user?.role === "leaver"
+              ? "Verify key architecture decisions before exit handover"
+              : user?.role === "incoming_maintainer"
+              ? "Inspect system architecture, dependencies and risk modules"
+              : "Read verified documentation and handover scope"}
           </p>
         </div>
 
@@ -688,20 +772,15 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
             <span>Quick Actions</span>
           </div>
 
-          <div className="grid grid-cols-4 gap-2 pt-1">
-            {[
-              { name: "Add Source", path: "/sources", icon: Plus },
-              { name: "Reconstruct", path: "/ledger", icon: RotateCcw },
-              { name: "Export Plan", path: "/handover", icon: Download },
-              { name: "Access ACL", path: "/access", icon: ShieldCheck },
-            ].map((action) => {
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            {roleQuickActions.map((action) => {
               const ActionIcon = action.icon;
               return (
                 <button
                   key={action.name}
                   type="button"
-                  onClick={() => navigate(action.path)}
-                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/40 flex flex-col items-center gap-1 text-gray-300 hover:text-white transition-all group cursor-pointer"
+                  onClick={() => (action.onClick ? action.onClick() : action.path ? navigate(action.path) : undefined)}
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/40 flex flex-col items-center gap-1 text-gray-300 hover:text-white active:scale-[0.98] transition-all duration-150 group cursor-pointer"
                 >
                   <ActionIcon className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
                   <span className="text-[10px] font-bold">{action.name}</span>
@@ -711,6 +790,14 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
           </div>
         </div>
       </section>
+
+      {/* Invite Member Modal */}
+      <InviteMemberModal
+        isOpen={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        projectId={user?.project_id}
+        projectName={activeProject?.name || "Active Project"}
+      />
     </div>
   );
 

@@ -22,3 +22,8 @@ def risk_radar(user: User = Depends(current_user), session: Session = Depends(ge
 @router.get("/delivery-status")
 def delivery_status(user: User = Depends(current_user), session: Session = Depends(get_session)):
     return public.delivery_status(user.project_id, session, user.role)
+
+
+@router.get("/graph")
+def knowledge_graph(user: User = Depends(current_user), session: Session = Depends(get_session)):
+    return public.knowledge_graph(user.project_id, session, user.role)

@@ -127,6 +127,11 @@ test.describe("Security, Resilience, and Failure Case Tests", () => {
     });
     expect(queueAttempt.status()).toBe(403);
 
+    const auditAttempt = await request.get(`${API_BASE}/audit`, {
+      headers: contributorHeaders,
+    });
+    expect(auditAttempt.status()).toBe(403);
+
     // Leaver cannot invoke approver endpoints
     const leaverHeaders = await getAuthHeader(request, "leaver");
     const leaverApprove = await request.post(`${API_BASE}/review/approve`, {
@@ -134,6 +139,11 @@ test.describe("Security, Resilience, and Failure Case Tests", () => {
       data: {},
     });
     expect(leaverApprove.status()).toBe(403);
+
+    const leaverAudit = await request.get(`${API_BASE}/audit`, {
+      headers: leaverHeaders,
+    });
+    expect(leaverAudit.status()).toBe(403);
   });
 
   test("cross-project ID guessing returns 404 Not Found to prevent data enumeration", async ({ request }) => {

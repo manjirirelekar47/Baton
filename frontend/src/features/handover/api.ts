@@ -56,6 +56,10 @@ export interface PlanItem {
   cycle: boolean;
   level: number;
   position: number;
+  action_status?: "not_started" | "in_progress" | "blocked" | "completed";
+  action_notes?: string | null;
+  action_updated_at?: string | null;
+  action_updated_by?: string | null;
   evidence: EvidenceView[];
 }
 
@@ -81,3 +85,82 @@ export const respondOwnership = (versionId: string, claimId: string, response: "
     method: "POST",
     body: { version_id: versionId, claim_id: claimId, response },
   });
+
+export const updateActionStatus = (
+  versionId: string,
+  claimId: string,
+  status: "not_started" | "in_progress" | "blocked" | "completed",
+  notes?: string
+) =>
+  api<{
+    version_id: string;
+    claim_id: string;
+    status: string;
+    notes: string | null;
+    updated_at: string;
+    updated_by: string;
+  }>("/handover/action-status", {
+    method: "POST",
+    body: { version_id: versionId, claim_id: claimId, status, notes },
+  });
+
+export interface CreateTaskPayload {
+  version_id: string;
+  title: string;
+  kind?: string;
+  owner?: string | null;
+  due_date?: string | null;
+  status?: "not_started" | "in_progress" | "blocked" | "completed";
+  notes?: string | null;
+  blocked_by?: string[];
+}
+
+export const createTask = (payload: CreateTaskPayload) =>
+  api<PlanItem>("/handover/tasks", {
+    method: "POST",
+    body: payload,
+  });
+
+export interface UpdateTaskPayload {
+  version_id: string;
+  title?: string;
+  owner?: string | null;
+  due_date?: string | null;
+  status?: "not_started" | "in_progress" | "blocked" | "completed";
+  notes?: string | null;
+  blocked_by?: string[];
+}
+
+export const updateTask = (taskId: string, payload: UpdateTaskPayload) =>
+  api<PlanItem>(`/handover/tasks/${encodeURIComponent(taskId)}`, {
+    method: "PATCH",
+    body: payload,
+  });
+
+export const deleteTask = (versionId: string, taskId: string) =>
+  api<{ status: string; task_id: string }>(`/handover/${encodeURIComponent(versionId)}/tasks/${encodeURIComponent(taskId)}`, {
+    method: "DELETE",
+  });
+
+export interface ActivityHistoryItem {
+  id: string;
+  version_id: string;
+  project_id: string;
+  task_id: string;
+  actor_id: string;
+  actor_name: string;
+  action: string;
+  field: string | null;
+  old_value: string | null;
+  new_value: string | null;
+  created_at: string;
+}
+
+export interface ActivityHistoryResponse {
+  version_id: string;
+  task_id: string;
+  history: ActivityHistoryItem[];
+}
+
+export const getTaskHistory = (versionId: string, taskId: string) =>
+  api<ActivityHistoryResponse>(`/handover/${encodeURIComponent(versionId)}/tasks/${encodeURIComponent(taskId)}/history`);

@@ -152,3 +152,5 @@ def reset_demo(session: Session) -> None:
     session.execute(text("delete from gap_answers where project_id = 'proj-campus-event-portal'"))
     session.execute(text("delete from review_events where project_id = 'proj-campus-event-portal'"))
     session.commit()
+    from .deps import _singleton_claims
+    _singleton_claims._local_overrides.clear()

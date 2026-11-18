@@ -32,8 +32,28 @@ def get_settings() -> Settings:
     secret = os.environ.get("JWT_SECRET", DEV_SECRET)
     if env == "production" and secret == DEV_SECRET:
         raise RuntimeError("JWT_SECRET must be set in production")
-    default_origins = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000"
-    origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", default_origins).split(",") if o.strip()]
+    default_origins = "http://localhost:5173,http://127.0.0.1:5173,http://[::1]:5173,http://localhost:3000,http://127.0.0.1:3000,http://[::1]:3000,http://localhost:8000,http://127.0.0.1:8000,http://[::1]:8000,http://localhost:4173,http://127.0.0.1:4173,http://[::1]:4173"
+    raw_cors = os.environ.get("CORS_ORIGINS", default_origins)
+    if "CORS_ORIGINS=" in raw_cors:
+        raw_cors = raw_cors.replace("CORS_ORIGINS=", "")
+    origins = [o.strip().strip("[]\"' ") for o in raw_cors.split(",") if o.strip().strip("[]\"' ")]
+    if env != "production":
+        for dev in [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://[::1]:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://[::1]:3000",
+            "http://localhost:8000",
+            "http://127.0.0.1:8000",
+            "http://[::1]:8000",
+            "http://localhost:4173",
+            "http://127.0.0.1:4173",
+            "http://[::1]:4173",
+        ]:
+            if dev not in origins:
+                origins.append(dev)
     return Settings(
         env=env,
         database_url=_normalise_db_url(os.environ.get("DATABASE_URL", "sqlite:///./baton_dev.db")),
