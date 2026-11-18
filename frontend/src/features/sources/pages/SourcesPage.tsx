@@ -897,6 +897,15 @@ export function SourcesPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">
+                      {source.source_url ? (
+                        <a href={source.source_url} target="_blank" rel="noopener noreferrer" className="font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-200">
+                          Open source ↗
+                        </a>
+                      ) : (
+                        <span className="text-slate-400">Not available</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
                       <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 font-semibold text-[10px]">
                         {source.status}
                         {source.note ? `: ${source.note}` : ""}
