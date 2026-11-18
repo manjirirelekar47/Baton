@@ -15,12 +15,6 @@ def _record(text: str, external_id: str) -> ParsedRecord:
 
 
 def test_source_connections_lifecycle(client, monkeypatch):
-    # JiraConnector validates deployment configuration at construction time,
-    # even when fetch_records is replaced with the deterministic test double.
-    monkeypatch.setenv("JIRA_URL", "https://jira.example.test")
-    monkeypatch.setenv("JIRA_USER_EMAIL", "baton-tests@example.test")
-    monkeypatch.setenv("JIRA_API_TOKEN", "test-only-jira-token")
-
     approver = login(client, "approver")
     contributor = login(client, "incoming_contributor")
 
