@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DashboardLayoutDark } from "../DashboardLayoutDark";
@@ -27,6 +28,19 @@ vi.mock("../../../features/auth/supabase", () => ({
   isSupabaseConfigured: false,
 }));
 
+vi.mock("../../../features/auth/linkGithubIdentity", () => ({
+  linkGithubIdentity: vi.fn(),
+}));
+
+function renderWithProviders(children: React.ReactNode) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>{children}</MemoryRouter>
+    </QueryClientProvider>,
+  );
+}
+
 describe("DashboardLayout Active Role Switcher Popover", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -49,13 +63,7 @@ describe("DashboardLayout Active Role Switcher Popover", () => {
         logout: vi.fn(),
       });
 
-      render(
-        <MemoryRouter>
-          <DashboardLayoutDark>
-            <div>Content</div>
-          </DashboardLayoutDark>
-        </MemoryRouter>
-      );
+      renderWithProviders(<DashboardLayoutDark><div>Content</div></DashboardLayoutDark>);
 
       // Open profile dropdown popover via button title
       const profileButton = screen.getByTitle(/Demo Approver/i);
@@ -84,13 +92,7 @@ describe("DashboardLayout Active Role Switcher Popover", () => {
         logout: vi.fn(),
       });
 
-      render(
-        <MemoryRouter>
-          <DashboardLayoutDark>
-            <div>Content</div>
-          </DashboardLayoutDark>
-        </MemoryRouter>
-      );
+      renderWithProviders(<DashboardLayoutDark><div>Content</div></DashboardLayoutDark>);
 
       const profileButton = screen.getByTitle(/Real Engineer/i);
       expect(profileButton).toBeInTheDocument();
@@ -119,13 +121,7 @@ describe("DashboardLayout Active Role Switcher Popover", () => {
         logout: vi.fn(),
       });
 
-      render(
-        <MemoryRouter>
-          <DashboardLayoutDark>
-            <div>Content</div>
-          </DashboardLayoutDark>
-        </MemoryRouter>
-      );
+      renderWithProviders(<DashboardLayoutDark><div>Content</div></DashboardLayoutDark>);
 
       const profileButton = screen.getByTitle(/Aarav \(Departing Lead\)/i);
       expect(profileButton).toBeInTheDocument();
@@ -155,13 +151,7 @@ describe("DashboardLayout Active Role Switcher Popover", () => {
         logout: vi.fn(),
       });
 
-      render(
-        <MemoryRouter>
-          <DashboardLayoutLight>
-            <div>Content</div>
-          </DashboardLayoutLight>
-        </MemoryRouter>
-      );
+      renderWithProviders(<DashboardLayoutLight><div>Content</div></DashboardLayoutLight>);
 
       const profileButton = screen.getByTitle(/Demo Approver/i);
       expect(profileButton).toBeInTheDocument();
@@ -189,13 +179,7 @@ describe("DashboardLayout Active Role Switcher Popover", () => {
         logout: vi.fn(),
       });
 
-      render(
-        <MemoryRouter>
-          <DashboardLayoutLight>
-            <div>Content</div>
-          </DashboardLayoutLight>
-        </MemoryRouter>
-      );
+      renderWithProviders(<DashboardLayoutLight><div>Content</div></DashboardLayoutLight>);
 
       const profileButton = screen.getByTitle(/Real Engineer/i);
       expect(profileButton).toBeInTheDocument();
@@ -224,13 +208,7 @@ describe("DashboardLayout Active Role Switcher Popover", () => {
         logout: vi.fn(),
       });
 
-      render(
-        <MemoryRouter>
-          <DashboardLayoutDark>
-            <div>Content</div>
-          </DashboardLayoutDark>
-        </MemoryRouter>
-      );
+      renderWithProviders(<DashboardLayoutDark><div>Content</div></DashboardLayoutDark>);
 
       const profileButton = screen.getByTitle(/Aarav \(Departing Lead\)/i);
       expect(profileButton).toBeInTheDocument();

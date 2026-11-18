@@ -27,7 +27,6 @@ import {
   ChevronRight,
   Search,
   Sun,
-  Bell,
   Plus,
   Download,
   X,
@@ -37,8 +36,9 @@ import { useTheme } from "../../context/ThemeContext";
 import { batonApi } from "../../api/client";
 import { isSupabaseConfigured } from "../../features/auth/supabase";
 import { linkGithubIdentity } from "../../features/auth/linkGithubIdentity";
-import { ProjectSwitcher } from "./ProjectSwitcher";
 import { ConfirmModal } from "../../shared/ui";
+import { ProjectSwitcher } from "./ProjectSwitcher";
+import { NotificationsMenu } from "./NotificationsMenu";
 
 interface DashboardLayoutDarkProps {
   children?: ReactNode;
@@ -57,7 +57,6 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const showLabels = isExpanded || mobileMenuOpen;
   const [profileDropdownOpen, setProfileDropdownOpen] = useState<boolean>(false);
-  const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
   const [searchModalOpen, setSearchModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [latencyMs, setLatencyMs] = useState<number>(42);
@@ -98,7 +97,6 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
       if (e.key === "Escape") {
         setSearchModalOpen(false);
         setProfileDropdownOpen(false);
-        setNotificationsOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -544,39 +542,7 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
               <Sun className="w-4 h-4 text-amber-400" />
             </button>
 
-            {/* Notifications Bell (hidden on mobile header; notifications are in drawer) */}
-            <div className="hidden sm:block relative">
-              <button
-                type="button"
-                onClick={() => setNotificationsOpen((prev) => !prev)}
-                className="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 flex items-center justify-center text-gray-300 hover:text-white transition-colors shadow-xs relative"
-                aria-label="Notifications"
-              >
-                <Bell className="w-4 h-4" />
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center shadow-xs">
-                  3
-                </span>
-              </button>
-
-              {notificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-black/90 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/15 p-3 z-50 text-xs text-white">
-                  <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                    <span className="font-bold text-white">Notifications</span>
-                    <span className="text-[10px] text-purple-400 font-semibold cursor-pointer hover:underline">
-                      Mark all read
-                    </span>
-                  </div>
-                  <div className="py-2 space-y-2">
-                    <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/20">
-                      <p className="font-semibold text-white text-[11px]">
-                        Review required: Payments module ownership
-                      </p>
-                      <p className="text-gray-400 text-[10px] mt-0.5">Conflicting claims between task board & chat</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <NotificationsMenu theme="dark" />
 
             {/* Top Right User Avatar (hidden on mobile header; profile is in drawer/bottom nav) */}
             <div className="hidden sm:block">
