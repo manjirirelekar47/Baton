@@ -797,6 +797,7 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
         onClose={() => setInviteModalOpen(false)}
         projectId={user?.project_id}
         projectName={activeProject?.name || "Active Project"}
+        currentUserRole={user?.role}
       />
     </div>
   );

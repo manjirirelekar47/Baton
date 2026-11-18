@@ -17,6 +17,7 @@ import {
   batonApi,
   getStoredToken,
   setStoredToken,
+  setStoredProjectId,
   type Role,
   type UserProfile,
   type ProjectItem,
@@ -36,7 +37,7 @@ export interface ExtendedUser extends UserProfile {
 export interface RegisterParams {
   email: string;
   name: string;
-  role: Role;
+  role?: Role;
   invitation_code?: string;
   user_id?: string;
   supabase_token?: string;
@@ -70,17 +71,17 @@ export const ROLE_DETAILS: Record<Role, { title: string; email: string; avatarTe
   approver: {
     title: "Project Admin",
     email: "manjiri.relekar47@gmail.com",
-    avatarText: "MJ",
+    avatarText: "PA",
   },
   leaver: {
-    title: "Aarav (Departing Lead)",
-    email: "aarav.lead@baton.internal",
-    avatarText: "AR",
+    title: "Departing Lead",
+    email: "leaver@baton.internal",
+    avatarText: "DL",
   },
   incoming_maintainer: {
-    title: "Meera (Incoming Maintainer)",
-    email: "meera.maintainer@baton.internal",
-    avatarText: "MR",
+    title: "Incoming Maintainer",
+    email: "maintainer@baton.internal",
+    avatarText: "IM",
   },
   incoming_contributor: {
     title: "Incoming Contributor",
@@ -189,6 +190,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setProjects(projs);
       const active = projs.find((p) => p.id === response.user.project_id) || projs[0] || null;
       setActiveProject(active);
+      setStoredProjectId(active?.id || response.user.project_id || null);
       setRequiresProject(false);
     } catch (err: unknown) {
       const message = err instanceof ApiError ? err.message : "Failed to sign in via demo role";
@@ -217,6 +219,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setProjects(projs);
       const active = projs.find((p) => p.id === response.user.project_id) || projs[0] || null;
       setActiveProject(active);
+      setStoredProjectId(active?.id || response.user.project_id || null);
       setRequiresProject(false);
       return formatted;
     } catch (err: unknown) {
@@ -294,6 +297,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const updatedUser = formatUser(res.user, authedEmail);
       setUser(updatedUser);
       setActiveProject(res.project);
+      setStoredProjectId(res.project.id);
       const projs = await batonApi.getProjects().catch(() => []);
       setProjects(projs);
       setRequiresProject(false);
@@ -320,6 +324,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const updatedUser = formatUser(res.user, authedEmail);
       setUser(updatedUser);
       setActiveProject(res.project);
+      setStoredProjectId(res.project.id);
       const projs = await batonApi.getProjects().catch(() => []);
       setProjects(projs);
       setRequiresProject(false);
@@ -347,6 +352,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const updatedUser = formatUser(res.user, authedEmail);
       setUser(updatedUser);
       setActiveProject(res.project);
+      setStoredProjectId(res.project.id);
       const projs = await batonApi.getProjects().catch(() => []);
       setProjects(projs);
       setRequiresProject(false);
@@ -409,6 +415,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               setProjects(projs);
               const active = projs.find((p) => p.id === raw.project_id) || projs[0] || null;
               setActiveProject(active);
+              setStoredProjectId(active?.id || raw.project_id || null);
               setRequiresProject(false);
             }
             return;
@@ -502,6 +509,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await supabase.auth.signOut({ scope: "local" });
     }
     setStoredToken(null);
+    setStoredProjectId(null);
     setUser(null);
     setProjects([]);
     setActiveProject(null);

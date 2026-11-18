@@ -44,8 +44,8 @@ describe("formatUser", () => {
   it("formats display role correctly across all 4 roles", () => {
     const roles: Array<{ role: UserProfile["role"]; expectedTitle: string }> = [
       { role: "approver", expectedTitle: "Project Admin" },
-      { role: "leaver", expectedTitle: "Aarav (Departing Lead)" },
-      { role: "incoming_maintainer", expectedTitle: "Meera (Incoming Maintainer)" },
+      { role: "leaver", expectedTitle: "Departing Lead" },
+      { role: "incoming_maintainer", expectedTitle: "Incoming Maintainer" },
       { role: "incoming_contributor", expectedTitle: "Incoming Contributor" },
     ];
 

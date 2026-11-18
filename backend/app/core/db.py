@@ -75,6 +75,14 @@ def _ensure_columns(conn) -> None:
     except Exception:
         pass
     try:
+        _exec("alter table members add column email text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table members add column is_demo integer not null default 0")
+    except Exception:
+        pass
+    try:
         _exec("alter table invitations add column project_id text references projects(id)")
     except Exception:
         pass

@@ -36,7 +36,7 @@ class RegisterRequest(BaseModel):
     user_id: str | None = None
     email: str
     name: str
-    role: str
+    role: str = "incoming_contributor"
     invitation_code: str | None = None
     project_id: str = DEMO_PROJECT_ID
     supabase_token: str | None = None
@@ -236,57 +236,74 @@ def register(
             existing_by_id = {"id": uid, "role": existing_pm["role"], "project_id": existing_pm["project_id"]}
 
     if existing_by_id:
-        assigned_role = existing_by_id["role"]
-        if assigned_role != body.role:
+        existing_role = existing_by_id["role"]
+        if body.role and body.role != existing_role:
             raise HTTPException(
                 status_code=400,
-                detail=f"Account already registered with role '{assigned_role}'. Unrestricted role switching is disabled.",
+                detail=f"Account already registered with role '{existing_role}'. Unrestricted role switching is disabled.",
             )
 
-    # 2. Approver registration requires invitation code or admin approval
-    if body.role == "approver" and not (existing_by_id and existing_by_id.get("role") == "approver"):
-        approved = False
-        if body.invitation_code and body.invitation_code.strip():
-            code_clean = body.invitation_code.strip()
-            inv_row = session.execute(
-                text("select id, code, role, email, status, project_id from invitations where code = :code and status = 'active'"),
-                {"code": code_clean},
-            ).mappings().first()
-            if inv_row:
-                if inv_row["role"] != "approver":
-                    raise HTTPException(status_code=403, detail="Invitation code is not valid for Approver access.")
-                if inv_row["email"] and inv_row["email"].lower() != email_clean:
-                    raise HTTPException(status_code=403, detail="Invitation code was issued to a different email address.")
-                approved = True
-                if inv_row.get("project_id") and not body.project_id:
-                    target_project_id = inv_row["project_id"]
-                session.execute(
-                    text("update invitations set status = 'used', used_by = :uid, used_at = :now where id = :id"),
-                    {"uid": uid, "now": audit.now_iso(), "id": inv_row["id"]},
-                )
-            else:
-                raise HTTPException(
-                    status_code=403,
-                    detail="Invalid or expired invitation code for Approver access.",
-                )
-        if not approved:
-            admin_appr = session.execute(
-                text("select id, project_id from invitations where lower(email) = :email and role = 'approver' and status in ('approved', 'active')"),
-                {"email": email_clean},
-            ).mappings().first()
-            if admin_appr:
-                approved = True
-                if admin_appr.get("project_id") and not body.project_id:
-                    target_project_id = admin_appr["project_id"]
-                session.execute(
-                    text("update invitations set status = 'used', used_by = :uid, used_at = :now where id = :id"),
-                    {"uid": uid, "now": audit.now_iso(), "id": admin_appr["id"]},
-                )
+    assigned_role = body.role
 
-        if not approved:
+    # 2. Invitation Code Validation or Approver Approval Check
+    if body.invitation_code and body.invitation_code.strip():
+        code_clean = body.invitation_code.strip()
+        inv_row = session.execute(
+            text("select id, code, role, email, status, project_id from invitations where code = :code and status = 'active'"),
+            {"code": code_clean},
+        ).mappings().first()
+        if not inv_row:
+            detail = "Invalid or expired invitation code for Approver access." if body.role == "approver" else "Invalid or expired invitation code."
+            raise HTTPException(
+                status_code=403,
+                detail=detail,
+            )
+        if body.role == "approver" and inv_row["role"] != "approver":
+            raise HTTPException(
+                status_code=403,
+                detail="Invitation code is not valid for Approver access.",
+            )
+        if inv_row["email"] and inv_row["email"].lower() != email_clean:
+            raise HTTPException(status_code=403, detail="Invitation code was issued to a different email address.")
+
+        assigned_role = inv_row["role"]
+        if inv_row.get("project_id") and not body.project_id:
+            target_project_id = inv_row["project_id"]
+
+        res = session.execute(
+            text("update invitations set status = 'used', used_by = :uid, used_at = :now where id = :id and status = 'active'"),
+            {"uid": uid, "now": audit.now_iso(), "id": inv_row["id"]},
+        )
+        if res.rowcount == 0:
+            raise HTTPException(
+                status_code=403,
+                detail="Invitation code has already been redeemed.",
+            )
+    elif body.role == "approver" and not (existing_by_id and existing_by_id.get("role") == "approver"):
+        admin_appr = session.execute(
+            text("select id, project_id from invitations where lower(email) = :email and role = 'approver' and status in ('approved', 'active')"),
+            {"email": email_clean},
+        ).mappings().first()
+        if admin_appr:
+            assigned_role = "approver"
+            if admin_appr.get("project_id") and not body.project_id:
+                target_project_id = admin_appr["project_id"]
+            session.execute(
+                text("update invitations set status = 'used', used_by = :uid, used_at = :now where id = :id"),
+                {"uid": uid, "now": audit.now_iso(), "id": admin_appr["id"]},
+            )
+        else:
             raise HTTPException(
                 status_code=403,
                 detail="Approver registration requires a valid invitation code or admin approval.",
+            )
+
+    if existing_by_id:
+        existing_role = existing_by_id["role"]
+        if existing_role != assigned_role:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Account already registered with role '{existing_role}'. Unrestricted role switching is disabled.",
             )
 
     # Ensure workspace project row exists
@@ -317,14 +334,14 @@ def register(
             values (:uid, :pid, :role, 1, :now)
             on conflict (user_id, project_id) do update set role = :role, active = 1
         """),
-        {"uid": uid, "pid": target_project_id, "role": body.role, "now": now},
+        {"uid": uid, "pid": target_project_id, "role": assigned_role, "now": now},
     )
 
     # Sync legacy members table
     try:
         session.execute(
             text("insert into members (id, project_id, name, role, active, email, is_demo) values (:id, :project_id, :name, :role, 1, :email, 0) on conflict (id) do update set project_id = :project_id, role = :role, active = 1, name = :name, email = :email"),
-            {"id": uid, "project_id": target_project_id, "name": name_clean, "role": body.role, "email": email_clean},
+            {"id": uid, "project_id": target_project_id, "name": name_clean, "role": assigned_role, "email": email_clean},
         )
     except Exception:
         pass
@@ -333,7 +350,7 @@ def register(
     user = User(
         id=uid,
         name=name_clean,
-        role=body.role,
+        role=assigned_role,
         project_id=target_project_id,
         email=email_clean,
         is_demo=False,
@@ -728,6 +745,14 @@ def join_project(
         email=account.email,
         is_demo=account.is_demo,
     )
+    record_identity_mapping(
+        session=session,
+        supabase_sub=account.id,
+        member_id=account.id,
+        project_id=target_pid,
+        role=inv["role"],
+        email=account.email,
+    )
     audit.log(session, user, "projects.join", obj=target_pid, detail=f"Joined project '{proj['name']}' as {inv['role']}")
     session.commit()
 
@@ -777,6 +802,15 @@ def switch_project(
         email=account.email,
         is_demo=account.is_demo,
     )
+    record_identity_mapping(
+        session=session,
+        supabase_sub=account.id,
+        member_id=account.id,
+        project_id=membership["id"],
+        role=membership["role"],
+        email=account.email,
+    )
+    session.commit()
     try:
         audit.log(session, user, "auth.switch_project", obj=membership["id"])
     except Exception:
@@ -948,13 +982,13 @@ def create_invitation(
     ).mappings().first()
 
     is_approver = False
-    if membership and membership["active"] and membership["role"] == "approver":
-        is_approver = True
+    if membership is not None:
+        is_approver = bool(membership["active"] and membership["role"] == "approver")
     else:
         legacy_m = session.execute(
             text("""
                 select role, active from members
-                where id = :uid and (project_id = :pid or project_id is null)
+                where id = :uid and project_id = :pid
             """),
             {"uid": user.id, "pid": target_pid},
         ).mappings().first()
@@ -1024,13 +1058,13 @@ def list_invitations(
     ).mappings().first()
 
     is_approver = False
-    if membership and membership["active"] and membership["role"] == "approver":
-        is_approver = True
+    if membership is not None:
+        is_approver = bool(membership["active"] and membership["role"] == "approver")
     else:
         legacy_m = session.execute(
             text("""
                 select role, active from members
-                where id = :uid and (project_id = :pid or project_id is null)
+                where id = :uid and project_id = :pid
             """),
             {"uid": user.id, "pid": target_pid},
         ).mappings().first()
@@ -1097,13 +1131,13 @@ def revoke_invitation(
     ).mappings().first()
 
     is_approver = False
-    if membership and membership["active"] and membership["role"] == "approver":
-        is_approver = True
+    if membership is not None:
+        is_approver = bool(membership["active"] and membership["role"] == "approver")
     else:
         legacy_m = session.execute(
             text("""
                 select role, active from members
-                where id = :uid and (project_id = :pid or project_id is null)
+                where id = :uid and project_id = :pid
             """),
             {"uid": user.id, "pid": target_pid},
         ).mappings().first()

@@ -34,6 +34,7 @@ export function setToken(token: string | null): void {
 
 export async function api<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
   const token = getToken();
+  const projectId = typeof window !== "undefined" ? localStorage.getItem("baton_active_project_id") : null;
   let response: Response;
   const url = `${BASE}${path}`;
   const isBodyAllowed = init.method && !["GET", "HEAD"].includes(init.method.toUpperCase());
@@ -41,6 +42,7 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     Accept: "application/json",
     ...(isBodyAllowed && init.body !== undefined ? { "Content-Type": "application/json" } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(projectId ? { "X-Project-Id": projectId } : {}),
   };
 
   try {

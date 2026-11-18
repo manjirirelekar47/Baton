@@ -924,3 +924,161 @@ def test_strict_multi_project_workspace_isolation(client):
     assert not any(s.get("title") == "alpha_readme.md" for s in sources_b)
 
 
+def test_invite_member_permission_approver_only(client):
+    """Bug 1: Only active Approvers can generate and view invitations.
+    Leavers, Incoming Maintainers, and Contributors are rejected with 403 on both
+    /auth/invitations and /projects/{id}/invitations.
+    """
+    approver_headers = login(client, "approver")
+    leaver_headers = login(client, "leaver")
+    maintainer_headers = login(client, "incoming_maintainer")
+    contributor_headers = login(client, "incoming_contributor")
+
+    # 1. Approver can create and list
+    create_res = client.post(
+        "/auth/invitations",
+        headers=approver_headers,
+        json={"role": "leaver", "email": "newleaver@test.com"},
+    )
+    assert create_res.status_code == 200
+    assert create_res.json()["role"] == "leaver"
+
+    list_res = client.get("/auth/invitations", headers=approver_headers)
+    assert list_res.status_code == 200
+    assert isinstance(list_res.json(), list)
+
+    # 2. Non-approver roles receive 403 on create and list
+    for non_approver_h in [leaver_headers, maintainer_headers, contributor_headers]:
+        # Attempt to create
+        forbidden_post = client.post(
+            "/auth/invitations",
+            headers=non_approver_h,
+            json={"role": "incoming_contributor"},
+        )
+        assert forbidden_post.status_code == 403
+        assert "approver" in forbidden_post.json()["detail"].lower()
+
+        # Attempt to list
+        forbidden_get = client.get("/auth/invitations", headers=non_approver_h)
+        assert forbidden_get.status_code == 403
+        assert "approver" in forbidden_get.json()["detail"].lower()
+
+
+def test_invitation_code_determines_role_and_signup_without_role(client):
+    """Bugs 2 & 3:
+    - User can register without explicit role or with default role.
+    - Invitation code deterministically assigns role (e.g. leaver).
+    - User cannot switch to another role.
+    """
+    approver_headers = login(client, "approver")
+
+    # Generate invitation specifically for 'leaver'
+    inv = client.post(
+        "/auth/invitations",
+        headers=approver_headers,
+        json={"role": "leaver", "email": "join-leaver@test.com"},
+    ).json()
+    code = inv["code"]
+
+    uid = "uid-joined-leaver"
+    email = "join-leaver@test.com"
+    sb_token = make_supabase_token(uid, email)
+
+    # Register without passing role (or passing default/none)
+    reg_res = client.post(
+        "/auth/register",
+        json={
+            "user_id": uid,
+            "email": email,
+            "name": "Joined Leaver Person",
+            "invitation_code": code,
+            "supabase_token": sb_token,
+        },
+    )
+    assert reg_res.status_code == 200
+    user_data = reg_res.json()["user"]
+    # Deterministically assigned role from invitation
+    assert user_data["role"] == "leaver"
+
+    # User cannot switch role
+    switch_res = client.post(
+        "/auth/register",
+        json={
+            "user_id": uid,
+            "email": email,
+            "name": "Joined Leaver Person",
+            "role": "approver",
+            "supabase_token": sb_token,
+        },
+    )
+    assert switch_res.status_code == 400
+
+
+def test_invitation_lifecycle_and_status_update(client):
+    """Bugs 4 & 5:
+    - Approver generates code (contains code and role, no dummy names).
+    - Initially active.
+    - User redeems code.
+    - Immediately changes to 'redeemed' / 'used' without manual DB intervention.
+    - Returns redemption info (used_by, used_by_name, used_at).
+    """
+    approver_headers = login(client, "approver")
+
+    # 1. Approver generates invitation for incoming_maintainer
+    create_res = client.post(
+        "/auth/invitations",
+        headers=approver_headers,
+        json={"role": "incoming_maintainer", "email": "lifecycle@test.com"},
+    )
+    assert create_res.status_code == 200
+    inv = create_res.json()
+    code = inv["code"]
+    inv_id = inv["id"]
+
+    # 2. Check list initially shows active
+    inv_list_before = client.get("/auth/invitations", headers=approver_headers).json()
+    matching_before = next(i for i in inv_list_before if i["id"] == inv_id)
+    assert matching_before["status"] == "active"
+    assert matching_before["used_by"] is None
+
+    # 3. User redeems invitation code
+    uid = "uid-lifecycle-user"
+    email = "lifecycle@test.com"
+    name = "Real Invitee Name"
+    reg_res = client.post(
+        "/auth/register",
+        json={
+            "user_id": uid,
+            "email": email,
+            "name": name,
+            "invitation_code": code,
+            "supabase_token": make_supabase_token(uid, email),
+        },
+    )
+    assert reg_res.status_code == 200
+    assert reg_res.json()["user"]["role"] == "incoming_maintainer"
+
+    # 4. Approver re-checks invitations list: status is immediately 'redeemed'
+    inv_list_after = client.get("/auth/invitations", headers=approver_headers).json()
+    matching_after = next(i for i in inv_list_after if i["id"] == inv_id)
+    assert matching_after["status"] == "redeemed"
+    assert matching_after["used_by"] == uid
+    assert matching_after["used_by_name"] == name
+    assert matching_after["used_at"] is not None
+
+    # 5. Attempting to redeem already redeemed code fails
+    repeat_res = client.post(
+        "/auth/register",
+        json={
+            "user_id": "uid-another-user",
+            "email": "another-lifecycle@test.com",
+            "name": "Another Person",
+            "invitation_code": code,
+            "supabase_token": make_supabase_token("uid-another-user", "another-lifecycle@test.com"),
+        },
+    )
+    assert repeat_res.status_code == 403
+    assert "redeemed" in repeat_res.json()["detail"].lower() or "invalid" in repeat_res.json()["detail"].lower()
+
+
+

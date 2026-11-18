@@ -81,7 +81,7 @@ export interface RegisterPayload {
   user_id?: string;
   email: string;
   name: string;
-  role: Role;
+  role?: Role;
   invitation_code?: string;
   project_id?: string;
   supabase_token?: string;
@@ -326,6 +326,28 @@ export function setStoredToken(token: string | null): void {
   }
 }
 
+export const PROJECT_ID_STORAGE_KEY = "baton_active_project_id";
+
+export function getStoredProjectId(): string | null {
+  try {
+    return localStorage.getItem(PROJECT_ID_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredProjectId(projectId: string | null): void {
+  try {
+    if (projectId) {
+      localStorage.setItem(PROJECT_ID_STORAGE_KEY, projectId);
+    } else {
+      localStorage.removeItem(PROJECT_ID_STORAGE_KEY);
+    }
+  } catch {
+    // Storage unavailable
+  }
+}
+
 /* =========================================================================
    Custom Error Class
    ========================================================================= */
@@ -371,11 +393,13 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
   }
 
   const token = getStoredToken();
+  const activeProjectId = getStoredProjectId();
   const isBodyAllowed = customConfig.method && !["GET", "HEAD"].includes(customConfig.method.toUpperCase());
   const requestHeaders: Record<string, string> = {
     Accept: "application/json",
     ...(isBodyAllowed && customConfig.body ? { "Content-Type": "application/json" } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(activeProjectId ? { "X-Project-Id": activeProjectId } : {}),
     ...(headers as Record<string, string>),
   };
 
