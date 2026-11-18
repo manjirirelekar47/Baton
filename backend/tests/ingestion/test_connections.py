@@ -21,7 +21,6 @@ def test_source_connections_lifecycle(client, monkeypatch):
     monkeypatch.setenv("JIRA_URL", "https://jira.example.test")
     monkeypatch.setenv("JIRA_USER_EMAIL", "baton-tests@example.test")
     monkeypatch.setenv("JIRA_API_TOKEN", "test-only-jira-token")
-
     approver = login(client, "approver")
     contributor = login(client, "incoming_contributor")
 
