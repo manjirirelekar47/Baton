@@ -203,7 +203,6 @@ describe("Supabase sign-in page", () => {
     fireEvent.change(screen.getByLabelText("Work Email"), { target: { value: "person@example.com" } });
     fireEvent.change(screen.getByLabelText("Create Password"), { target: { value: "StrongPass123!" } });
     fireEvent.change(screen.getByLabelText("Repeat Password"), { target: { value: "StrongPass123!" } });
-    fireEvent.click(screen.getByText("Incoming Maintainer"));
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: /create account/i }));
 
@@ -234,7 +233,6 @@ describe("Supabase sign-in page", () => {
     fireEvent.change(screen.getByLabelText("Work Email"), { target: { value: "person@example.com" } });
     fireEvent.change(screen.getByLabelText("Create Password"), { target: { value: "StrongPass123!" } });
     fireEvent.change(screen.getByLabelText("Repeat Password"), { target: { value: "StrongPass123!" } });
-    fireEvent.click(screen.getByText("Incoming Maintainer"));
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: /create account/i }));
 
@@ -263,7 +261,6 @@ describe("Supabase sign-in page", () => {
     fireEvent.change(screen.getByLabelText("Work Email"), { target: { value: "person@example.com" } });
     fireEvent.change(screen.getByLabelText("Create Password"), { target: { value: "StrongPass123!" } });
     fireEvent.change(screen.getByLabelText("Repeat Password"), { target: { value: "StrongPass123!" } });
-    fireEvent.click(screen.getByText("Incoming Maintainer"));
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: /create account/i }));
 

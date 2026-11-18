@@ -298,7 +298,11 @@ def current_account_user(
     raise _unauthorised("Account not found. Please sign in again.")
 
 
-def current_user(authorization: str | None = Header(default=None), session: Session = Depends(get_session)) -> User:
+def current_user(
+    authorization: str | None = Header(default=None),
+    x_project_id: str | None = Header(default=None, alias="X-Project-Id"),
+    session: Session = Depends(get_session),
+) -> User:
     """FastAPI dependency that validates a Bearer JWT (Baton or Supabase) and returns the authenticated User.
 
     Supports:
@@ -334,8 +338,19 @@ def current_user(authorization: str | None = Header(default=None), session: Sess
     if not uid:
         raise _unauthorised("Token subject (sub) missing.")
 
-    active_pid = claims.get("project_id")
+    active_pid = (x_project_id.strip() if x_project_id and x_project_id.strip() else None) or claims.get("project_id")
     token_email = (claims.get("email") or claims.get("user_metadata", {}).get("email") or "").strip().lower()
+
+    if not active_pid:
+        try:
+            im = session.execute(
+                text("select project_id from identity_mappings where supabase_sub = :sub"),
+                {"sub": uid},
+            ).mappings().first()
+            if im and im["project_id"]:
+                active_pid = im["project_id"]
+        except Exception:
+            pass
 
     # 3. Authoritative project memberships lookup
     has_any_pm = False
@@ -366,7 +381,8 @@ def current_user(authorization: str | None = Header(default=None), session: Sess
                     from users u
                     join project_memberships pm on pm.user_id = u.id
                     where u.id = :uid
-                    order by pm.created_at asc
+                    order by pm.created_at desc
+                    limit 1
                 """),
                 {"uid": uid},
             ).mappings().first()

@@ -24,6 +24,7 @@ interface InviteMemberModalProps {
   onClose: () => void;
   projectId?: string;
   projectName?: string;
+  currentUserRole?: Role | string;
 }
 
 const ROLES: { role: Role; label: string; desc: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -58,6 +59,7 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
   onClose,
   projectId,
   projectName = "Active Project",
+  currentUserRole = "approver",
 }) => {
   const [activeTab, setActiveTab] = useState<"create" | "manage">("create");
   const [selectedRole, setSelectedRole] = useState<Role>("incoming_contributor");
@@ -181,7 +183,7 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
     };
   }, [invitations]);
 
-  if (!isOpen) return null;
+  if (!isOpen || currentUserRole !== "approver") return null;
 
   return (
     <div
@@ -569,6 +571,7 @@ export const InviteMemberModal: React.FC<InviteMemberModalProps> = ({
                                 <span>•</span>
                                 <span className="text-purple-600 dark:text-purple-300 font-medium">
                                   Redeemed by {inv.used_by_name || "member"}
+                                  {inv.used_at ? ` on ${new Date(inv.used_at).toLocaleDateString()}` : ""}
                                 </span>
                               </>
                             )}

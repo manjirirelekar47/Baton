@@ -39,30 +39,6 @@ import type { Role } from "@/shared/types";
 import { ROLE_LABELS } from "@/shared/types";
 import type { ProjectItem } from "@/api/client";
 
-const ROLE_OPTIONS: { role: Role; title: string; subtitle: string; badge?: string }[] = [
-  {
-    role: "approver",
-    title: "Approver (Engineering Lead)",
-    subtitle: "Authorize handovers, manage sources, full administrative oversight",
-    badge: "Invitation Required",
-  },
-  {
-    role: "leaver",
-    title: "Leaver",
-    subtitle: "Departing lead handing over institutional knowledge and context",
-  },
-  {
-    role: "incoming_maintainer",
-    title: "Incoming Maintainer",
-    subtitle: "Architectural ownership, roadmap review, and continuity",
-  },
-  {
-    role: "incoming_contributor",
-    title: "Incoming Contributor",
-    subtitle: "Task-based onboarding roadmap and day-1 execution",
-  },
-];
-
 function isPasswordRecoveryLocation(search: string, hash: string) {
   const hashParams = new URLSearchParams(hash.replace(/^#/, ""));
   return (
@@ -340,13 +316,7 @@ export function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<Role | "">("");
   const [invitationCode, setInvitationCode] = useState("");
-  const [oauthPendingRoleSetup, setOauthPendingRoleSetup] = useState<{
-    user_id: string;
-    email: string;
-    name: string;
-  } | null>(null);
   const [pendingProjectOnboarding, setPendingProjectOnboarding] = useState<{
     user_id: string;
     email: string;
@@ -399,12 +369,8 @@ export function SignUp() {
         throw new Error("No active authenticated session found.");
       }
 
-      const pendingRole = (sessionStorage.getItem("baton.pending_role") as Role | null);
       const pendingInvite = sessionStorage.getItem("baton.pending_invite") || undefined;
-      const metaRole = (activeSession.user_metadata?.role as Role | undefined);
       const metaInvite = (activeSession.user_metadata?.invitation_code as string | undefined);
-
-      const targetRole = pendingRole || metaRole;
       const targetInvite = pendingInvite || metaInvite;
 
       if (syncSession) {
@@ -442,12 +408,11 @@ export function SignUp() {
         }
       }
 
-      if (targetRole && register) {
+      if (targetInvite && register) {
         await register({
           user_id: activeSession.id,
           email: activeSession.email,
           name: (activeSession.user_metadata?.full_name as string) || activeSession.email.split("@")[0],
-          role: targetRole,
           invitation_code: targetInvite,
           supabase_token: session?.access_token,
         });
@@ -457,12 +422,14 @@ export function SignUp() {
         return;
       }
 
-      // No role assigned yet - show role selection prompt for OAuth user
-      setOauthPendingRoleSetup({
+      // No project assigned yet - show project onboarding
+      setPendingProjectOnboarding({
         user_id: activeSession.id,
         email: activeSession.email,
         name: (activeSession.user_metadata?.full_name as string) || activeSession.email.split("@")[0],
       });
+      setOnboardingMode("create");
+      void loadExistingProjects();
     } catch (cause) {
       completingLogin.current = false;
       setError(cause instanceof Error ? cause.message : "Signed in, but Baton could not open your workspace.");
@@ -470,43 +437,7 @@ export function SignUp() {
       completingLogin.current = false;
       setSubmitting(false);
     }
-  }, [navigate, register, syncSession]);
-
-  const handleCompleteOAuthRoleSetup = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!oauthPendingRoleSetup) return;
-    if (!selectedRole) {
-      setError("Please select a role to continue.");
-      return;
-    }
-    if (selectedRole === "approver" && !invitationCode.trim()) {
-      setError("Approver registration requires a valid invitation code or admin approval.");
-      return;
-    }
-    setSubmitting(true);
-    setError(null);
-    try {
-      if (register) {
-        const session = (await supabase?.auth.getSession())?.data.session;
-        await register({
-          user_id: oauthPendingRoleSetup.user_id,
-          email: oauthPendingRoleSetup.email,
-          name: oauthPendingRoleSetup.name,
-          role: selectedRole,
-          invitation_code: selectedRole === "approver" ? invitationCode.trim() : undefined,
-          supabase_token: session?.access_token,
-        });
-      }
-      sessionStorage.removeItem("baton.pending_role");
-      sessionStorage.removeItem("baton.pending_invite");
-      setOauthPendingRoleSetup(null);
-      navigate("/dashboard", { replace: true });
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Failed to complete account setup.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  }, [fetchProjects, loadExistingProjects, navigate, register, switchProject, syncSession]);
 
   const handleCompleteProjectOnboarding = async (e: FormEvent) => {
     e.preventDefault();
@@ -629,10 +560,6 @@ export function SignUp() {
       return;
     }
     if (!isLogin && !isRecovery) {
-      if (selectedRole === "approver" && !invitationCode.trim()) {
-        setError("Approver registration requires a valid invitation code or admin approval.");
-        return;
-      }
       if (!agreeTerms) {
         setError("Please accept Baton's terms and privacy policy to continue.");
         return;
@@ -659,14 +586,6 @@ export function SignUp() {
         if (signInError) throw signInError;
         await completeAuthenticatedLogin();
       } else {
-        if (isRegistration && !selectedRole) {
-          setError("Please select a role to continue.");
-          return;
-        }
-        if (isRegistration && selectedRole === "approver" && !invitationCode.trim()) {
-          setError("Approver registration requires a valid invitation code or admin approval.");
-          return;
-        }
         signupInProgress.current = true;
         try {
           const { data, error: signUpError } = await supabase.auth.signUp({
@@ -675,8 +594,7 @@ export function SignUp() {
             options: {
               data: {
                 full_name: name.trim(),
-                role: selectedRole,
-                invitation_code: selectedRole === "approver" ? invitationCode.trim() : undefined,
+                invitation_code: invitationCode.trim() || undefined,
               },
               emailRedirectTo: `${window.location.origin}/login`,
             },
@@ -706,12 +624,11 @@ export function SignUp() {
                   user_id: data.user?.id,
                   email: email.trim(),
                   name: name.trim(),
-                  role: selectedRole as Role,
-                  invitation_code: selectedRole === "approver" ? invitationCode.trim() : undefined,
+                  invitation_code: invitationCode.trim() || undefined,
                   supabase_token: data.session.access_token,
                 });
               } catch (regErr) {
-                setError(regErr instanceof Error ? regErr.message : "Failed to register account role with backend.");
+                setError(regErr instanceof Error ? regErr.message : "Failed to register account with backend.");
                 return;
               }
             }
@@ -760,17 +677,6 @@ export function SignUp() {
     setNotice(null);
     try {
       if (isRegistration) {
-        if (!selectedRole) {
-          setError(`Please select a role to continue before connecting with ${provider === "google" ? "Google" : "GitHub"}.`);
-          setSubmitting(false);
-          return;
-        }
-        if (selectedRole === "approver" && !invitationCode.trim()) {
-          setError("Approver registration requires a valid invitation code before connecting with " + provider + ".");
-          setSubmitting(false);
-          return;
-        }
-        sessionStorage.setItem("baton.pending_role", selectedRole);
         if (invitationCode.trim()) {
           sessionStorage.setItem("baton.pending_invite", invitationCode.trim());
         }
@@ -1087,72 +993,30 @@ export function SignUp() {
                         />
                       </div>
 
-                      {/* Role Selector (Sign Up Only) */}
-                      <div className="space-y-2 pt-3">
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                          Select Your Role
+                      {/* Invitation Code (Optional for Joining a Project) */}
+                      <div className="space-y-1.5 pt-3">
+                        <label
+                          htmlFor="signup-invitation-code"
+                          className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1"
+                        >
+                          Invitation Code <span className="text-slate-400 font-normal lowercase">(optional)</span>
                         </label>
-                        <div className="grid grid-cols-1 gap-1.5" role="radiogroup" aria-label="Select role">
-                          {ROLE_OPTIONS.map((opt) => {
-                            const isSelected = selectedRole === opt.role;
-                            return (
-                              <button
-                                key={opt.role}
-                                type="button"
-                                role="radio"
-                                aria-checked={isSelected}
-                                onClick={() => setSelectedRole(opt.role)}
-                                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                                  isSelected
-                                    ? "border-purple-600 bg-purple-50/80 dark:bg-purple-950/40 ring-1 ring-purple-600"
-                                    : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-transparent"
-                                }`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <span className={`text-xs font-bold ${isSelected ? "text-purple-700 dark:text-purple-300" : "text-slate-800 dark:text-slate-200"}`}>
-                                    {opt.title}
-                                  </span>
-                                  {opt.badge && (
-                                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
-                                      {opt.badge}
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1 leading-tight">
-                                  {opt.subtitle}
-                                </p>
-                              </button>
-                            );
-                          })}
+                        <div className="relative flex items-center">
+                          <KeyRound className="w-4 h-4 text-purple-500 mr-2 flex-shrink-0" />
+                          <input
+                            id="signup-invitation-code"
+                            type="text"
+                            value={invitationCode}
+                            onChange={(e) => setInvitationCode(e.target.value.toUpperCase())}
+                            placeholder="e.g. INV-LEAVER-XXXX or INV-MAINTAINER-XXXX"
+                            className={`w-full bg-transparent py-2 px-0 text-sm font-mono tracking-wider focus:outline-none placeholder:text-slate-400 placeholder:font-sans border-b border-purple-500/40 focus:border-purple-500 transition-colors ${
+                              isDark ? "text-white" : "text-slate-900"
+                            }`}
+                          />
                         </div>
-
-                        {/* Invitation Code (Shown only when Approver role is selected) */}
-                        {selectedRole === "approver" && (
-                          <div className="pt-2">
-                            <label
-                              htmlFor="signup-invitation-code"
-                              className="block text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1"
-                            >
-                              Invitation Code (Required for Approver)
-                            </label>
-                            <div className="relative flex items-center">
-                              <KeyRound className="w-4 h-4 text-amber-500 mr-2 flex-shrink-0" />
-                              <input
-                                id="signup-invitation-code"
-                                type="text"
-                                value={invitationCode}
-                                onChange={(e) => setInvitationCode(e.target.value)}
-                                placeholder="e.g. INV-APPROVER-8F92A1B7C4"
-                                className={`w-full bg-transparent py-2 px-0 text-sm font-medium focus:outline-none placeholder:text-slate-400 border-b border-amber-400/80 transition-colors ${
-                                  isDark ? "text-white" : "text-slate-900"
-                                }`}
-                              />
-                            </div>
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-                              Approver access grants full project oversight and requires a valid invitation or admin approval.
-                            </p>
-                          </div>
-                        )}
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                          Have an invitation code? Paste it here to join your project with your assigned role. You can also create or join a project after signup.
+                        </p>
                       </div>
                     </motion.div>
                   )}
@@ -1572,108 +1436,6 @@ export function SignUp() {
 
         </div>
       </main>
-
-      {/* OAuth Role Setup Modal (Requirement 9: Google & GitHub cannot bypass role selection) */}
-      {oauthPendingRoleSetup && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in"
-        >
-          <div
-            className={`w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 border ${
-              isDark ? "bg-[#0d1024] border-white/10 text-white" : "bg-white border-slate-200 text-slate-900"
-            }`}
-          >
-            <div>
-              <h2 className="text-xl font-bold tracking-tight">Complete Account Setup</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Welcome, {oauthPendingRoleSetup.name}! Please select your assigned project role to access Baton:
-              </p>
-            </div>
-
-            {error && (
-              <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs">
-                {error}
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Choose Role
-              </label>
-              <div className="grid grid-cols-1 gap-2" role="radiogroup" aria-label="Select role">
-                {ROLE_OPTIONS.map((opt) => {
-                  const isSelected = selectedRole === opt.role;
-                  return (
-                    <button
-                      key={opt.role}
-                      type="button"
-                      role="radio"
-                      aria-checked={isSelected}
-                      onClick={() => setSelectedRole(opt.role)}
-                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                        isSelected
-                          ? "border-purple-600 bg-purple-50/80 dark:bg-purple-950/40 ring-1 ring-purple-600"
-                          : "border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-transparent"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className={`text-xs font-bold ${isSelected ? "text-purple-700 dark:text-purple-300" : "text-slate-800 dark:text-slate-200"}`}>
-                          {opt.title}
-                        </span>
-                        {opt.badge && (
-                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
-                            {opt.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                        {opt.subtitle}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {selectedRole === "approver" && (
-                <div className="pt-2">
-                  <label
-                    htmlFor="oauth-invitation-code"
-                    className="block text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1"
-                  >
-                    Invitation Code (Required for Approver)
-                  </label>
-                  <input
-                    id="oauth-invitation-code"
-                    type="text"
-                    value={invitationCode}
-                    onChange={(e) => setInvitationCode(e.target.value)}
-                    placeholder="e.g. INV-APPROVER-8F92A1B7C4"
-                    className={`w-full bg-transparent py-2.5 px-3 rounded-xl text-sm font-medium focus:outline-none border border-amber-400/80 transition-colors ${
-                      isDark ? "text-white bg-white/5" : "text-slate-900 bg-slate-50"
-                    }`}
-                  />
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-                    Approver access requires a valid invitation code or prior admin approval.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="pt-2 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={handleCompleteOAuthRoleSetup}
-                disabled={submitting}
-                className="w-full py-3 px-4 rounded-xl font-bold text-sm text-white shadow-lg shadow-purple-600/30 bg-purple-600 hover:bg-purple-500 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                <span>{submitting ? "Finishing Setup…" : "Finish Setup & Enter Baton →"}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Project Onboarding Modal (For 0-project users: Create Project or Join with Code) */}
       {pendingProjectOnboarding && (
