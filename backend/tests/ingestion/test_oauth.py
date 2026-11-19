@@ -197,3 +197,110 @@ def test_scoped_tokens_used_during_sync_and_needs_attention_status(client, monke
     assert sync_res.json()["status"] == "failed"
     assert sync_res.json()["auth_status"] == "needs_attention"
     assert "rejected" in sync_res.json()["error_message"].lower()
+
+
+def test_oauth_authorize_missing_provider_rejected_422(client):
+    """Regression test: Omitting 'provider' from request body must be rejected with 422 Unprocessable Content."""
+    approver = login(client, "approver")
+    res = client.post(
+        "/sources/oauth/github/authorize",
+        json={
+            # provider omitted!
+            "target_name": "owner/repo",
+            "acl_label": "L1",
+            "consent": True,
+        },
+        headers=approver,
+    )
+    assert res.status_code == 422
+    data = res.json()
+    assert "detail" in data
+    # Check that error loc specifies 'provider'
+    error_locs = [tuple(err.get("loc", [])) for err in data["detail"]]
+    assert any("provider" in loc for loc in error_locs)
+
+
+def test_oauth_authorize_provider_mismatch_rejected_422(client):
+    """Mismatched provider between URL and body must be rejected with 422."""
+    approver = login(client, "approver")
+    res = client.post(
+        "/sources/oauth/github/authorize",
+        json={
+            "provider": "jira",  # Valid Jira body, but sent to /github/ endpoint!
+            "target_name": "CAMPUS",
+            "acl_label": "L1",
+            "consent": True,
+        },
+        headers=approver,
+    )
+    assert res.status_code == 422
+    assert "Provider mismatch" in res.json()["detail"]
+
+
+def test_oauth_callback_flow_github(client, monkeypatch):
+    """Verify GitHub OAuth callback handles code exchange, creates connection, and redirects to frontend."""
+    approver = login(client, "approver")
+
+    # Mock GitHub code exchange
+    mock_token = "gho_test_callback_token_999"
+
+    def fake_urlopen(req, timeout=20):
+        resp_body = json.dumps({
+            "access_token": mock_token,
+            "expires_in": 3600,
+            "scope": "repo,read:org",
+        }).encode("utf-8")
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = resp_body
+        mock_resp.__enter__.return_value = mock_resp
+        return mock_resp
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+
+    # 1. Authorize to get state
+    auth_res = client.post(
+        "/sources/oauth/github/authorize",
+        json={
+            "provider": "github",
+            "target_name": "acme/proj",
+            "acl_label": "L1",
+            "consent": True,
+            "redirect_uri": "http://localhost:5173/sources",
+        },
+        headers=approver,
+    )
+    assert auth_res.status_code == 200
+    state = auth_res.json()["state"]
+
+    # 2. Simulate GitHub redirecting to callback
+    cb_res = client.get(
+        f"/sources/oauth/github/callback?code=mock_code_123&state={state}",
+        follow_redirects=False,
+    )
+    assert cb_res.status_code in (302, 307)
+    location = cb_res.headers.get("location", "")
+    assert "oauth=success" in location
+    assert "provider=github" in location
+    assert "connection_id=" in location
+
+
+def test_oauth_callback_error_and_invalid_state(client):
+    """Verify denied or missing OAuth callback redirects with error message."""
+    # 1. Provider returns error (e.g. user denied consent on GitHub)
+    res_denied = client.get(
+        "/sources/oauth/github/callback?error=access_denied&error_description=The+user+has+denied+your+application+access.",
+        follow_redirects=False,
+    )
+    assert res_denied.status_code in (302, 307)
+    location = res_denied.headers.get("location", "")
+    assert "oauth=error" in location
+    assert "access" in location.lower() or "denied" in location.lower()
+
+    # 2. Missing code or state
+    res_missing = client.get(
+        "/sources/oauth/github/callback",
+        follow_redirects=False,
+    )
+    assert res_missing.status_code in (302, 307)
+    assert "oauth=error" in res_missing.headers.get("location", "")
+

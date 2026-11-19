@@ -177,6 +177,7 @@ describe("SourcesPage Live Connections & OAuth UI", () => {
         expect.objectContaining({
           method: "POST",
           body: expect.objectContaining({
+            provider: "github",
             target_name: "test-org/test-repo",
             acl_label: "L1",
             consent: true,
@@ -184,6 +185,41 @@ describe("SourcesPage Live Connections & OAuth UI", () => {
         })
       );
     });
+  });
+
+  it("displays backend validation error in modal when OAuth authorization fails", async () => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: "u-1", name: "Alice", role: "approver", project_id: "p-1" },
+    } as any);
+
+    vi.mocked(api).mockImplementation((path: string) => {
+      if (path === "/sources") return Promise.resolve([]);
+      if (path === "/drift/alerts") return Promise.resolve([]);
+      if (path === "/drift/scan") return Promise.resolve({ baselined: 0, changed: 0 });
+      if (path === "/sources/connections") return Promise.resolve([]);
+      if (path === "/sources/oauth/github/authorize") {
+        return Promise.reject(new Error("provider: Field required"));
+      }
+      return Promise.resolve({});
+    });
+
+    renderWithProviders();
+
+    const connectBtn = await screen.findByRole("button", { name: /Connect Live Source/i });
+    fireEvent.click(connectBtn);
+
+    const targetInput = screen.getByPlaceholderText("acme-corp/project-repo");
+    fireEvent.change(targetInput, { target: { value: "test-org/test-repo" } });
+
+    const consentCheckbox = screen.getByRole("checkbox", {
+      name: /I confirm that I am authorised to connect and sync/i,
+    });
+    fireEvent.click(consentCheckbox);
+
+    const authBtn = screen.getByRole("button", { name: /Authorize with GitHub/i });
+    fireEvent.click(authBtn);
+
+    expect(await screen.findByText("provider: Field required")).toBeInTheDocument();
   });
 
   it("displays success banner when returning from OAuth callback", async () => {
