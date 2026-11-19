@@ -145,7 +145,7 @@ export function PlanPanel({
     const uId = (currentUserId || "").toLowerCase().trim();
     const uRole = (currentUserRole || "").toLowerCase().replace("_", " ").trim();
 
-    if (owner && (owner === uName || owner === uId || owner === uRole)) return true;
+    if (owner && (owner === uName || owner === uId || owner === uRole || (owner === "contributor" && (currentUserRole === "contributor" || currentUserRole === "incoming_contributor")))) return true;
     if (propOwner && (propOwner === uName || propOwner === uRole)) return true;
     if (item.proposed_for_me) return true;
     return false;
@@ -278,6 +278,16 @@ export function PlanPanel({
                           </span>
                           <StateBadge state={item.state} />
 
+                          {/* Provenance Badge for Tasks Transferred from Leaver */}
+                          {item.is_transferred && (
+                            <span
+                              data-testid="transferred-badge"
+                              className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-100/90 border border-amber-300 dark:text-amber-200 dark:bg-amber-950/70 dark:border-amber-500/40 px-2.5 py-0.5 rounded-full shadow-xs"
+                            >
+                              <span>Transferred from Leaver{item.transferred_from ? ` (${item.transferred_from})` : ""}</span>
+                            </span>
+                          )}
+
                           {/* Visual Indicator for Overdue Tasks */}
                           {isOverdue && (
                             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-300 dark:text-rose-300 dark:bg-rose-950/60 dark:border-rose-500/40 px-2.5 py-0.5 rounded-full animate-pulse shadow-xs">
@@ -347,6 +357,11 @@ export function PlanPanel({
                           <strong className="font-semibold text-slate-800 dark:text-gray-200">
                             {item.owner_known || item.owner ? item.owner : "Unassigned"}
                           </strong>
+                          {item.is_transferred && (
+                            <span className="text-[11px] text-slate-500 dark:text-gray-400 ml-1.5 font-normal">
+                              (Originally owned by: <span className="font-medium text-slate-700 dark:text-gray-300">{item.original_owner || item.transferred_from || "Leaver"}</span>)
+                            </span>
+                          )}
                         </span>
 
                         {item.proposed_for_me && (

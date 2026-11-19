@@ -1,6 +1,6 @@
 import type { RouteObject } from "react-router-dom";
 
-export type Role = "approver" | "leaver" | "incoming_maintainer" | "incoming_contributor";
+export type Role = "approver" | "leaver" | "incoming_maintainer" | "contributor" | "incoming_contributor";
 export type ClaimState = "verified" | "inferred" | "conflicting" | "missing" | "attested";
 
 export interface User {
@@ -26,5 +26,6 @@ export const ROLE_LABELS: Record<Role, string> = {
   approver: "Approver",
   leaver: "Leaver",
   incoming_maintainer: "Incoming Maintainer",
-  incoming_contributor: "Incoming Contributor",
+  contributor: "Contributor",
+  incoming_contributor: "Contributor",
 };

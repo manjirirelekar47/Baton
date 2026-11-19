@@ -42,15 +42,21 @@ export function ApprovalBar({
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([
     "incoming_maintainer",
+    "contributor",
     "incoming_contributor",
   ]);
 
   const isReady = readiness?.ready ?? false;
 
   const toggleRole = (role: string) => {
-    setSelectedRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
-    );
+    setSelectedRoles((prev) => {
+      const isSelected = prev.includes(role) || (role === "contributor" && prev.includes("incoming_contributor"));
+      if (isSelected) {
+        return prev.filter((r) => r !== role && !(role === "contributor" && r === "incoming_contributor"));
+      } else {
+        return role === "contributor" ? [...prev, "contributor", "incoming_contributor"] : [...prev, role];
+      }
+    });
   };
 
   const handleApprove = () => {
@@ -172,13 +178,13 @@ export function ApprovalBar({
               <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
                 <input
                   type="checkbox"
-                  checked={selectedRoles.includes("incoming_contributor")}
-                  onChange={() => toggleRole("incoming_contributor")}
+                  checked={selectedRoles.includes("contributor") || selectedRoles.includes("incoming_contributor")}
+                  onChange={() => toggleRole("contributor")}
                   className="rounded text-purple-600 focus:ring-purple-500"
                 />
                 <div>
                   <div className="text-xs font-bold text-slate-900 dark:text-white">
-                    Incoming Contributor
+                    Contributor
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-gray-400">
                     Public claims and verified team-wide workflows

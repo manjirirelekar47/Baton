@@ -9,7 +9,7 @@ Rules (Master Guide sections 5 and 7):
 from dataclasses import dataclass, field
 
 LABELS = ("L1", "L2", "L3", "L4")
-ROLES = ("approver", "leaver", "incoming_maintainer", "incoming_contributor")
+ROLES = ("approver", "leaver", "incoming_maintainer", "contributor", "incoming_contributor")
 _RANK = {label: i for i, label in enumerate(LABELS, start=1)}
 
 # Master Guide table. The Leaver column is not in the guide: ASSUMPTION, mirrors the maintainer. Confirm as a team.
@@ -17,12 +17,14 @@ _READ = {
     "approver": {"L1", "L2", "L3"},
     "leaver": {"L1", "L2"},
     "incoming_maintainer": {"L1", "L2"},
+    "contributor": {"L1"},
     "incoming_contributor": {"L1"},
 }
 _COUNT_ONLY = {
     "approver": set(),
     "leaver": {"L3"},
     "incoming_maintainer": {"L3"},
+    "contributor": {"L2", "L3"},
     "incoming_contributor": {"L2", "L3"},
 }
 

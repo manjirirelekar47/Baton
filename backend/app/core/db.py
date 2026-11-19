@@ -86,6 +86,66 @@ def _ensure_columns(conn) -> None:
         _exec("alter table invitations add column project_id text references projects(id)")
     except Exception:
         pass
+    try:
+        _exec("alter table project_memberships add column handover_deadline text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table project_memberships add column handover_status text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table invitations add column handover_deadline text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table members add column handover_deadline text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table members add column handover_status text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table handover_tasks add column transferred_from text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table handover_tasks add column original_owner text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table handover_tasks add column is_transferred integer not null default 0")
+    except Exception:
+        pass
+    try:
+        _exec("alter table handover_tasks add column transfer_notes text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table plan_action_status add column transferred_from text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table plan_action_status add column original_owner text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table plan_action_status add column is_transferred integer not null default 0")
+    except Exception:
+        pass
+    try:
+        _exec("alter table claims add column transferred_from text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table claims add column original_owner text")
+    except Exception:
+        pass
+    try:
+        _exec("alter table claims add column is_transferred integer not null default 0")
+    except Exception:
+        pass
 
 
 def apply_schema(engine: Engine | None = None) -> list[str]:
@@ -120,7 +180,7 @@ def apply_schema(engine: Engine | None = None) -> list[str]:
                 "  supabase_sub text primary key,"
                 "  member_id text not null,"
                 "  project_id text not null,"
-                "  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'incoming_contributor')),"
+                "  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'contributor', 'incoming_contributor')),"
                 "  email text,"
                 "  created_at text not null,"
                 "  updated_at text not null"

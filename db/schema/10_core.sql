@@ -11,7 +11,7 @@ create table if not exists members (
   id text primary key,
   project_id text not null references projects(id),
   name text not null,
-  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'incoming_contributor')),
+  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'contributor', 'incoming_contributor')),
   active integer not null default 1,
   email text,
   is_demo integer not null default 0
@@ -21,7 +21,7 @@ create table if not exists invitations (
   id text primary key,
   project_id text references projects(id),
   code text unique not null,
-  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'incoming_contributor')),
+  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'contributor', 'incoming_contributor')),
   email text,
   status text not null default 'active',
   created_at text not null,
@@ -35,7 +35,7 @@ create table if not exists identity_mappings (
   supabase_sub text primary key,
   member_id text not null,
   project_id text not null,
-  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'incoming_contributor')),
+  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'contributor', 'incoming_contributor')),
   email text,
   created_at text not null,
   updated_at text not null

@@ -53,6 +53,7 @@ class SessionRequest(BaseModel):
 class CreateInvitationRequest(BaseModel):
     role: str = "approver"
     email: str | None = None
+    handover_deadline: str | None = None
 
 
 class CreateProjectRequest(BaseModel):
@@ -70,6 +71,13 @@ class SwitchProjectRequest(BaseModel):
 class UpdateMemberRequest(BaseModel):
     role: str | None = None
     active: bool | None = None
+    handover_deadline: str | None = None
+    handover_status: str | None = None
+
+
+class TransferTasksRequest(BaseModel):
+    target_member_id: str
+    task_ids: list[str] | None = None
 
 
 def assert_not_last_approver(session: Session, project_id: str, target_user_id: str) -> None:
@@ -122,36 +130,52 @@ def health():
 
 @router.post("/auth/demo-login", tags=["core"])
 def demo_login(body: DemoLogin, session: Session = Depends(get_session)):
+    is_contrib = 1 if body.role in ("contributor", "incoming_contributor") else 0
     # 1. Authoritative lookup in project_memberships joined with users
-    row = session.execute(
-        text("""
-            select u.id, u.name, pm.role, pm.project_id
-            from project_memberships pm
-            join users u on u.id = pm.user_id
-            where pm.role = :role and pm.project_id = :pid and pm.active = 1
-        """),
-        {"role": body.role, "pid": DEMO_PROJECT_ID},
-    ).mappings().first()
-
-    # 2. Fallback to legacy members table
-    if row is None:
-        row = session.execute(
-            text("select id, name, role, project_id from members where role = :role and project_id = :pid and active = 1"),
-            {"role": body.role, "pid": DEMO_PROJECT_ID},
-        ).mappings().first()
-
-    # 3. If neither has the seeded demo user, re-seed and fetch again
-    if row is None:
-        seed_demo(session)
+    try:
         row = session.execute(
             text("""
                 select u.id, u.name, pm.role, pm.project_id
                 from project_memberships pm
                 join users u on u.id = pm.user_id
-                where pm.role = :role and pm.project_id = :pid and pm.active = 1
+                where (pm.role = :role or (:is_contrib = 1 and pm.role in ('contributor', 'incoming_contributor')))
+                  and pm.project_id = :pid and pm.active = 1
             """),
-            {"role": body.role, "pid": DEMO_PROJECT_ID},
+            {"role": body.role, "is_contrib": is_contrib, "pid": DEMO_PROJECT_ID},
         ).mappings().first()
+    except Exception:
+        row = None
+
+    # 2. Fallback to legacy members table
+    if row is None:
+        try:
+            row = session.execute(
+                text("""
+                    select id, name, role, project_id from members
+                    where (role = :role or (:is_contrib = 1 and role in ('contributor', 'incoming_contributor')))
+                      and project_id = :pid and active = 1
+                """),
+                {"role": body.role, "is_contrib": is_contrib, "pid": DEMO_PROJECT_ID},
+            ).mappings().first()
+        except Exception:
+            row = None
+
+    # 3. If neither has the seeded demo user, re-seed and fetch again
+    if row is None:
+        seed_demo(session)
+        try:
+            row = session.execute(
+                text("""
+                    select u.id, u.name, pm.role, pm.project_id
+                    from project_memberships pm
+                    join users u on u.id = pm.user_id
+                    where (pm.role = :role or (:is_contrib = 1 and pm.role in ('contributor', 'incoming_contributor')))
+                      and pm.project_id = :pid and pm.active = 1
+                """),
+                {"role": body.role, "is_contrib": is_contrib, "pid": DEMO_PROJECT_ID},
+            ).mappings().first()
+        except Exception:
+            row = None
 
     if row is None:
         raise HTTPException(status_code=404, detail="No demo user has that role.")
@@ -244,12 +268,13 @@ def register(
             )
 
     assigned_role = body.role
+    inv_row = None
 
     # 2. Invitation Code Validation or Approver Approval Check
     if body.invitation_code and body.invitation_code.strip():
         code_clean = body.invitation_code.strip()
         inv_row = session.execute(
-            text("select id, code, role, email, status, project_id from invitations where code = :code and status = 'active'"),
+            text("select id, code, role, email, status, project_id, handover_deadline from invitations where code = :code and status = 'active'"),
             {"code": code_clean},
         ).mappings().first()
         if not inv_row:
@@ -328,20 +353,21 @@ def register(
     )
 
     # Insert project membership
+    handover_dl = inv_row.get("handover_deadline") if inv_row else None
     session.execute(
         text("""
-            insert into project_memberships (user_id, project_id, role, active, created_at)
-            values (:uid, :pid, :role, 1, :now)
-            on conflict (user_id, project_id) do update set role = :role, active = 1
+            insert into project_memberships (user_id, project_id, role, active, created_at, handover_deadline)
+            values (:uid, :pid, :role, 1, :now, :handover_dl)
+            on conflict (user_id, project_id) do update set role = :role, active = 1, handover_deadline = coalesce(:handover_dl, handover_deadline)
         """),
-        {"uid": uid, "pid": target_project_id, "role": assigned_role, "now": now},
+        {"uid": uid, "pid": target_project_id, "role": assigned_role, "now": now, "handover_dl": handover_dl},
     )
 
     # Sync legacy members table
     try:
         session.execute(
-            text("insert into members (id, project_id, name, role, active, email, is_demo) values (:id, :project_id, :name, :role, 1, :email, 0) on conflict (id) do update set project_id = :project_id, role = :role, active = 1, name = :name, email = :email"),
-            {"id": uid, "project_id": target_project_id, "name": name_clean, "role": assigned_role, "email": email_clean},
+            text("insert into members (id, project_id, name, role, active, email, is_demo, handover_deadline) values (:id, :project_id, :name, :role, 1, :email, 0, :handover_dl) on conflict (id) do update set project_id = :project_id, role = :role, active = 1, name = :name, email = :email, handover_deadline = coalesce(:handover_dl, handover_deadline)"),
+            {"id": uid, "project_id": target_project_id, "name": name_clean, "role": assigned_role, "email": email_clean, "handover_dl": handover_dl},
         )
     except Exception:
         pass
@@ -653,7 +679,7 @@ def join_project(
     """Redeem an invitation code to join an existing project."""
     code_clean = body.invitation_code.strip()
     inv = session.execute(
-        text("select id, code, role, email, status, project_id from invitations where code = :code and status = 'active'"),
+        text("select id, code, role, email, status, project_id, handover_deadline from invitations where code = :code and status = 'active'"),
         {"code": code_clean},
     ).mappings().first()
 
@@ -709,21 +735,22 @@ def join_project(
             "now": now,
         },
     )
+    handover_dl = inv.get("handover_deadline")
     session.execute(
         text("""
-            insert into project_memberships (user_id, project_id, role, active, created_at)
-            values (:uid, :pid, :role, 1, :now)
-            on conflict (user_id, project_id) do update set role = :role, active = 1
+            insert into project_memberships (user_id, project_id, role, active, created_at, handover_deadline)
+            values (:uid, :pid, :role, 1, :now, :handover_dl)
+            on conflict (user_id, project_id) do update set role = :role, active = 1, handover_deadline = coalesce(:handover_dl, handover_deadline)
         """),
-        {"uid": account.id, "pid": target_pid, "role": inv["role"], "now": now},
+        {"uid": account.id, "pid": target_pid, "role": inv["role"], "now": now, "handover_dl": handover_dl},
     )
 
     try:
         session.execute(
             text("""
-                insert into members (id, project_id, name, role, active, email, is_demo)
-                values (:id, :pid, :name, :role, 1, :email, :demo)
-                on conflict (id) do update set project_id = :pid, role = :role, active = 1
+                insert into members (id, project_id, name, role, active, email, is_demo, handover_deadline)
+                values (:id, :pid, :name, :role, 1, :email, :demo, :handover_dl)
+                on conflict (id) do update set project_id = :pid, role = :role, active = 1, handover_deadline = coalesce(:handover_dl, handover_deadline)
             """),
             {
                 "id": account.id,
@@ -732,6 +759,7 @@ def join_project(
                 "role": inv["role"],
                 "email": account.email,
                 "demo": 1 if account.is_demo else 0,
+                "handover_dl": handover_dl,
             },
         )
     except Exception:
@@ -823,6 +851,40 @@ def switch_project(
     }
 
 
+def check_and_expire_leavers(session: Session, project_id: str | None = None) -> list[str]:
+    """Find active leavers whose handover_deadline has passed and automatically deactivate them."""
+    now_str = audit.now_iso()
+    today_str = now_str[:10]
+    query = """
+        select user_id, project_id, handover_deadline from project_memberships
+        where role = 'leaver' and active = 1 and handover_deadline is not null
+    """
+    params = {}
+    if project_id:
+        query += " and project_id = :pid"
+        params["pid"] = project_id
+    rows = session.execute(text(query), params).mappings().all()
+    expired_ids = []
+    for r in rows:
+        dl = r["handover_deadline"]
+        if dl and (dl < now_str or dl <= today_str):
+            session.execute(
+                text("update project_memberships set active = 0, handover_status = 'expired' where user_id = :uid and project_id = :pid"),
+                {"uid": r["user_id"], "pid": r["project_id"]},
+            )
+            try:
+                session.execute(
+                    text("update members set active = 0, handover_status = 'expired' where id = :uid and project_id = :pid"),
+                    {"uid": r["user_id"], "pid": r["project_id"]},
+                )
+            except Exception:
+                pass
+            expired_ids.append(r["user_id"])
+    if expired_ids:
+        session.commit()
+    return expired_ids
+
+
 @router.get("/projects/{project_id}/members", tags=["projects"])
 def list_project_members(
     project_id: str,
@@ -832,9 +894,11 @@ def list_project_members(
     if user.project_id != project_id:
         raise HTTPException(status_code=403, detail="Access denied to this project's members.")
 
+    check_and_expire_leavers(session, project_id)
+
     rows = session.execute(
         text("""
-            select u.id, u.name, u.email, u.is_demo, pm.role, pm.active, pm.created_at
+            select u.id, u.name, u.email, u.is_demo, pm.role, pm.active, pm.created_at, pm.handover_deadline, pm.handover_status
             from project_memberships pm
             join users u on u.id = pm.user_id
             where pm.project_id = :pid
@@ -846,7 +910,7 @@ def list_project_members(
     if not rows:
         rows = session.execute(
             text("""
-                select id, name, email, is_demo, role, active
+                select id, name, email, is_demo, role, active, handover_deadline, handover_status
                 from members
                 where project_id = :pid
             """),
@@ -858,9 +922,12 @@ def list_project_members(
             "id": r["id"],
             "name": r["name"],
             "email": r.get("email"),
-            "role": r["role"],
+            "role": "contributor" if r["role"] == "incoming_contributor" else r["role"],
+            "raw_role": r["role"],
             "active": bool(r["active"]),
             "is_demo": bool(r.get("is_demo", 0)),
+            "handover_deadline": r.get("handover_deadline"),
+            "handover_status": r.get("handover_status") or ("active" if bool(r["active"]) else "inactive"),
         }
         for r in rows
     ]
@@ -899,6 +966,12 @@ def update_project_member(
     if body.active is not None:
         updates.append("active = :active")
         params["active"] = 1 if body.active else 0
+    if body.handover_deadline is not None:
+        updates.append("handover_deadline = :handover_deadline")
+        params["handover_deadline"] = body.handover_deadline
+    if body.handover_status is not None:
+        updates.append("handover_status = :handover_status")
+        params["handover_status"] = body.handover_status
 
     if updates:
         session.execute(
@@ -937,12 +1010,312 @@ def update_project_member(
     return {"status": "updated", "member_id": member_id, "project_id": project_id}
 
 
+@router.post("/projects/{project_id}/members/{member_id}/complete-handover", tags=["projects"])
+def complete_leaver_handover(
+    project_id: str,
+    member_id: str,
+    user: User = Depends(current_user),
+    session: Session = Depends(get_session),
+):
+    if user.project_id != project_id or user.role != "approver":
+        raise HTTPException(status_code=403, detail="Only approvers can finalize member handover transitions.")
+
+    pm = session.execute(
+        text("select role, active from project_memberships where user_id = :uid and project_id = :pid"),
+        {"uid": member_id, "pid": project_id},
+    ).mappings().first()
+
+    if not pm:
+        raise HTTPException(status_code=404, detail="Member not found in project.")
+
+    session.execute(
+        text("update project_memberships set active = 0, handover_status = 'completed' where user_id = :uid and project_id = :pid"),
+        {"uid": member_id, "pid": project_id},
+    )
+    try:
+        session.execute(
+            text("update members set active = 0, handover_status = 'completed' where id = :uid and project_id = :pid"),
+            {"uid": member_id, "pid": project_id},
+        )
+    except Exception:
+        pass
+
+    session.commit()
+    audit.log(session, user, "projects.complete_handover", obj=f"{project_id}:{member_id}", detail="Completed handover transition; ended active membership while preserving historical contributions.")
+    return {"status": "completed", "member_id": member_id, "project_id": project_id, "active": False, "handover_status": "completed"}
+
+
+@router.get("/projects/{project_id}/members/{member_id}/remaining-tasks", tags=["projects"])
+def get_member_remaining_tasks(
+    project_id: str,
+    member_id: str,
+    user: User = Depends(current_user),
+    session: Session = Depends(get_session),
+):
+    if user.project_id != project_id or user.role != "approver":
+        raise HTTPException(status_code=403, detail="Only approvers can inspect remaining tasks for transition.")
+
+    member = session.execute(
+        text("select u.id, u.name, pm.role from users u join project_memberships pm on pm.user_id = u.id where u.id = :uid and pm.project_id = :pid"),
+        {"uid": member_id, "pid": project_id},
+    ).mappings().first()
+    if not member:
+        member = session.execute(
+            text("select id, name, role from members where id = :uid and project_id = :pid"),
+            {"uid": member_id, "pid": project_id},
+        ).mappings().first()
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found.")
+
+    m_name = member["name"]
+    m_id = member["id"]
+    m_role = member["role"]
+
+    # 1. Handover custom tasks
+    tasks = []
+    ht_rows = session.execute(
+        text("""
+            select id, title, kind, status, owner, due_date, notes, blocked_by, transferred_from, original_owner, is_transferred
+            from handover_tasks
+            where project_id = :pid and status != 'completed'
+              and (lower(owner) in (:uname, :uid, 'leaver') or created_by = :uid)
+        """),
+        {"pid": project_id, "uname": m_name.lower(), "uid": m_id.lower()},
+    ).mappings().all()
+    seen_ids = set()
+    for r in ht_rows:
+        seen_ids.add(r["id"])
+        tasks.append({
+            "id": r["id"],
+            "title": r["title"],
+            "kind": r["kind"] or "next_action",
+            "status": r["status"] or "not_started",
+            "due_date": r["due_date"],
+            "notes": r["notes"],
+            "original_owner": r["original_owner"] or m_name,
+            "transferred_from": r["transferred_from"],
+            "is_transferred": bool(r["is_transferred"]),
+            "source_type": "handover_task",
+        })
+
+    # 2. Plan action status items
+    pas_rows = session.execute(
+        text("""
+            select claim_id as id, status, owner, due_date, notes, transferred_from, original_owner, is_transferred
+            from plan_action_status
+            where project_id = :pid and status != 'completed'
+              and (lower(owner) in (:uname, :uid, 'leaver'))
+        """),
+        {"pid": project_id, "uname": m_name.lower(), "uid": m_id.lower()},
+    ).mappings().all()
+    for r in pas_rows:
+        if r["id"] not in seen_ids:
+            seen_ids.add(r["id"])
+            tasks.append({
+                "id": r["id"],
+                "title": f"Action on {r['id']}",
+                "kind": "next_action",
+                "status": r["status"] or "not_started",
+                "due_date": r["due_date"],
+                "notes": r["notes"],
+                "original_owner": r["original_owner"] or m_name,
+                "transferred_from": r["transferred_from"],
+                "is_transferred": bool(r["is_transferred"]),
+                "source_type": "plan_action_status",
+            })
+
+    # 3. Claims assigned to leaver
+    claim_rows = session.execute(
+        text("""
+            select id, statement as title, type as kind, state as status, owner, due_date, transferred_from, original_owner, is_transferred
+            from claims
+            where project_id = :pid
+              and (lower(owner) in (:uname, :uid, 'leaver') or lower(proposed_owner) in (:uname, :uid, 'leaver') or proposed_owner_id = :uid)
+              and state != 'verified'
+        """),
+        {"pid": project_id, "uname": m_name.lower(), "uid": m_id.lower()},
+    ).mappings().all()
+    for r in claim_rows:
+        if r["id"] not in seen_ids:
+            seen_ids.add(r["id"])
+            tasks.append({
+                "id": r["id"],
+                "title": r["title"],
+                "kind": r["kind"] or "next_action",
+                "status": r["status"] or "in_progress",
+                "due_date": r["due_date"],
+                "notes": None,
+                "original_owner": r["original_owner"] or m_name,
+                "transferred_from": r["transferred_from"],
+                "is_transferred": bool(r["is_transferred"]),
+                "source_type": "claim",
+            })
+
+    return {
+        "member_id": m_id,
+        "member_name": m_name,
+        "member_role": m_role,
+        "remaining_tasks_count": len(tasks),
+        "tasks": tasks,
+    }
+
+
+@router.post("/projects/{project_id}/members/{member_id}/transfer-tasks", tags=["projects"])
+def transfer_leaver_tasks(
+    project_id: str,
+    member_id: str,
+    body: TransferTasksRequest,
+    user: User = Depends(current_user),
+    session: Session = Depends(get_session),
+):
+    if user.project_id != project_id or user.role != "approver":
+        raise HTTPException(status_code=403, detail="Only approvers can reassign leaver tasks.")
+
+    leaver = session.execute(
+        text("select u.id, u.name from users u join project_memberships pm on pm.user_id = u.id where u.id = :uid and pm.project_id = :pid"),
+        {"uid": member_id, "pid": project_id},
+    ).mappings().first()
+    if not leaver:
+        leaver = session.execute(
+            text("select id, name from members where id = :uid and project_id = :pid"),
+            {"uid": member_id, "pid": project_id},
+        ).mappings().first()
+    if not leaver:
+        raise HTTPException(status_code=404, detail="Leaver not found in this project.")
+
+    target = session.execute(
+        text("select u.id, u.name, pm.role from users u join project_memberships pm on pm.user_id = u.id where u.id = :uid and pm.project_id = :pid and pm.active = 1"),
+        {"uid": body.target_member_id, "pid": project_id},
+    ).mappings().first()
+    if not target:
+        target = session.execute(
+            text("select id, name, role from members where id = :uid and project_id = :pid and active = 1"),
+            {"uid": body.target_member_id, "pid": project_id},
+        ).mappings().first()
+    if not target:
+        raise HTTPException(status_code=404, detail="Target contributor not found or inactive in this project.")
+
+    leaver_name = leaver["name"]
+    target_name = target["name"]
+    now = audit.now_iso()
+    transfer_note = f"Transferred from Leaver ({leaver_name})"
+
+    filter_ids = body.task_ids
+
+    # 1. Update handover_tasks
+    ht_query = """
+        update handover_tasks
+        set owner = :target_name,
+            transferred_from = :leaver_name,
+            original_owner = coalesce(original_owner, :leaver_name),
+            is_transferred = 1,
+            transfer_notes = :note,
+            updated_by = :uid,
+            updated_at = :now
+        where project_id = :pid and status != 'completed'
+    """
+    params = {
+        "target_name": target_name,
+        "leaver_name": leaver_name,
+        "note": transfer_note,
+        "uid": user.id,
+        "now": now,
+        "pid": project_id,
+        "lid": member_id.lower(),
+        "lname": leaver_name.lower(),
+    }
+    if filter_ids:
+        placeholders = ", ".join(f":ht_id_{i}" for i in range(len(filter_ids)))
+        ht_query += f" and id in ({placeholders})"
+        for i, fid in enumerate(filter_ids):
+            params[f"ht_id_{i}"] = fid
+    else:
+        ht_query += " and (lower(owner) in (:lname, :lid, 'leaver') or created_by = :lid)"
+
+    session.execute(text(ht_query), params)
+
+    # 2. Update plan_action_status
+    pas_query = """
+        update plan_action_status
+        set owner = :target_name,
+            transferred_from = :leaver_name,
+            original_owner = coalesce(original_owner, :leaver_name),
+            is_transferred = 1,
+            updated_by = :uid,
+            updated_at = :now
+        where project_id = :pid and status != 'completed'
+    """
+    pas_params = {
+        "target_name": target_name,
+        "leaver_name": leaver_name,
+        "uid": user.id,
+        "now": now,
+        "pid": project_id,
+        "lid": member_id.lower(),
+        "lname": leaver_name.lower(),
+    }
+    if filter_ids:
+        pas_placeholders = ", ".join(f":pas_id_{i}" for i in range(len(filter_ids)))
+        pas_query += f" and claim_id in ({pas_placeholders})"
+        for i, fid in enumerate(filter_ids):
+            pas_params[f"pas_id_{i}"] = fid
+    else:
+        pas_query += " and (lower(owner) in (:lname, :lid, 'leaver'))"
+
+    session.execute(text(pas_query), pas_params)
+
+    # 3. Update claims
+    c_query = """
+        update claims
+        set owner = :target_name,
+            transferred_from = :leaver_name,
+            original_owner = coalesce(original_owner, :leaver_name),
+            is_transferred = 1,
+            updated_at = :now
+        where project_id = :pid and state != 'verified'
+    """
+    c_params = {
+        "target_name": target_name,
+        "leaver_name": leaver_name,
+        "now": now,
+        "pid": project_id,
+        "lid": member_id.lower(),
+        "lname": leaver_name.lower(),
+    }
+    if filter_ids:
+        c_placeholders = ", ".join(f":c_id_{i}" for i in range(len(filter_ids)))
+        c_query += f" and id in ({c_placeholders})"
+        for i, fid in enumerate(filter_ids):
+            c_params[f"c_id_{i}"] = fid
+    else:
+        c_query += " and (lower(owner) in (:lname, :lid, 'leaver') or lower(proposed_owner) in (:lname, :lid, 'leaver') or proposed_owner_id = :lid)"
+
+    session.execute(text(c_query), c_params)
+
+    session.commit()
+    audit.log(
+        session,
+        user,
+        "tasks.transferred",
+        obj=f"{project_id}:{body.target_member_id}",
+        detail=f"Reassigned unfinished tasks from Leaver {leaver_name} to Contributor {target_name}",
+    )
+    return {
+        "status": "success",
+        "leaver_id": member_id,
+        "leaver_name": leaver_name,
+        "target_member_id": body.target_member_id,
+        "target_name": target_name,
+        "transferred_at": now,
+    }
+
+
 @router.get("/auth/invitations/validate", tags=["core"])
 def validate_invitation(code: str = Query(...), session: Session = Depends(get_session)):
     code_clean = code.strip()
     row = session.execute(
         text("""
-            select i.id, i.code, i.role, i.email, i.status, i.project_id, p.name as project_name
+            select i.id, i.code, i.role, i.email, i.status, i.project_id, i.handover_deadline, p.name as project_name
             from invitations i
             left join projects p on p.id = i.project_id
             where i.code = :code and i.status = 'active'
@@ -953,10 +1326,12 @@ def validate_invitation(code: str = Query(...), session: Session = Depends(get_s
         return {"valid": False, "detail": "Invalid or expired invitation code."}
     return {
         "valid": True,
-        "role": row["role"],
+        "role": "contributor" if row["role"] == "incoming_contributor" else row["role"],
+        "raw_role": row["role"],
         "email": row.get("email"),
         "project_id": row.get("project_id"),
         "project_name": row.get("project_name"),
+        "handover_deadline": row.get("handover_deadline"),
     }
 
 
@@ -1011,8 +1386,8 @@ def create_invitation(
 
     session.execute(
         text("""
-            insert into invitations (id, project_id, code, role, email, status, created_at)
-            values (:id, :project_id, :code, :role, :email, 'active', :created_at)
+            insert into invitations (id, project_id, code, role, email, status, handover_deadline, created_at)
+            values (:id, :project_id, :code, :role, :email, 'active', :handover_deadline, :created_at)
         """),
         {
             "id": inv_id,
@@ -1020,6 +1395,7 @@ def create_invitation(
             "code": code,
             "role": body.role,
             "email": email_clean,
+            "handover_deadline": body.handover_deadline,
             "created_at": now,
         },
     )
@@ -1032,6 +1408,7 @@ def create_invitation(
         "role": body.role,
         "email": email_clean,
         "status": "active",
+        "handover_deadline": body.handover_deadline,
         "created_at": now,
     }
 
@@ -1079,7 +1456,7 @@ def list_invitations(
 
     rows = session.execute(
         text("""
-            select i.id, i.project_id, i.code, i.role, i.email, i.status, i.created_at, i.used_by, i.used_at,
+            select i.id, i.project_id, i.code, i.role, i.email, i.status, i.created_at, i.used_by, i.used_at, i.handover_deadline,
                    coalesce(u.name, m.name) as used_by_name
             from invitations i
             left join users u on u.id = i.used_by
@@ -1095,13 +1472,15 @@ def list_invitations(
             "id": r["id"],
             "project_id": r["project_id"],
             "code": r["code"],
-            "role": r["role"],
+            "role": "contributor" if r["role"] == "incoming_contributor" else r["role"],
+            "raw_role": r["role"],
             "email": r["email"],
             "status": "redeemed" if r["status"] == "used" else r["status"],
             "created_at": r["created_at"],
             "used_by": r["used_by"],
             "used_by_name": r["used_by_name"],
             "used_at": r["used_at"],
+            "handover_deadline": r.get("handover_deadline"),
         }
         for r in rows
     ]

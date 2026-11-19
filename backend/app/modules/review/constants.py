@@ -8,11 +8,15 @@ class Role(StrEnum):
     APPROVER = "approver"
     LEAVER = "leaver"
     INCOMING_MAINTAINER = "incoming_maintainer"
+    CONTRIBUTOR = "contributor"
     INCOMING_CONTRIBUTOR = "incoming_contributor"
 
 
 INCOMING_ROLES: frozenset[str] = frozenset(
     {Role.INCOMING_MAINTAINER.value, Role.INCOMING_CONTRIBUTOR.value}
+)
+VALID_SHARE_ROLES: frozenset[str] = frozenset(
+    {Role.INCOMING_MAINTAINER.value, Role.INCOMING_CONTRIBUTOR.value, Role.CONTRIBUTOR.value}
 )
 
 

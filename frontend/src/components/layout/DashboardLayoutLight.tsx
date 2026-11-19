@@ -141,6 +141,7 @@ export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
     approver: ["/dashboard", "/sources", "/ledger", "/graph", "/risk", "/review", "/handover", "/access", "/audit", "/settings"],
     leaver: ["/dashboard", "/ledger", "/graph", "/risk", "/review", "/audit", "/settings"],
     incoming_maintainer: ["/dashboard", "/ledger", "/graph", "/risk", "/review", "/handover", "/settings"],
+    contributor: ["/dashboard", "/ledger", "/graph", "/review", "/handover", "/settings"],
     incoming_contributor: ["/dashboard", "/ledger", "/graph", "/review", "/handover", "/settings"],
   };
 
@@ -383,7 +384,7 @@ export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
                         { role: "approver", name: "Approver (Engineering Lead)" },
                         { role: "leaver", name: "Aarav (Departing Lead)" },
                         { role: "incoming_maintainer", name: "Meera (Incoming Maintainer)" },
-                        { role: "incoming_contributor", name: "Incoming Contributor" },
+                        { role: "contributor", name: "Contributor" },
                       ] as const
                     ).map(({ role, name }) => (
                       <button

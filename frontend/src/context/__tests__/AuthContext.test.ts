@@ -46,7 +46,8 @@ describe("formatUser", () => {
       { role: "approver", expectedTitle: "Project Admin" },
       { role: "leaver", expectedTitle: "Departing Lead" },
       { role: "incoming_maintainer", expectedTitle: "Incoming Maintainer" },
-      { role: "incoming_contributor", expectedTitle: "Incoming Contributor" },
+      { role: "incoming_contributor", expectedTitle: "Contributor" },
+      { role: "contributor", expectedTitle: "Contributor" },
     ];
 
     roles.forEach(({ role, expectedTitle }) => {
@@ -66,7 +67,8 @@ describe("formatUser", () => {
     expect(formatUserDropdownRole({ name: "Aarav", role: "leaver" })).toBe("Aarav (Departing Lead)");
     expect(formatUserDropdownRole({ name: "Meera", role: "incoming_maintainer" })).toBe("Meera (Incoming Maintainer)");
     expect(formatUserDropdownRole({ name: "Samiksha", role: "approver" })).toBe("Samiksha (Engineering Lead)");
-    expect(formatUserDropdownRole({ name: "Priya", role: "incoming_contributor" })).toBe("Priya (Incoming Contributor)");
+    expect(formatUserDropdownRole({ name: "Priya", role: "incoming_contributor" })).toBe("Priya (Contributor)");
+    expect(formatUserDropdownRole({ name: "Priya", role: "contributor" })).toBe("Priya (Contributor)");
     // Verifies name is fetched from profile and NOT from email
     expect(formatUserDropdownRole({ name: "Aarav", email: "somebody.else@example.com", role: "leaver" })).toBe("Aarav (Departing Lead)");
   });

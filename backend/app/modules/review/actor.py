@@ -22,7 +22,11 @@ class Actor:
 
 
 def require_roles(actor: Actor, *allowed: Role) -> None:
-    if actor.role not in {r.value for r in allowed}:
+    allowed_roles = {r.value for r in allowed}
+    if Role.CONTRIBUTOR in allowed or Role.INCOMING_CONTRIBUTOR in allowed:
+        allowed_roles.add(Role.CONTRIBUTOR.value)
+        allowed_roles.add(Role.INCOMING_CONTRIBUTOR.value)
+    if actor.role not in allowed_roles:
         raise ReviewError(
             403, "forbidden", "Your role cannot perform this action."
         )

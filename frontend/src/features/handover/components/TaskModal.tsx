@@ -148,6 +148,28 @@ export function TaskModal({
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
+          {task?.is_transferred && (
+            <div
+              data-testid="task-transferred-banner"
+              className="p-3.5 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs shadow-xs"
+            >
+              <div className="font-bold flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md bg-amber-200 dark:bg-amber-900/80 text-[10px] uppercase font-extrabold tracking-wider border border-amber-300 dark:border-amber-600/40">
+                  Transferred from Leaver
+                </span>
+                {task.transferred_from && <span>Transferred by {task.transferred_from}</span>}
+              </div>
+              <div className="mt-1.5 text-[11px] text-amber-800 dark:text-amber-300">
+                Original owner: <strong className="font-semibold">{task.original_owner || task.transferred_from || "Leaver"}</strong> • Currently assigned to: <strong className="font-semibold">{task.owner || "Contributor"}</strong>
+              </div>
+              {task.transfer_notes && (
+                <div className="mt-1 text-[11px] italic text-amber-700 dark:text-amber-400">
+                  Notes: {task.transfer_notes}
+                </div>
+              )}
+            </div>
+          )}
+
           {errorMsg && (
             <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 text-xs font-medium dark:bg-rose-950/50 dark:border-rose-500/40 dark:text-rose-200 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />

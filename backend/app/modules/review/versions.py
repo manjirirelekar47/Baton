@@ -5,7 +5,7 @@ import hashlib
 import json
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -161,6 +161,26 @@ def approve(ctx: Ctx, req: ApproveRequest) -> VersionOut:
     ctx.claims.mark_review_state(
         ctx.project_id, [i["claim_id"] for i in items if not i["unknown"]], APPROVED_STATE
     )
+    # Automatic transition completion for Leavers: active project membership ends upon handover approval
+    try:
+        session.execute(
+            text("""
+                update project_memberships
+                set active = 0, handover_status = 'completed'
+                where project_id = :pid and role = 'leaver' and active = 1
+            """),
+            {"pid": ctx.project_id},
+        )
+        session.execute(
+            text("""
+                update members
+                set active = 0, handover_status = 'completed'
+                where project_id = :pid and role = 'leaver' and active = 1
+            """),
+            {"pid": ctx.project_id},
+        )
+    except Exception:
+        pass
     record_event(
         session, ctx.actor, "version.approve", "version", version.id,
         {"version_number": number, "hash": version.snapshot_hash,
