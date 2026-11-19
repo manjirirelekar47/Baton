@@ -5,12 +5,14 @@ EXPECTED_READ = {
     "approver": {"L1", "L2", "L3"},
     "leaver": {"L1", "L2"},
     "incoming_maintainer": {"L1", "L2"},
+    "contributor": {"L1"},
     "incoming_contributor": {"L1"},
 }
 EXPECTED_COUNT = {
     "approver": set(),
     "leaver": {"L3"},
     "incoming_maintainer": {"L3"},
+    "contributor": {"L2", "L3"},
     "incoming_contributor": {"L2", "L3"},
 }
 

@@ -31,8 +31,8 @@ const roleGuardedFeatureRoutes = featureRoutes
   .map((route) => {
     let allowed: Role[] | undefined;
     if (route.path === "sources") allowed = ["approver"];
-    else if (route.path === "review") allowed = ["approver", "leaver", "incoming_maintainer", "incoming_contributor"];
-    else if (route.path === "handover") allowed = ["approver", "incoming_maintainer", "incoming_contributor"];
+    else if (route.path === "review") allowed = ["approver", "leaver", "incoming_maintainer", "contributor", "incoming_contributor"];
+    else if (route.path === "handover") allowed = ["approver", "incoming_maintainer", "contributor", "incoming_contributor"];
     else if (route.path === "risk") allowed = ["approver", "leaver", "incoming_maintainer"];
 
     if (allowed) {
@@ -99,7 +99,7 @@ export const router = createBrowserRouter([
       {
         path: "graph",
         element: (
-          <ProtectedRoute allowedRoles={["approver", "leaver", "incoming_maintainer", "incoming_contributor"]}>
+          <ProtectedRoute allowedRoles={["approver", "leaver", "incoming_maintainer", "contributor", "incoming_contributor"]}>
             <GraphPage />
           </ProtectedRoute>
         ),

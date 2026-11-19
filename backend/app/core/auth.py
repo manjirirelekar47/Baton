@@ -367,7 +367,7 @@ def current_user(
         if active_pid:
             row = session.execute(
                 text("""
-                    select u.id, u.name, u.email, u.is_demo, pm.role, pm.project_id, pm.active
+                    select u.id, u.name, u.email, u.is_demo, pm.role, pm.project_id, pm.active, pm.handover_deadline, pm.handover_status
                     from users u
                     join project_memberships pm on pm.user_id = u.id
                     where u.id = :uid and pm.project_id = :pid
@@ -377,7 +377,7 @@ def current_user(
         else:
             row = session.execute(
                 text("""
-                    select u.id, u.name, u.email, u.is_demo, pm.role, pm.project_id, pm.active
+                    select u.id, u.name, u.email, u.is_demo, pm.role, pm.project_id, pm.active, pm.handover_deadline, pm.handover_status
                     from users u
                     join project_memberships pm on pm.user_id = u.id
                     where u.id = :uid
@@ -386,6 +386,24 @@ def current_user(
                 """),
                 {"uid": uid},
             ).mappings().first()
+
+        if row is not None and row["role"] == "leaver" and row["active"]:
+            dl = row.get("handover_deadline")
+            now_str = _now_iso()
+            if dl and (dl < now_str or dl <= now_str[:10]):
+                try:
+                    session.execute(
+                        text("update project_memberships set active = 0, handover_status = 'expired' where user_id = :uid and project_id = :pid"),
+                        {"uid": uid, "pid": row["project_id"]},
+                    )
+                    session.execute(
+                        text("update members set active = 0, handover_status = 'expired' where id = :uid and project_id = :pid"),
+                        {"uid": uid, "pid": row["project_id"]},
+                    )
+                    session.commit()
+                except Exception:
+                    pass
+                raise _unauthorised("Your handover period has ended and your active project membership has expired.")
 
         if row is None or not row["active"]:
             raise _unauthorised("This account no longer has access to the project.")

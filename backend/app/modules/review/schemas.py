@@ -11,6 +11,7 @@ from .constants import (
     MAX_GAP_ANSWER_LEN,
     MAX_NOTE_LEN,
     MAX_STATEMENT_LEN,
+    VALID_SHARE_ROLES,
     ReviewAction,
 )
 
@@ -125,7 +126,7 @@ class ApproveRequest(BaseModel):
     @field_validator("shared_to_roles")
     @classmethod
     def _only_incoming_roles(cls, v: list[str]) -> list[str]:
-        bad = [r for r in v if r not in INCOMING_ROLES]
+        bad = [r for r in v if r not in VALID_SHARE_ROLES]
         if bad:
             raise ValueError(f"unknown or non-shareable roles: {bad}")
         return sorted(set(v))

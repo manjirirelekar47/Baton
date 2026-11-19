@@ -89,8 +89,21 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     let detail = response.statusText;
     try {
       const data = await response.json();
-      if (typeof data.detail === "string") detail = data.detail;
-      else if (Array.isArray(data.detail)) detail = "The request was not valid.";
+      if (typeof data.detail === "string") {
+        detail = data.detail;
+      } else if (Array.isArray(data.detail)) {
+        detail = data.detail
+          .map((item: { loc?: (string | number)[]; msg?: string }) => {
+            const field = Array.isArray(item.loc)
+              ? item.loc.filter((part) => part !== "body").join(".")
+              : "";
+            return field && item.msg ? `${field}: ${item.msg}` : item.msg || "Invalid value";
+          })
+          .filter(Boolean)
+          .join("; ") || "The request was not valid.";
+      } else if (data.message && typeof data.message === "string") {
+        detail = data.message;
+      }
     } catch {
       /* keep statusText */
     }

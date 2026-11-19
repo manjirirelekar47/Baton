@@ -51,6 +51,7 @@ export type Role =
   | "approver"
   | "leaver"
   | "incoming_maintainer"
+  | "contributor"
   | "incoming_contributor";
 
 export type ClaimState =
@@ -140,6 +141,7 @@ export interface InvitationItem {
   used_by?: string | null;
   used_by_name?: string | null;
   used_at?: string | null;
+  handover_deadline?: string | null;
 }
 
 export interface DemoLoginResponse {
@@ -177,6 +179,10 @@ export interface ClaimItem {
   evidence: EvidenceItem[];
   conflict_with?: string[];
   suggested_claim_id?: string | null;
+  is_transferred?: boolean;
+  transferred_from?: string | null;
+  original_owner?: string | null;
+  transfer_notes?: string | null;
 }
 
 export interface ClaimsListResponse {
@@ -261,8 +267,43 @@ export interface ProjectMember {
   name: string;
   email?: string | null;
   role: Role;
+  raw_role?: Role | string;
   active: boolean;
   is_demo?: boolean;
+  handover_deadline?: string | null;
+  handover_status?: string | null;
+}
+
+export interface RemainingTaskItem {
+  id: string;
+  type: "task" | "claim";
+  title: string;
+  status: string;
+  due?: string | null;
+  priority?: string | null;
+  is_transferred?: boolean;
+  transferred_from?: string | null;
+  original_owner?: string | null;
+  transfer_notes?: string | null;
+}
+
+export interface RemainingTasksResponse {
+  member_id: string;
+  member_name: string;
+  role: string;
+  tasks_count: number;
+  claims_count: number;
+  total_count: number;
+  tasks: RemainingTaskItem[];
+  claims: RemainingTaskItem[];
+}
+
+export interface TransferTasksResponse {
+  status: string;
+  transferred_tasks: number;
+  transferred_claims: number;
+  target_member_id: string;
+  target_member_name: string;
 }
 
 export interface SourceItem {
@@ -558,8 +599,12 @@ export const batonApi = {
     ),
   validateInvitation: (code: string) =>
     apiClient.get<ValidateInvitationResponse>(`/auth/invitations/validate?code=${encodeURIComponent(code)}`),
-  createInvitation: (role: Role = "approver", email?: string, projectId?: string) =>
-    apiClient.post<InvitationItem>(projectId ? `/projects/${projectId}/invitations` : "/auth/invitations", { role, email }),
+  createInvitation: (role: Role = "approver", email?: string, projectId?: string, handoverDeadline?: string) =>
+    apiClient.post<InvitationItem>(projectId ? `/projects/${projectId}/invitations` : "/auth/invitations", {
+      role,
+      email,
+      handover_deadline: handoverDeadline || undefined,
+    }),
   getInvitations: (projectId?: string) =>
     apiClient.get<InvitationItem[]>(projectId ? `/projects/${projectId}/invitations` : "/auth/invitations"),
   revokeInvitation: (id: string) =>
@@ -571,6 +616,17 @@ export const batonApi = {
   getProjects: () => apiClient.get<ProjectItem[]>("/projects"),
   getProjectMembers: (projectId: string) =>
     apiClient.get<ProjectMember[]>(`/projects/${projectId}/members`),
+  getRemainingTasks: (projectId: string, memberId: string) =>
+    apiClient.get<RemainingTasksResponse>(`/projects/${projectId}/members/${memberId}/remaining-tasks`),
+  transferMemberTasks: (projectId: string, memberId: string, targetMemberId: string, taskIds?: string[]) =>
+    apiClient.post<TransferTasksResponse>(`/projects/${projectId}/members/${memberId}/transfer-tasks`, {
+      target_member_id: targetMemberId,
+      task_ids: taskIds,
+    }),
+  completeMemberHandover: (projectId: string, memberId: string) =>
+    apiClient.post<{ status: string; member_id: string; active: boolean; handover_status: string }>(
+      `/projects/${projectId}/members/${memberId}/complete-handover`
+    ),
   createProject: (name: string) =>
     apiClient.post<{ project: ProjectItem; token: string; user: UserProfile }>("/projects", { name }),
   joinProject: (invitation_code: string) =>

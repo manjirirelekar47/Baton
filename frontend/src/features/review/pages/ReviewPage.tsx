@@ -125,7 +125,7 @@ export function ReviewPage() {
   }
 
   // Role: Incoming Reader / Contributor
-  if (user?.role === "incoming_maintainer" || user?.role === "incoming_contributor") {
+  if (user?.role === "incoming_maintainer" || user?.role === "contributor" || user?.role === "incoming_contributor") {
     return (
       <section className="space-y-6 max-w-7xl mx-auto w-full pb-12">
         <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Handover Checklist & Review</h1>

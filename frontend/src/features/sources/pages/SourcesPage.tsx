@@ -238,6 +238,7 @@ export function SourcesPage() {
         {
           method: "POST",
           body: {
+            provider: payload.provider,
             target_name: payload.target_name,
             acl_label: payload.acl_label,
             consent: payload.consent,

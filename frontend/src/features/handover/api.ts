@@ -23,6 +23,10 @@ export interface ClaimView {
   blocked_by: string[];
   attested_by: string | null;
   evidence: EvidenceView[];
+  is_transferred?: boolean;
+  transferred_from?: string | null;
+  original_owner?: string | null;
+  transfer_notes?: string | null;
 }
 
 export interface SectionView {
@@ -61,6 +65,10 @@ export interface PlanItem {
   action_updated_at?: string | null;
   action_updated_by?: string | null;
   evidence: EvidenceView[];
+  is_transferred?: boolean;
+  transferred_from?: string | null;
+  original_owner?: string | null;
+  transfer_notes?: string | null;
 }
 
 export type PlanBuckets = { day_1: PlanItem[]; week_1: PlanItem[]; month_1: PlanItem[] };

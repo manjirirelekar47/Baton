@@ -83,10 +83,15 @@ export const ROLE_DETAILS: Record<Role, { title: string; email: string; avatarTe
     email: "maintainer@baton.internal",
     avatarText: "IM",
   },
-  incoming_contributor: {
-    title: "Incoming Contributor",
+  contributor: {
+    title: "Contributor",
     email: "contributor@baton.internal",
-    avatarText: "IC",
+    avatarText: "CO",
+  },
+  incoming_contributor: {
+    title: "Contributor",
+    email: "contributor@baton.internal",
+    avatarText: "CO",
   },
 };
 
@@ -108,8 +113,8 @@ export function formatUserDropdownRole(
     roleTitle = "Departing Lead";
   } else if (user.role === "incoming_maintainer") {
     roleTitle = "Incoming Maintainer";
-  } else if (user.role === "incoming_contributor") {
-    roleTitle = "Incoming Contributor";
+  } else if (user.role === "contributor" || user.role === "incoming_contributor") {
+    roleTitle = "Contributor";
   } else if (user.role === "approver") {
     roleTitle = "Engineering Lead";
   } else if (user.displayRole) {
@@ -140,7 +145,7 @@ export function formatUser(
     rawUser.is_demo !== undefined
       ? Boolean(rawUser.is_demo)
       : rawUser.id.startsWith("u-") &&
-        ["approver", "leaver", "incoming_maintainer", "incoming_contributor"].includes(rawUser.role);
+        ["approver", "leaver", "incoming_maintainer", "contributor", "incoming_contributor"].includes(rawUser.role);
 
   let displayRole = meta.title;
   if (!is_demo && rawUser.name && rawUser.name.trim()) {

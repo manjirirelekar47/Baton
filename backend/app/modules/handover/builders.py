@@ -5,8 +5,8 @@ Output is built from an explicit whitelist of fields rendered through fixed temp
 no free-text summariser, and nothing the viewer may not see can reach the response."""
 from app.core import acl
 
-VIEW_ROLES = {"approver", "incoming_maintainer", "incoming_contributor"}
-ACK_ROLES = {"incoming_maintainer", "incoming_contributor"}
+VIEW_ROLES = {"approver", "incoming_maintainer", "incoming_contributor", "contributor"}
+ACK_ROLES = {"incoming_maintainer", "incoming_contributor", "contributor"}
 
 SECTIONS = [
     ("ownership", "Ownership"),
@@ -67,6 +67,9 @@ def project_claim(claim: dict, viewer_id: str, visible_ids: set[str]) -> dict:
         "blocked_by": [b for b in claim.get("blocked_by", []) if b in visible_ids],
         "attested_by": claim.get("attested_by"),
         "evidence": [project_evidence(e) for e in claim.get("evidence", [])],
+        "is_transferred": bool(claim.get("is_transferred", False)),
+        "transferred_from": claim.get("transferred_from"),
+        "original_owner": claim.get("original_owner"),
     }
 
 
@@ -138,6 +141,9 @@ def build_plan(visible_claims: list[dict], viewer_id: str) -> dict[str, list[dic
             "cycle": in_cycle,
             "level": lvl,
             "evidence": projected["evidence"],
+            "is_transferred": bool(claim.get("is_transferred", False)),
+            "transferred_from": claim.get("transferred_from"),
+            "original_owner": claim.get("original_owner"),
         })
     rows.sort(key=lambda r: (r["level"], not r["cycle"], _KIND_RANK[r["kind"]], r["due_date"] or "9999-99-99", r["claim_id"]))
 

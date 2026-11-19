@@ -142,6 +142,29 @@ def revoke_connection(
     return public.revoke_connection(user.project_id, connection_id, session)
 
 
+def _resolve_callback_uri(request: Request, provider: str) -> str:
+    """Resolve the OAuth callback redirect URI consistently for authorization and code exchange."""
+    prov_key = f"OAUTH_CALLBACK_URL_{provider.upper()}"
+    specific = os.environ.get(prov_key) or os.environ.get(f"{provider.upper()}_OAUTH_CALLBACK_URL")
+    if specific:
+        return specific
+
+    env_callback = os.environ.get("OAUTH_CALLBACK_URL")
+    if env_callback:
+        if "{provider}" in env_callback:
+            return env_callback.format(provider=provider)
+        if env_callback.rstrip("/").endswith(f"/sources/oauth/{provider}/callback"):
+            return env_callback
+        if not env_callback.rstrip("/").endswith("/callback"):
+            return f"{env_callback.rstrip('/')}/sources/oauth/{provider}/callback"
+        return env_callback
+
+    # Respect reverse-proxy forwarded headers (e.g. Render HTTPS reverse proxy)
+    proto = request.headers.get("x-forwarded-proto") or request.url.scheme or "http"
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or str(request.base_url.netloc)
+    return f"{proto}://{host.rstrip('/')}/sources/oauth/{provider}/callback"
+
+
 @router.post("/sources/connections/{connection_id}/reauthorize", response_model=ReauthorizeResponse)
 def reauthorize_connection(
     connection_id: str,
@@ -155,7 +178,7 @@ def reauthorize_connection(
     if not conn:
         raise HTTPException(status_code=404, detail="Source connection not found.")
     provider = conn["provider"]
-    callback_uri = os.environ.get("OAUTH_CALLBACK_URL") or f"{str(request.base_url).rstrip('/')}/sources/oauth/{provider}/callback"
+    callback_uri = _resolve_callback_uri(request, provider)
     result = public.reauthorize_connection(user.project_id, user.id, connection_id, session, redirect_uri=callback_uri)
     return ReauthorizeResponse(
         authorization_url=result["authorization_url"],
@@ -196,10 +219,15 @@ def oauth_authorize(
 ):
     if provider not in ("github", "jira"):
         raise HTTPException(status_code=400, detail=f"Unsupported OAuth provider: {provider}")
+    if body.provider != provider:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Provider mismatch: URL path specifies '{provider}' but request body specifies '{body.provider}'.",
+        )
     if not service.can_manage_sources(user.role):
         raise HTTPException(status_code=403, detail="Only the project approver can connect sources.")
 
-    callback_uri = os.environ.get("OAUTH_CALLBACK_URL") or f"{str(request.base_url).rstrip('/')}/sources/oauth/{provider}/callback"
+    callback_uri = _resolve_callback_uri(request, provider)
 
     state = crypto.generate_oauth_state(
         session,
@@ -247,7 +275,7 @@ def oauth_callback(
         redirect_url = f"{frontend_base}/sources?oauth=error&provider={provider}&message=Missing%20authorization%20code%20or%20state"
         return RedirectResponse(url=redirect_url)
 
-    callback_uri = os.environ.get("OAUTH_CALLBACK_URL") or f"{str(request.base_url).rstrip('/')}/sources/oauth/{provider}/callback"
+    callback_uri = _resolve_callback_uri(request, provider)
 
     try:
         result = public.complete_oauth_flow(
@@ -283,7 +311,7 @@ def oauth_exchange(
     if not service.can_manage_sources(user.role):
         raise HTTPException(status_code=403, detail="Only the project approver can exchange OAuth tokens.")
 
-    callback_uri = os.environ.get("OAUTH_CALLBACK_URL") or f"{str(request.base_url).rstrip('/')}/sources/oauth/{provider}/callback"
+    callback_uri = _resolve_callback_uri(request, provider)
 
     try:
         result = public.complete_oauth_flow(

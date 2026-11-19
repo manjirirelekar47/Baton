@@ -98,6 +98,8 @@ def is_task_assigned_to_user(task: dict, user: User) -> bool:
 
     if owner and (owner == u_name or owner == u_id or owner == u_role):
         return True
+    if user.role in ("contributor", "incoming_contributor") and owner in ("contributor", "incoming_contributor", "incoming contributor"):
+        return True
     if prop_owner_id and prop_owner_id == user.id:
         return True
     if prop_owner and (prop_owner == u_name or prop_owner == u_role):
@@ -294,7 +296,7 @@ def get_plan(session: Session, user: User, version_id: str) -> dict:
         custom_deps.setdefault(d["task_id"], []).append(d["blocked_by_id"])
 
     status_rows = session.execute(
-        text("select claim_id, status, owner, due_date, notes, updated_by, updated_at from plan_action_status where version_id = :v"),
+        text("select claim_id, status, owner, due_date, notes, updated_by, updated_at, transferred_from, original_owner, is_transferred from plan_action_status where version_id = :v"),
         {"v": version_id},
     ).mappings().all()
     status_map = {r["claim_id"]: dict(r) for r in status_rows}
@@ -314,11 +316,17 @@ def get_plan(session: Session, user: User, version_id: str) -> dict:
                 item["owner"] = s["owner"]
             if s.get("due_date") is not None:
                 item["due_date"] = s["due_date"]
+            if s.get("transferred_from") is not None:
+                item["transferred_from"] = s["transferred_from"]
+            if s.get("original_owner") is not None:
+                item["original_owner"] = s["original_owner"]
+            if s.get("is_transferred") is not None:
+                item["is_transferred"] = bool(s["is_transferred"])
         visible_items.append(item)
 
     # Add custom tasks
     custom_tasks = session.execute(
-        text("select id, version_id, project_id, title, kind, status, owner, due_date, notes, blocked_by, created_by, created_at, updated_by, updated_at "
+        text("select id, version_id, project_id, title, kind, status, owner, due_date, notes, blocked_by, created_by, created_at, updated_by, updated_at, transferred_from, original_owner, is_transferred "
              "from handover_tasks where version_id = :v and id not in (select task_id from plan_deleted_tasks where version_id = :v)"),
         {"v": version_id},
     ).mappings().all()
@@ -339,6 +347,9 @@ def get_plan(session: Session, user: User, version_id: str) -> dict:
             "evidence": [],
             "notes": ct["notes"],
             "is_custom": True,
+            "transferred_from": ct.get("transferred_from"),
+            "original_owner": ct.get("original_owner"),
+            "is_transferred": bool(ct.get("is_transferred", 0)),
         })
 
     plan = builders.build_plan(visible_items, user.id)
@@ -357,6 +368,9 @@ def get_plan(session: Session, user: User, version_id: str) -> dict:
                 item["owner"] = ct["owner"]
                 item["due_date"] = ct["due_date"]
                 item["is_custom"] = True
+                item["is_transferred"] = bool(ct.get("is_transferred", 0))
+                item["transferred_from"] = ct.get("transferred_from")
+                item["original_owner"] = ct.get("original_owner")
             elif cid in status_map:
                 s = status_map[cid]
                 item["action_status"] = s["status"]
@@ -368,6 +382,9 @@ def get_plan(session: Session, user: User, version_id: str) -> dict:
                 if s.get("due_date"):
                     item["due_date"] = s["due_date"]
                 item["is_custom"] = False
+                item["is_transferred"] = bool(s.get("is_transferred", 0))
+                item["transferred_from"] = s.get("transferred_from")
+                item["original_owner"] = s.get("original_owner")
             else:
                 item["action_status"] = "not_started"
                 item["action_notes"] = None

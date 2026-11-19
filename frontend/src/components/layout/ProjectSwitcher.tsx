@@ -6,7 +6,8 @@ const PROJECT_ROLE_TITLES: Record<string, string> = {
   approver: "Engineering Lead",
   leaver: "Departing Lead",
   incoming_maintainer: "Incoming Maintainer",
-  incoming_contributor: "Incoming Contributor",
+  contributor: "Contributor",
+  incoming_contributor: "Contributor",
 };
 
 export function ProjectSwitcher() {

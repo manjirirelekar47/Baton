@@ -238,7 +238,7 @@ export const PlaceholderPageLight: React.FC = () => {
                   <th className="py-2.5 px-3">Classification Label</th>
                   <th className="py-2.5 px-3">Approver</th>
                   <th className="py-2.5 px-3">Incoming Maintainer</th>
-                  <th className="py-2.5 px-3">Incoming Contributor</th>
+                  <th className="py-2.5 px-3">Contributor</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">

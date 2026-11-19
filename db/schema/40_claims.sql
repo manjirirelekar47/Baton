@@ -18,6 +18,9 @@ create table if not exists claims (
   blocked_by_json text not null default '[]',
   attested_by text,
   conflict_with_json text not null default '[]',
+  transferred_from text,
+  original_owner text,
+  is_transferred integer not null default 0,
   created_at text not null,
   updated_at text not null
 );

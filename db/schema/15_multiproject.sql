@@ -31,9 +31,11 @@ where not exists (
 create table if not exists project_memberships (
   user_id text not null references users(id),
   project_id text not null references projects(id),
-  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'incoming_contributor')),
+  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'contributor', 'incoming_contributor')),
   active integer not null default 1,
   created_at text not null,
+  handover_deadline text,
+  handover_status text,
   primary key (user_id, project_id)
 );
 
