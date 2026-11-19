@@ -12,9 +12,8 @@
  */
 
 import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { batonApi, GraphNode, GraphEdge, KnowledgeGraphData } from "@/api/client";
 import { GraphSummaryCards } from "../components/GraphSummaryCards";
@@ -24,7 +23,6 @@ import { NodeDetailsPanel } from "../components/NodeDetailsPanel";
 import { SourceDrawer } from "@/features/sources/components/SourceDrawer";
 
 export const GraphPage: React.FC = () => {
-  const navigate = useNavigate();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -125,27 +123,13 @@ export const GraphPage: React.FC = () => {
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                  isDark
-                    ? "border-white/10 bg-white/5 hover:bg-white/10 text-gray-200"
-                    : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
-                }`}
-                aria-label="Go back"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <h1
-                className={`text-2xl sm:text-3xl font-bold tracking-tight font-display ${
-                  isDark ? "text-white" : "text-slate-900"
-                }`}
-              >
-                Knowledge Graph
-              </h1>
-            </div>
+            <h1
+              className={`text-2xl sm:text-3xl font-bold tracking-tight font-display ${
+                isDark ? "text-white" : "text-slate-900"
+              }`}
+            >
+              Knowledge Graph
+            </h1>
 
             <p
               className={`text-sm sm:text-base leading-relaxed ${

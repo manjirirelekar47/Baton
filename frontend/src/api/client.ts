@@ -256,6 +256,27 @@ export interface ReviewActionPayload {
   chosen_claim_id?: string;
 }
 
+export interface ProjectMember {
+  id: string;
+  name: string;
+  email?: string | null;
+  role: Role;
+  active: boolean;
+  is_demo?: boolean;
+}
+
+export interface SourceItem {
+  source_id: string;
+  project_id: string;
+  title: string;
+  type: string;
+  acl_label: string;
+  status: string;
+  chunks: number;
+  note?: string | null;
+  created_at?: string | null;
+}
+
 export interface GraphNode {
   id: string;
   label: string;
@@ -548,12 +569,17 @@ export const batonApi = {
 
   // Projects & Multi-Project
   getProjects: () => apiClient.get<ProjectItem[]>("/projects"),
+  getProjectMembers: (projectId: string) =>
+    apiClient.get<ProjectMember[]>(`/projects/${projectId}/members`),
   createProject: (name: string) =>
     apiClient.post<{ project: ProjectItem; token: string; user: UserProfile }>("/projects", { name }),
   joinProject: (invitation_code: string) =>
     apiClient.post<{ project: ProjectItem; token: string; user: UserProfile }>("/projects/join", { invitation_code }),
   switchProject: (project_id: string) =>
     apiClient.post<SwitchProjectResponse>("/auth/switch-project", { project_id }),
+
+  // Sources & Evidence
+  getSources: () => apiClient.get<SourceItem[]>("/sources"),
 
   // Claims & Ledger
   getClaims: () => apiClient.get<ClaimsListResponse>("/claims"),

@@ -102,11 +102,11 @@ export function DashboardPage() {
   };
 
   // Compute live metrics or defaults
-  const flaggedCount = radarData?.filter((r) => r.flagged).length ?? 3;
-  const verifiedCount = queueData?.items.filter((i) => i.state.toLowerCase() === "verified").length ?? 24;
-  const totalClaims = queueData?.total ?? 28;
-  const verifiedPercentage = totalClaims > 0 ? Math.round((verifiedCount / totalClaims) * 100) : 95;
-  const isReady = readinessData?.ready ?? true;
+  const flaggedCount = radarData?.filter((r) => r.flagged).length ?? 0;
+  const verifiedCount = queueData?.items.filter((i) => i.state.toLowerCase() === "verified").length ?? 0;
+  const totalClaims = queueData?.total ?? 0;
+  const verifiedPercentage = totalClaims > 0 ? Math.round((verifiedCount / totalClaims) * 100) : 0;
+  const isReady = readinessData?.ready ?? false;
 
   // Claims for Evidence Explorer
   const defaultClaims: ClaimItem[] = [
