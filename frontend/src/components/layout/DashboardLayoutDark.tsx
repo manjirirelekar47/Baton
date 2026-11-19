@@ -10,7 +10,7 @@
  * - Smooth stateful margins (lg:pl-64 / lg:pl-20).
  */
 
-import React, { useState, useEffect, type ReactNode, useMemo } from "react";
+import React, { useState, useEffect, type ReactNode, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -32,6 +32,8 @@ import {
   X,
 } from "lucide-react";
 import { useAuth, formatUserDropdownRole } from "../../context/AuthContext";
+import { TopHeaderUserMenu } from "./TopHeaderUserMenu";
+import { ProfileMenuContent } from "./ProfileMenuContent";
 import { useTheme } from "../../context/ThemeContext";
 import { batonApi } from "../../api/client";
 import { isSupabaseConfigured } from "../../features/auth/supabase";
@@ -57,6 +59,25 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const showLabels = isExpanded || mobileMenuOpen;
   const [profileDropdownOpen, setProfileDropdownOpen] = useState<boolean>(false);
+  const sidebarProfileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!profileDropdownOpen) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (sidebarProfileRef.current && !sidebarProfileRef.current.contains(e.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setProfileDropdownOpen(false);
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    window.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [profileDropdownOpen]);
   const [searchModalOpen, setSearchModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [latencyMs, setLatencyMs] = useState<number>(42);
@@ -305,7 +326,7 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
         </div>
 
         {/* Dynamic User Profile Card at Bottom */}
-        <div className="p-3 border-t border-white/10 relative">
+        <div className="p-3 border-t border-white/10 relative" ref={sidebarProfileRef}>
           <button
             type="button"
             onClick={() => setProfileDropdownOpen((prev) => !prev)}
@@ -359,107 +380,12 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
 
           {/* Role Switcher Popover */}
           {profileDropdownOpen && (
-            <div
-              className={`absolute bottom-16 bg-black/90 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/15 p-2 z-50 text-xs animate-in fade-in slide-in-from-bottom-2 duration-150 ${
-                showLabels ? "left-3 right-3" : "left-20 w-64"
-              }`}
-            >
-              {user?.is_demo ? (
-                <>
-                  <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-purple-400">
-                        Switch Active Role
-                      </p>
-                      <p className="text-gray-400 text-[11px] truncate">Demo Account</p>
-                    </div>
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-950/60 text-purple-300 border border-purple-500/30">
-                      Demo
-                    </span>
-                  </div>
-
-                  <div className="py-1 space-y-0.5">
-                    {(
-                      [
-                        { role: "approver", name: "Approver (Engineering Lead)" },
-                        { role: "leaver", name: "Aarav (Departing Lead)" },
-                        { role: "incoming_maintainer", name: "Meera (Incoming Maintainer)" },
-                        { role: "contributor", name: "Contributor" },
-                      ] as const
-                    ).map(({ role, name }) => (
-                      <button
-                        key={role}
-                        type="button"
-                        onClick={async () => {
-                          await switchRole(role);
-                          setProfileDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-1.5 rounded-xl font-medium flex items-center justify-between transition-colors ${
-                          user?.role === role
-                            ? "bg-purple-950/60 text-purple-300 font-semibold"
-                            : "text-gray-300 hover:bg-white/10"
-                        }`}
-                      >
-                        <span>{name}</span>
-                        {user?.role === role && <span className="text-purple-400 font-bold">✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="px-3 py-2.5 border-b border-white/10">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                      Assigned Role
-                    </p>
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-950/60 text-purple-300 border border-purple-500/30">
-                      Verified
-                    </span>
-                  </div>
-                  <p className="text-sm font-bold text-white mt-0.5">{formatUserDropdownRole(user)}</p>
-                  <p className="text-gray-400 text-[11px] truncate mt-0.5">{user?.email}</p>
-                </div>
-              )}
-
-              {isSupabaseConfigured && (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      await linkGithubIdentity();
-                      setProfileDropdownOpen(false);
-                    } catch (linkError) {
-                      window.alert(linkError instanceof Error ? linkError.message : "Could not link your GitHub account.");
-                    }
-                  }}
-                  className="w-full text-left px-3 py-1.5 rounded-xl text-gray-300 hover:bg-white/10 transition-colors"
-                >
-                  Link GitHub account
-                </button>
-              )}
-              <div className="pt-1.5 mt-1 border-t border-white/10 flex items-center justify-between px-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProfileDropdownOpen(false);
-                    setIsResetModalOpen(true);
-                  }}
-                  className="text-gray-400 hover:text-purple-300 font-medium px-2 py-1 rounded hover:bg-white/5 active:scale-[0.98] transition-all duration-150 cursor-pointer"
-                >
-                  Reset Demo
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await logout();
-                    setProfileDropdownOpen(false);
-                  }}
-                  className="text-rose-400 hover:text-rose-300 font-medium px-2 py-1 rounded hover:bg-rose-950/40 transition-colors"
-                >
-                  Sign Out
-                </button>
-              </div>
-            </div>
+            <ProfileMenuContent
+              theme="dark"
+              onClose={() => setProfileDropdownOpen(false)}
+              onOpenResetModal={() => setIsResetModalOpen(true)}
+              className={`absolute bottom-16 ${showLabels ? "left-3 right-3" : "left-20 w-64"}`}
+            />
           )}
         </div>
       </aside>
@@ -547,13 +473,11 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
 
             {/* Top Right User Avatar (hidden on mobile header; profile is in drawer/bottom nav) */}
             <div className="hidden sm:block">
-              {loading || !user ? (
-                <div className="w-9 h-9 rounded-xl bg-slate-800 animate-pulse flex-shrink-0" />
-              ) : (
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-700 text-white font-bold text-xs flex items-center justify-center shadow-sm shadow-purple-500/20 flex-shrink-0">
-                  {userInitials || "U"}
-                </div>
-              )}
+              <TopHeaderUserMenu
+                theme="dark"
+                userInitials={userInitials}
+                onOpenResetModal={() => setIsResetModalOpen(true)}
+              />
             </div>
           </div>
         </header>

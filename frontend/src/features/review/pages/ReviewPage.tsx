@@ -65,10 +65,14 @@ export function ReviewPage() {
   const actionMutation = useMutation({
     mutationFn: ({ claimId, req }: { claimId: string; req: ActionRequest }) =>
       postAction(claimId, req),
-    onSuccess: (updatedClaim) => {
+    onSuccess: (updatedClaim, variables) => {
       queryClient.invalidateQueries({ queryKey: ["reviewQueue"] });
       queryClient.invalidateQueries({ queryKey: ["readiness"] });
       queryClient.invalidateQueries({ queryKey: ["claims"] });
+      queryClient.invalidateQueries({ queryKey: ["gapInterview"] });
+      if (variables?.req?.action === "ask_leaver") {
+        setAskingClaim(null);
+      }
       setStatusMessage({
         text: `Claim ${updatedClaim.claim.claim_id} action saved. New state: ${updatedClaim.claim.state}.`,
       });

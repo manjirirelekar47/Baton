@@ -10,7 +10,7 @@
  * - Smooth stateful margins (lg:pl-64 / lg:pl-20).
  */
 
-import React, { useState, useEffect, type ReactNode, useMemo } from "react";
+import React, { useState, useEffect, type ReactNode, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -32,6 +32,8 @@ import {
   X,
 } from "lucide-react";
 import { useAuth, formatUserDropdownRole } from "../../context/AuthContext";
+import { TopHeaderUserMenu } from "./TopHeaderUserMenu";
+import { ProfileMenuContent } from "./ProfileMenuContent";
 import { useTheme } from "../../context/ThemeContext";
 import { batonApi } from "../../api/client";
 import { isSupabaseConfigured } from "../../features/auth/supabase";
@@ -57,6 +59,25 @@ export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const showLabels = isExpanded || mobileMenuOpen;
   const [profileDropdownOpen, setProfileDropdownOpen] = useState<boolean>(false);
+  const sidebarProfileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!profileDropdownOpen) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (sidebarProfileRef.current && !sidebarProfileRef.current.contains(e.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setProfileDropdownOpen(false);
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    window.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [profileDropdownOpen]);
   const [searchModalOpen, setSearchModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [latencyMs, setLatencyMs] = useState<number>(42);
@@ -305,7 +326,7 @@ export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
         </div>
 
         {/* Dynamic User Profile Card at Bottom */}
-        <div className="p-3 border-t border-slate-200/80 relative">
+        <div className="p-3 border-t border-slate-200/80 relative" ref={sidebarProfileRef}>
           <button
             type="button"
             onClick={() => setProfileDropdownOpen((prev) => !prev)}
@@ -359,107 +380,12 @@ export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
 
           {/* Role Switcher Popover */}
           {profileDropdownOpen && (
-            <div
-              className={`absolute bottom-16 bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-slate-200 p-2 z-50 text-xs animate-in fade-in slide-in-from-bottom-2 duration-150 ${
-                showLabels ? "left-3 right-3" : "left-20 w-64"
-              }`}
-            >
-              {user?.is_demo ? (
-                <>
-                  <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-purple-700">
-                        Switch Active Role
-                      </p>
-                      <p className="text-slate-500 text-[11px] truncate">Demo Account</p>
-                    </div>
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
-                      Demo
-                    </span>
-                  </div>
-
-                  <div className="py-1 space-y-0.5">
-                    {(
-                      [
-                        { role: "approver", name: "Approver (Engineering Lead)" },
-                        { role: "leaver", name: "Aarav (Departing Lead)" },
-                        { role: "incoming_maintainer", name: "Meera (Incoming Maintainer)" },
-                        { role: "contributor", name: "Contributor" },
-                      ] as const
-                    ).map(({ role, name }) => (
-                      <button
-                        key={role}
-                        type="button"
-                        onClick={async () => {
-                          await switchRole(role);
-                          setProfileDropdownOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-1.5 rounded-xl font-medium flex items-center justify-between transition-colors ${
-                          user?.role === role
-                            ? "bg-purple-100 text-purple-800 font-semibold"
-                            : "text-slate-700 hover:bg-slate-100"
-                        }`}
-                      >
-                        <span>{name}</span>
-                        {user?.role === role && <span className="text-purple-600 font-bold">✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="px-3 py-2.5 border-b border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                      Assigned Role
-                    </p>
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">
-                      Verified
-                    </span>
-                  </div>
-                  <p className="text-sm font-bold text-slate-800 mt-0.5">{formatUserDropdownRole(user)}</p>
-                  <p className="text-slate-500 text-[11px] truncate mt-0.5">{user?.email}</p>
-                </div>
-              )}
-
-              {isSupabaseConfigured && (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      await linkGithubIdentity();
-                      setProfileDropdownOpen(false);
-                    } catch (linkError) {
-                      window.alert(linkError instanceof Error ? linkError.message : "Could not link your GitHub account.");
-                    }
-                  }}
-                  className="w-full text-left px-3 py-1.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
-                >
-                  Link GitHub account
-                </button>
-              )}
-              <div className="pt-1.5 mt-1 border-t border-slate-100 flex items-center justify-between px-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProfileDropdownOpen(false);
-                    setIsResetModalOpen(true);
-                  }}
-                  className="text-slate-500 hover:text-purple-700 font-medium px-2 py-1 rounded hover:bg-purple-50 active:scale-[0.98] transition-all duration-150 cursor-pointer"
-                >
-                  Reset Demo
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await logout();
-                    setProfileDropdownOpen(false);
-                  }}
-                  className="text-rose-600 hover:text-rose-700 font-medium px-2 py-1 rounded hover:bg-rose-50 transition-colors"
-                >
-                  Sign Out
-                </button>
-              </div>
-            </div>
+            <ProfileMenuContent
+              theme="light"
+              onClose={() => setProfileDropdownOpen(false)}
+              onOpenResetModal={() => setIsResetModalOpen(true)}
+              className={`absolute bottom-16 ${showLabels ? "left-3 right-3" : "left-20 w-64"}`}
+            />
           )}
         </div>
       </aside>
@@ -547,13 +473,11 @@ export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
 
             {/* Top Right User Avatar (hidden on mobile header; profile is in drawer/bottom nav) */}
             <div className="hidden sm:block">
-              {loading || !user ? (
-                <div className="w-9 h-9 rounded-xl bg-slate-200 animate-pulse flex-shrink-0" />
-              ) : (
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-700 text-white font-bold text-xs flex items-center justify-center shadow-sm shadow-purple-500/20 flex-shrink-0">
-                  {userInitials || "U"}
-                </div>
-              )}
+              <TopHeaderUserMenu
+                theme="light"
+                userInitials={userInitials}
+                onOpenResetModal={() => setIsResetModalOpen(true)}
+              />
             </div>
           </div>
         </header>
