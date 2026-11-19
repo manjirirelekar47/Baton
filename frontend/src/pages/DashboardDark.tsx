@@ -16,13 +16,15 @@ import {
   type ClaimItem,
   type QueueItem,
   type RiskModule,
+  type SourceItem,
+  type ProjectMember,
   ApiError,
 } from "../api/client";
 import { DashboardLayoutDark } from "../components/layout/DashboardLayoutDark";
 import { FallbackHero } from "../components/hero/FallbackHero";
 import { DocumentUploader } from "../components/upload/DocumentUploader";
 import { InviteMemberModal } from "../components/invitation/InviteMemberModal";
-import { CloudUpload, X, Plus, RotateCcw, Download, ShieldCheck, Share2, Compass, FileText, UserPlus } from "lucide-react";
+import { CloudUpload, X, Plus, RotateCcw, Download, ShieldCheck, Share2, Compass, FileText, UserPlus, CheckCircle2 } from "lucide-react";
 
 const ThreeHeroNode = React.lazy(() =>
   import("../components/hero/ThreeHeroNode").then(({ ThreeHeroNode }) => ({ default: ThreeHeroNode })),
@@ -34,36 +36,67 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
 
   // Dynamic Live State from Backend APIs
   const [claims, setClaims] = useState<ClaimItem[]>([]);
+  const [sources, setSources] = useState<SourceItem[]>([]);
+  const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
   const [reviewQueue, setReviewQueue] = useState<QueueItem[]>([]);
-  const [pendingQueueCount, setPendingQueueCount] = useState<number>(3);
+  const [pendingQueueCount, setPendingQueueCount] = useState<number>(0);
   const [riskModules, setRiskModules] = useState<RiskModule[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState<boolean>(false);
   const [inviteModalOpen, setInviteModalOpen] = useState<boolean>(false);
 
+  const targetProjectId = activeProject?.id || user?.project_id;
+
   // Fetch live backend data concurrently
   const loadDashboardData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [claimsRes, queueRes, riskRes] = await Promise.allSettled([
+      const promises: Promise<unknown>[] = [
         batonApi.getClaims(),
         batonApi.getReviewQueue(),
         batonApi.getRiskRadar(),
-      ]);
-
-      if (claimsRes.status === "fulfilled") {
-        setClaims(claimsRes.value.claims || []);
+        batonApi.getSources(),
+      ];
+      if (targetProjectId) {
+        promises.push(batonApi.getProjectMembers(targetProjectId));
       }
 
-      if (queueRes.status === "fulfilled") {
-        setReviewQueue(queueRes.value.items || []);
-        setPendingQueueCount(queueRes.value.pending ?? queueRes.value.items?.length ?? 3);
+      const results = await Promise.allSettled(promises);
+      const [claimsRes, queueRes, riskRes, sourcesRes, membersRes] = results;
+
+      if (claimsRes && claimsRes.status === "fulfilled") {
+        setClaims((claimsRes.value as { claims?: ClaimItem[] }).claims || []);
+      } else {
+        setClaims([]);
       }
 
-      if (riskRes.status === "fulfilled") {
-        setRiskModules(riskRes.value || []);
+      if (queueRes && queueRes.status === "fulfilled") {
+        const val = queueRes.value as { items?: QueueItem[]; pending?: number };
+        setReviewQueue(val.items || []);
+        setPendingQueueCount(val.pending ?? val.items?.length ?? 0);
+      } else {
+        setReviewQueue([]);
+        setPendingQueueCount(0);
+      }
+
+      if (riskRes && riskRes.status === "fulfilled") {
+        setRiskModules((riskRes.value as RiskModule[]) || []);
+      } else {
+        setRiskModules([]);
+      }
+
+      if (sourcesRes && sourcesRes.status === "fulfilled") {
+        setSources((sourcesRes.value as SourceItem[]) || []);
+      } else {
+        setSources([]);
+      }
+
+      if (membersRes && membersRes.status === "fulfilled") {
+        setProjectMembers((membersRes.value as ProjectMember[]) || []);
+      } else {
+        setProjectMembers([]);
       }
     } catch (err: unknown) {
       setError(
@@ -76,22 +109,22 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [targetProjectId]);
 
   // Compute Live Metrics from API Data
   const metrics = useMemo(() => {
-    const total = claims.length || 24;
-    const verified = claims.filter((c) => c.state === "verified").length || 18;
-    const conflicting = claims.filter((c) => c.state === "conflicting").length || 3;
-    const team = 5;
+    const total = claims.length;
+    const verified = claims.filter((c) => c.state === "verified").length;
+    const conflicting = claims.filter((c) => c.state === "conflicting").length;
+    const team = projectMembers.length || (user ? 1 : 0);
 
     return { total, verified, conflicting, team };
-  }, [claims]);
+  }, [claims, projectMembers, user]);
 
   // Compute Risk Radar Distribution dynamically from riskModules
   const riskStats = useMemo(() => {
     if (!riskModules.length) {
-      return { lowPct: 65, medPct: 22, highPct: 13, overallLevel: "Low Risk" };
+      return { lowPct: 0, medPct: 0, highPct: 0, overallLevel: "No Risks", hasData: false };
     }
 
     let high = 0;
@@ -117,7 +150,7 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
     if (highPct > 25 || high > 1) overallLevel = "High Risk";
     else if (medPct > 35) overallLevel = "Medium Risk";
 
-    return { lowPct, medPct, highPct, overallLevel };
+    return { lowPct, medPct, highPct, overallLevel, hasData: true };
   }, [riskModules]);
 
   // Dynamic Quick Actions per role
@@ -167,26 +200,7 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
       }));
     }
 
-    return [
-      {
-        id: "c1",
-        title: "API Integration Details",
-        source: "Source: Design Docs • 2m ago",
-        state: "verified",
-      },
-      {
-        id: "c2",
-        title: "Budget Estimation",
-        source: "Source: Finance Report • 5m ago",
-        state: "conflicting",
-      },
-      {
-        id: "c3",
-        title: "Deployment Timeline",
-        source: "Source: Tech Plan • 7m ago",
-        state: "verified",
-      },
-    ];
+    return [];
   }, [reviewQueue]);
 
   const content = (
@@ -351,9 +365,15 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 border border-emerald-500/30">
-              ↑ 12%
-            </span>
+            {metrics.total > 0 ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 border border-emerald-500/30">
+                ↑ 12%
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-slate-400 border border-white/10">
+                0%
+              </span>
+            )}
           </div>
 
           <div className="mt-4">
@@ -376,9 +396,15 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 border border-emerald-500/30">
-              ↑ 8%
-            </span>
+            {metrics.total > 0 ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 border border-emerald-500/30">
+                ↑ 8%
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-slate-400 border border-white/10">
+                0%
+              </span>
+            )}
           </div>
 
           <div className="mt-4">
@@ -401,9 +427,15 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-950/50 text-rose-300 border border-rose-500/30">
-              ↓ 1%
-            </span>
+            {metrics.total > 0 ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-950/50 text-rose-300 border border-rose-500/30">
+                ↓ 1%
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-slate-400 border border-white/10">
+                0%
+              </span>
+            )}
           </div>
 
           <div className="mt-4">
@@ -479,64 +511,85 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
             </Link>
           </div>
 
-          <div className="relative h-56 my-2 flex items-center justify-center">
-            <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:16px_16px] opacity-70" />
-
-            <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 220">
-              <path d="M 200 110 Q 140 75 100 80" stroke="#475569" strokeWidth="2" strokeDasharray="3 3" fill="none" />
-              <path d="M 200 110 Q 140 145 90 155" stroke="#9f1239" strokeWidth="2" strokeDasharray="3 3" fill="none" />
-              <path d="M 200 110 Q 260 70 300 75" stroke="#7e22ce" strokeWidth="2" strokeDasharray="3 3" fill="none" />
-              <path d="M 200 110 Q 270 145 310 150" stroke="#075985" strokeWidth="2" strokeDasharray="3 3" fill="none" />
-            </svg>
-
-            {/* Center "B" Master Node */}
-            <div className="relative z-10 w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-700 text-white font-extrabold text-2xl flex items-center justify-center shadow-lg shadow-purple-500/40 ring-4 ring-slate-900 animate-pulse">
-              <span className="italic">B</span>
-            </div>
-
-            {/* Verified Node */}
-            <div className="absolute top-6 left-12 z-10 flex flex-col items-center group cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 ring-2 ring-slate-900 group-hover:scale-110 transition-transform">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
+          {metrics.total === 0 && sources.length === 0 ? (
+            <div className="relative h-56 my-2 flex flex-col items-center justify-center text-center p-4">
+              <div className="w-12 h-12 rounded-2xl bg-purple-950/40 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-3 shadow-inner">
+                <Share2 className="w-6 h-6" />
               </div>
-              <span className="text-[10px] font-bold text-slate-300 mt-1">Verified ({metrics.verified})</span>
+              <h3 className="text-sm font-bold text-white mb-1">No Graph Data Available</h3>
+              <p className="text-xs text-gray-400 max-w-xs mb-3">
+                Connect GitHub, Jira or upload project documents to generate your knowledge graph.
+              </p>
+              <Link
+                to="/sources"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/30 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Sources</span>
+              </Link>
             </div>
+          ) : (
+            <div className="relative h-56 my-2 flex items-center justify-center">
+              <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:16px_16px] opacity-70" />
 
-            {/* Conflicts Node */}
-            <div className="absolute bottom-6 left-10 z-10 flex flex-col items-center group cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-500/20 ring-2 ring-slate-900 group-hover:scale-110 transition-transform">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <span className="text-[10px] font-bold text-slate-300 mt-1">Conflicts ({metrics.conflicting})</span>
-            </div>
+              <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 220">
+                <path d="M 200 110 Q 140 75 100 80" stroke="#475569" strokeWidth="2" strokeDasharray="3 3" fill="none" />
+                <path d="M 200 110 Q 140 145 90 155" stroke="#9f1239" strokeWidth="2" strokeDasharray="3 3" fill="none" />
+                <path d="M 200 110 Q 260 70 300 75" stroke="#7e22ce" strokeWidth="2" strokeDasharray="3 3" fill="none" />
+                <path d="M 200 110 Q 270 145 310 150" stroke="#075985" strokeWidth="2" strokeDasharray="3 3" fill="none" />
+              </svg>
 
-            {/* Docs Node */}
-            <div className="absolute top-6 right-14 z-10 flex flex-col items-center group cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/20 ring-2 ring-slate-900 group-hover:scale-110 transition-transform">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+              {/* Center "B" Master Node */}
+              <div className="relative z-10 w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-700 text-white font-extrabold text-2xl flex items-center justify-center shadow-lg shadow-purple-500/40 ring-4 ring-slate-900 animate-pulse">
+                <span className="italic">B</span>
               </div>
-              <span className="text-[10px] font-bold text-slate-300 mt-1">Sources (4)</span>
-            </div>
 
-            {/* Team Node */}
-            <div className="absolute bottom-6 right-12 z-10 flex flex-col items-center group cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 ring-2 ring-slate-900 group-hover:scale-110 transition-transform">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
+              {/* Verified Node */}
+              <div className="absolute top-6 left-12 z-10 flex flex-col items-center group cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 ring-2 ring-slate-900 group-hover:scale-110 transition-transform">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-[10px] font-bold text-slate-300 mt-1">Verified ({metrics.verified})</span>
               </div>
-              <span className="text-[10px] font-bold text-slate-300 mt-1">Owners ({metrics.team})</span>
+
+              {/* Conflicts Node */}
+              <div className="absolute bottom-6 left-10 z-10 flex flex-col items-center group cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-md shadow-rose-500/20 ring-2 ring-slate-900 group-hover:scale-110 transition-transform">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <span className="text-[10px] font-bold text-slate-300 mt-1">Conflicts ({metrics.conflicting})</span>
+              </div>
+
+              {/* Docs Node */}
+              <div className="absolute top-6 right-14 z-10 flex flex-col items-center group cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/20 ring-2 ring-slate-900 group-hover:scale-110 transition-transform">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <span className="text-[10px] font-bold text-slate-300 mt-1">Sources ({sources.length})</span>
+              </div>
+
+              {/* Team Node */}
+              <div className="absolute bottom-6 right-12 z-10 flex flex-col items-center group cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 ring-2 ring-slate-900 group-hover:scale-110 transition-transform">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <span className="text-[10px] font-bold text-slate-300 mt-1">Owners ({metrics.team})</span>
+              </div>
             </div>
-          </div>
+          )}
 
           <p className="text-[11px] text-gray-400 text-center font-medium">
-            Click any node to explore dependencies and citation links
+            {metrics.total === 0 && sources.length === 0
+              ? "Graph will automatically populate as project evidence is processed"
+              : "Click any node to explore dependencies and citation links"}
           </p>
         </div>
 
@@ -582,6 +635,14 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
               <div className="py-8 text-center space-y-2">
                 <div className="w-8 h-8 mx-auto border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
                 <p className="text-xs text-gray-400">Loading claims...</p>
+              </div>
+            ) : displayQueueItems.length === 0 ? (
+              <div className="py-8 text-center space-y-2 px-4">
+                <div className="w-10 h-10 mx-auto rounded-xl bg-purple-950/40 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                </div>
+                <p className="text-xs font-bold text-white">Queue is clear</p>
+                <p className="text-[11px] text-gray-400">No pending items to review. Ingest project sources to populate the queue.</p>
               </div>
             ) : (
               displayQueueItems.map((item) => (
@@ -658,8 +719,14 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
               </span>
               <h2 className="text-sm font-bold text-white">Risk Radar</h2>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
-              + Live
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                riskStats.hasData
+                  ? "bg-emerald-950/50 text-emerald-300 border border-emerald-500/30"
+                  : "bg-white/5 text-gray-400 border border-white/10"
+              }`}
+            >
+              {riskStats.hasData ? "+ Live" : "Empty"}
             </span>
           </div>
 
@@ -673,40 +740,44 @@ export const DashboardDark: React.FC<{ withLayout?: boolean }> = ({ withLayout =
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
-                <path
-                  className="text-emerald-500 transition-all duration-700 ease-out"
-                  strokeDasharray={`${riskStats.lowPct}, 100`}
-                  strokeWidth="3.6"
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="text-amber-500 transition-all duration-700 ease-out"
-                  strokeDasharray={`${riskStats.medPct}, 100`}
-                  strokeDashoffset={`-${riskStats.lowPct}`}
-                  strokeWidth="3.6"
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className="text-rose-500 transition-all duration-700 ease-out"
-                  strokeDasharray={`${riskStats.highPct}, 100`}
-                  strokeDashoffset={`-${riskStats.lowPct + riskStats.medPct}`}
-                  strokeWidth="3.6"
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
+                {riskStats.hasData && (
+                  <>
+                    <path
+                      className="text-emerald-500 transition-all duration-700 ease-out"
+                      strokeDasharray={`${riskStats.lowPct}, 100`}
+                      strokeWidth="3.6"
+                      strokeLinecap="round"
+                      stroke="currentColor"
+                      fill="none"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path
+                      className="text-amber-500 transition-all duration-700 ease-out"
+                      strokeDasharray={`${riskStats.medPct}, 100`}
+                      strokeDashoffset={`-${riskStats.lowPct}`}
+                      strokeWidth="3.6"
+                      strokeLinecap="round"
+                      stroke="currentColor"
+                      fill="none"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path
+                      className="text-rose-500 transition-all duration-700 ease-out"
+                      strokeDasharray={`${riskStats.highPct}, 100`}
+                      strokeDashoffset={`-${riskStats.lowPct + riskStats.medPct}`}
+                      strokeWidth="3.6"
+                      strokeLinecap="round"
+                      stroke="currentColor"
+                      fill="none"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                  </>
+                )}
               </svg>
 
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                 <span className="text-[11px] font-black text-white leading-tight">
-                  {riskStats.overallLevel}
+                  {riskStats.hasData ? riskStats.overallLevel : "No Risks"}
                 </span>
               </div>
             </div>
