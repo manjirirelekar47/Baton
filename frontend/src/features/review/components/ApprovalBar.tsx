@@ -89,8 +89,8 @@ export function ApprovalBar({
           <p className="text-xs text-slate-500 dark:text-gray-300">
             {readiness?.reasons && readiness.reasons.length > 0
               ? readiness.reasons.join(" · ")
-              : `${readiness?.unresolved_conflicts.length ?? 0} conflicts remain, ${
-                  readiness?.unaccepted_inferred.length ?? 0
+              : `${readiness?.unresolved_conflicts?.length ?? 0} conflicts remain, ${
+                  readiness?.unaccepted_inferred?.length ?? 0
                 } unaccepted inferred, ${readiness?.pending_count ?? 0} pending.`}
           </p>
         </div>

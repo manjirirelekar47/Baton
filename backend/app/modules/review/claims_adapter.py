@@ -143,14 +143,70 @@ class PublicClaimsAdapter:
 
     def edit_statement(self, project_id: str, claim_id: str, statement: str, edited_by: str) -> Claim:
         fn = _fn_or_none("reverify", "edit_claim", "update_claim")
+        get_claim_fn = _fn_or_none("get_claim")
+
         if fn:
-            return to_claim(fn(project_id, claim_id, statement, edited_by), project_id)
+            # 1. Retrieve the original claim using verification module's get_claim
+            raw_claim = get_claim_fn(project_id, claim_id) if get_claim_fn else None
+
+            # 2. Handle missing claims with ReviewError(404)
+            if not raw_claim:
+                cached = self.get_claim(project_id, claim_id)
+                if not cached:
+                    raise ReviewError(404, "claim_not_found", f"Claim '{claim_id}' not found.")
+                raw_claim = {
+                    "claim_id": cached.id,
+                    "project_id": cached.project_id,
+                    "type": cached.type,
+                    "entity_key": cached.entity_key,
+                    "attribute": cached.attribute,
+                    "statement": cached.statement,
+                    "state": cached.state.lower() if cached.state else "missing",
+                    "acl_label": cached.acl_label,
+                    "review_state": cached.review_state,
+                    "owner": cached.owner,
+                    "proposed_owner": cached.proposed_owner,
+                    "proposed_owner_id": cached.proposed_owner_id,
+                    "due_date": cached.due_date,
+                    "blocked_by": list(cached.blocked_by),
+                    "attested_by": cached.attested_by,
+                    "conflict_with": list(cached.conflict_with),
+                    "suggested_claim_id": cached.suggested_claim_id,
+                    "evidence": [
+                        {
+                            "chunk_id": e.chunk_id,
+                            "quote": e.quote,
+                            "acl_label": e.acl_label,
+                            "source_id": e.source_id,
+                            "source_title": e.source_title,
+                            "event_time": e.event_time,
+                        }
+                        for e in cached.evidence
+                    ],
+                }
+
+            # 3 & 4. Preserve complete original claim dictionary, replacing only the statement
+            updated_claim_data = dict(raw_claim)
+            updated_claim_data["statement"] = statement
+            if not updated_claim_data.get("review_state"):
+                updated_claim_data["review_state"] = "Reviewed"
+
+            # 5. Pass updated dictionary to fn(project_id, updated_claim_data)
+            result = fn(project_id, updated_claim_data)
+
+            # 6. Convert returned claim using existing to_claim() adapter
+            claim_obj = to_claim(result, project_id)
+            if claim_obj.review_state == "Labelled":
+                claim_obj = replace(claim_obj, review_state="Reviewed")
+            self._local_overrides[(project_id, claim_id)] = claim_obj
+            return claim_obj
+
         claim = self.get_claim(project_id, claim_id)
         if claim:
             updated = replace(claim, statement=statement, review_state="Reviewed")
             self._local_overrides[(project_id, claim_id)] = updated
             return updated
-        raise ReviewError(404, "claim_not_found", "Claim not found.")
+        raise ReviewError(404, "claim_not_found", f"Claim '{claim_id}' not found.")
 
     def resolve_conflict(self, project_id: str, chosen_claim_id: str, other_claim_ids: Sequence[str], resolved_by: str) -> Claim:
         fn = _fn_or_none("resolve_conflict")
