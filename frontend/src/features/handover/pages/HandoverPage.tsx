@@ -23,6 +23,12 @@ type Tab = "handover" | "plan";
 
 export function HandoverPage() {
   const { user } = useAuth();
+  const projectName =
+    user?.project_id === "proj-campus-event-portal"
+      ? "Campus Event Portal"
+      : user?.project_id
+        ? user.project_id.replace(/^proj-/, "").replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+        : "Project";
   const queryClient = useQueryClient();
   const { version, isLoading: versionLoading, error: versionError, refetch } = useLatestVersion();
   const [tab, setTab] = useState<Tab>("handover");
@@ -83,7 +89,7 @@ export function HandoverPage() {
       {/* Header with High-Contrast Typography */}
       <header>
         <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-          Handover for Campus Event Portal
+          Handover for {projectName}
         </h1>
         <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
           Version {version.version_id}, approved {version.approved_at ? new Date(version.approved_at).toLocaleDateString() : "recently"}

@@ -9,11 +9,16 @@ import { apiClient } from "@/api/client";
 
 export const AuditPageLight: React.FC = () => {
   const [auditEntries, setAuditEntries] = useState<Record<string, any>[]>([]);
+  const [healthInfo, setHealthInfo] = useState<Record<string, any>>({});
 
   useEffect(() => {
     apiClient
       .get<Record<string, any>[]>("/audit")
       .then((data: Record<string, any>[]) => setAuditEntries(data || []))
+      .catch(() => {});
+    apiClient
+      .get<Record<string, any>>("/health")
+      .then((data: Record<string, any>) => setHealthInfo(data || {}))
       .catch(() => {});
   }, []);
 
@@ -50,14 +55,14 @@ export const AuditPageLight: React.FC = () => {
         <div className="rounded-2xl bg-white border border-slate-200 p-6 shadow-md shadow-slate-200/50 hover:shadow-lg transition-all">
           <p className="text-xs font-semibold text-slate-500">Logged Actions</p>
           <p className="text-2xl font-black text-slate-900 mt-1 font-display">
-            {auditEntries.length > 0 ? `${auditEntries.length} Actions` : "12 Actions"}
+            {auditEntries.length} {auditEntries.length === 1 ? "Action" : "Actions"}
           </p>
           <p className="text-xs text-purple-700 font-medium mt-1">Verified team log</p>
         </div>
         <div className="rounded-2xl bg-white border border-slate-200 p-6 shadow-md shadow-slate-200/50 hover:shadow-lg transition-all">
           <p className="text-xs font-semibold text-slate-500">Record Storage</p>
-          <p className="text-2xl font-black text-slate-900 mt-1 font-display">SQLite / WAL</p>
-          <p className="text-xs text-purple-700 font-medium mt-1">Secure local storage</p>
+          <p className="text-2xl font-black text-slate-900 mt-1 font-display">{healthInfo.storage || "SQLite / WAL"}</p>
+          <p className="text-xs text-purple-700 font-medium mt-1">{healthInfo.environment === "Production" ? "Encrypted cloud persistence" : "Secure local storage"}</p>
         </div>
         <div className="rounded-2xl bg-white border border-slate-200 p-6 shadow-md shadow-slate-200/50 hover:shadow-lg transition-all">
           <p className="text-xs font-semibold text-slate-500">Security Status</p>
@@ -73,7 +78,7 @@ export const AuditPageLight: React.FC = () => {
             Live Activity Trail
           </h2>
           <span className="text-xs text-purple-700 font-mono font-semibold">
-            {auditEntries.length} actions recorded
+            {auditEntries.length} {auditEntries.length === 1 ? "action recorded" : "actions recorded"}
           </span>
         </div>
 
@@ -83,17 +88,23 @@ export const AuditPageLight: React.FC = () => {
           </div>
         ) : (
           <div className="divide-y divide-slate-100 max-h-96 overflow-y-auto">
-            {auditEntries.slice(0, 10).map((entry, idx) => (
-              <div key={idx} className="py-3 flex items-center justify-between text-xs">
-                <div>
-                  <span className="font-bold text-slate-900">{entry.action}</span>
-                  <span className="text-slate-500 ml-2">by {entry.actor_name || entry.reviewer_id || "User"}</span>
+            {auditEntries.slice(0, 10).map((entry, idx) => {
+              const actionLabel = entry.action || (entry.event_type ? entry.event_type.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) : "Review Decision");
+              const actorLabel = entry.actor_name || entry.actor_id || entry.actor_role || entry.reviewer_id || "Approver";
+              const target = entry.object_type ? ` · ${entry.object_type}: ${entry.object_id}` : "";
+              return (
+                <div key={idx} className="py-3 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="font-bold text-slate-900">{actionLabel}</span>
+                    <span className="text-purple-700 ml-1.5">{target}</span>
+                    <span className="text-slate-500 ml-2">by {actorLabel}</span>
+                  </div>
+                  <span className="text-slate-400 text-[11px] font-mono">
+                    {entry.created_at ? new Date(entry.created_at).toLocaleTimeString() : "Just now"}
+                  </span>
                 </div>
-                <span className="text-slate-400 text-[11px] font-mono">
-                  {entry.created_at ? new Date(entry.created_at).toLocaleTimeString() : "Just now"}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

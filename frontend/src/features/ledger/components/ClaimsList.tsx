@@ -104,7 +104,13 @@ export function ClaimsList({ claims, onSelectClaim, onOpenSource }: ClaimsListPr
       </div>
 
       {/* Spacious Claims List */}
-      {filtered.length === 0 ? (
+      {claims.length === 0 ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-black/40 dark:backdrop-blur-xl dark:shadow-2xl">
+          <EmptyState title="No project facts extracted yet">
+            Connect your project sources (Git, Docs, Tasks) or click &ldquo;Reconstruct Project State&rdquo; above to extract and verify verifiable project facts.
+          </EmptyState>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-black/40 dark:backdrop-blur-xl dark:shadow-2xl">
           <EmptyState title="No claims match your filters">
             Try adjusting the State or Type filters, or clearing the search query.

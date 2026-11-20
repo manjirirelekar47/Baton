@@ -50,6 +50,11 @@ export function LedgerPage() {
   const handleReconstructComplete = () => {
     queryClient.invalidateQueries({ queryKey: ["claims"] });
     queryClient.invalidateQueries({ queryKey: ["gaps"] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    queryClient.invalidateQueries({ queryKey: ["knowledge-graph"] });
+    queryClient.invalidateQueries({ queryKey: ["timeline"] });
+    queryClient.invalidateQueries({ queryKey: ["risk-radar"] });
+    queryClient.invalidateQueries({ queryKey: ["review-queue"] });
   };
 
   const handleOpenSource = (chunkId: string, quote: string) => {

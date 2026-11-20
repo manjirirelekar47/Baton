@@ -3,8 +3,9 @@ import json
 import os
 import urllib.parse
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, Request, UploadFile
 from fastapi.responses import RedirectResponse
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core import acl
@@ -34,6 +35,8 @@ async def upload_source(
     file: UploadFile = File(...),
     consent: bool = Form(...),
     acl_label: str = Form(...),
+    project_id: str | None = Form(default=None),
+    x_project_id: str | None = Header(default=None, alias="X-Project-Id"),
     user: User = Depends(current_user),
     session: Session = Depends(get_session),
 ):
@@ -45,12 +48,24 @@ async def upload_source(
         raise HTTPException(status_code=422, detail="Access label must be L1, L2, L3 or L4.")
     if acl_label == "L4":
         raise HTTPException(status_code=422, detail="L4 secret sources are never accepted or stored.")
+    target_project_id = (project_id or "").strip() or (x_project_id or "").strip() or user.project_id
     try:
         content = await file.read(service.MAX_UPLOAD_BYTES + 1)
         allow_chat = os.getenv("INGEST_ENABLE_CHAT", "false").lower() == "true"
         source_type, records = service.parse_upload(file.filename or "", content, allow_chat=allow_chat)
-        return service.persist_source(session, project_id=user.project_id, filename=file.filename or "upload", source_type=source_type,
+        persisted = service.persist_source(session, project_id=target_project_id, filename=file.filename or "upload", source_type=source_type,
                                       acl_label=acl_label, records=records)
+        existing_claims = session.execute(
+            text("select count(*) from claims where project_id = :p"),
+            {"p": target_project_id},
+        ).scalar() or 0
+        if existing_claims == 0:
+            try:
+                from app.modules.extraction import public as extraction_public
+                extraction_public.start_reconstruct(target_project_id)
+            except Exception:
+                pass
+        return persisted
     except (ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         session.rollback()
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -97,7 +112,18 @@ def sync_connection(
     conn = service.get_connection(session, user.project_id, connection_id)
     if not conn:
         raise HTTPException(status_code=404, detail="Source connection not found.")
-    return public.sync_connection(user.project_id, connection_id, session)
+    result = public.sync_connection(user.project_id, connection_id, session)
+    existing_claims = session.execute(
+        text("select count(*) from claims where project_id = :p"),
+        {"p": user.project_id},
+    ).scalar() or 0
+    if existing_claims == 0:
+        try:
+            from app.modules.extraction import public as extraction_public
+            extraction_public.start_reconstruct(user.project_id)
+        except Exception:
+            pass
+    return result
 
 
 @router.delete("/sources/connections/{connection_id}")

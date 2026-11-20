@@ -2,6 +2,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError, getToken } from "@/app/api";
+import { getStoredProjectId } from "@/api/client";
 import { useAuth } from "@/app/auth";
 import { Button, EmptyState, ErrorState, Loading } from "@/shared/ui";
 import {
@@ -70,11 +71,18 @@ async function uploadSource(file: File, consent: boolean, aclLabel: string): Pro
   form.set("file", file);
   form.set("consent", String(consent));
   form.set("acl_label", aclLabel);
+  const projectId = getStoredProjectId();
+  if (projectId) {
+    form.set("project_id", projectId);
+  }
   const base = (import.meta.env.VITE_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
   const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (projectId) headers["X-Project-Id"] = projectId;
   const response = await fetch(`${base}/sources`, {
     method: "POST",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    headers,
     body: form,
   });
   if (!response.ok) {
@@ -288,6 +296,11 @@ export function SourcesPage() {
       formElement.reset();
       await queryClient.invalidateQueries({ queryKey: ["sources"] });
       await queryClient.invalidateQueries({ queryKey: ["drift-alerts"] });
+      await queryClient.invalidateQueries({ queryKey: ["claims"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      await queryClient.invalidateQueries({ queryKey: ["knowledge-graph"] });
+      await queryClient.invalidateQueries({ queryKey: ["timeline"] });
+      await queryClient.invalidateQueries({ queryKey: ["risk-radar"] });
     } catch (cause) {
       setUploadError(cause instanceof Error ? cause.message : "Source upload failed.");
     } finally {
@@ -894,16 +907,7 @@ export function SourcesPage() {
                           Open source ↗
                         </a>
                       ) : (
-                        <span className="text-slate-400">Not available</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {source.source_url ? (
-                        <a href={source.source_url} target="_blank" rel="noopener noreferrer" className="font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-200">
-                          Open source ↗
-                        </a>
-                      ) : (
-                        <span className="text-slate-400">Not available</span>
+                        <span className="text-slate-400">Uploaded file</span>
                       )}
                     </td>
                     <td className="px-4 py-3">

@@ -7,16 +7,40 @@
  * - bg-white/5 inner telemetry panels
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { ConfirmModal } from "@/shared/ui";
+import { apiClient } from "@/api/client";
 
 export const SettingsPageDark: React.FC = () => {
   const navigate = useNavigate();
-  const { resetDemo } = useAuth();
+  const { user, resetDemo } = useAuth();
   const [resetting, setResetting] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [healthInfo, setHealthInfo] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    apiClient
+      .get<Record<string, any>>("/health")
+      .then((data) => setHealthInfo(data || {}))
+      .catch(() => {});
+  }, []);
+
+  const isDemoProject = user?.project_id === "proj-campus-event-portal" || (user as any)?.is_demo;
+  const projectName = isDemoProject
+    ? "Campus Event"
+    : user?.project_id
+      ? user.project_id.replace(/^proj-/, "").replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+      : "Active Project";
+  const projectDesc = isDemoProject ? "Sample seed project" : "Custom Workspace";
+
+  const clearanceText =
+    user?.role === "approver"
+      ? "Level 1 - Level 4 Clearance (Approver)"
+      : user?.role === "incoming_maintainer"
+        ? "Level 1 - Level 2 Clearance (Maintainer)"
+        : "Level 1 Clearance (Contributor)";
 
   const handleConfirmReset = async () => {
     setResetting(true);
@@ -50,23 +74,25 @@ export const SettingsPageDark: React.FC = () => {
             </div>
 
             <p className="text-base font-bold text-purple-200">
-              Project metadata, team rosters, and demo state reset
+              Project metadata, team rosters, and environment status
             </p>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              Manage repository links, API credentials, and project-level parameters. Approvers can also reset the sample demo project database here.
+              Manage repository links, API credentials, and project-level parameters.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-            <button
-              type="button"
-              onClick={() => setIsResetModalOpen(true)}
-              disabled={resetting}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-transparent hover:bg-white/5 border border-white/10 text-slate-300 hover:text-white font-semibold text-xs shadow-xs active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer"
-            >
-              <span>{resetting ? "Resetting..." : "Reset Demo Data"}</span>
-            </button>
-          </div>
+          {isDemoProject && (
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+              <button
+                type="button"
+                onClick={() => setIsResetModalOpen(true)}
+                disabled={resetting}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-transparent hover:bg-white/5 border border-white/10 text-slate-300 hover:text-white font-semibold text-xs shadow-xs active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer"
+              >
+                <span>{resetting ? "Resetting..." : "Reset Demo Data"}</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -74,18 +100,18 @@ export const SettingsPageDark: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 p-6 shadow-2xl hover:border-purple-500/30 transition-all">
           <p className="text-xs font-semibold text-slate-400">Backend API</p>
-          <p className="text-2xl font-black text-white mt-1 font-display">FastAPI</p>
-          <p className="text-xs text-purple-300 font-medium mt-1">Local port 8000</p>
+          <p className="text-2xl font-black text-white mt-1 font-display">{healthInfo.engine || "FastAPI"}</p>
+          <p className="text-xs text-purple-300 font-medium mt-1">Uvicorn API server</p>
         </div>
         <div className="rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 p-6 shadow-2xl hover:border-purple-500/30 transition-all">
           <p className="text-xs font-semibold text-slate-400">Active Project</p>
-          <p className="text-2xl font-black text-white mt-1 font-display">Campus Event</p>
-          <p className="text-xs text-purple-300 font-medium mt-1">Sample seed project</p>
+          <p className="text-2xl font-black text-white mt-1 font-display">{projectName}</p>
+          <p className="text-xs text-purple-300 font-medium mt-1">{projectDesc}</p>
         </div>
         <div className="rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 p-6 shadow-2xl hover:border-purple-500/30 transition-all">
           <p className="text-xs font-semibold text-slate-400">Environment</p>
-          <p className="text-2xl font-black text-white mt-1 font-display">Development</p>
-          <p className="text-xs text-purple-300 font-medium mt-1">Offline verified</p>
+          <p className="text-2xl font-black text-white mt-1 font-display">{healthInfo.environment || "Production"}</p>
+          <p className="text-xs text-purple-300 font-medium mt-1">{healthInfo.storage || "Encrypted storage"}</p>
         </div>
       </div>
 
@@ -104,15 +130,15 @@ export const SettingsPageDark: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
             <span className="text-xs font-bold text-white">Backend Health</span>
-            <p className="text-[11px] text-slate-400">Uvicorn API server running on port 8000 with SQLite WAL persistence.</p>
+            <p className="text-[11px] text-slate-400">Uvicorn API server running with {healthInfo.storage || "SQLite WAL"} persistence.</p>
             <div className="inline-flex items-center gap-2 text-xs text-emerald-400 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" /> Connected (42ms)
+              <span className="w-2 h-2 rounded-full bg-emerald-400" /> Connected
             </div>
           </div>
 
           <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
             <span className="text-xs font-bold text-white">Active Clearance Tier</span>
-            <p className="text-[11px] text-slate-400">Current session authenticated with Level 2 - Level 4 clearance.</p>
+            <p className="text-[11px] text-slate-400">Current session authenticated with {clearanceText}.</p>
             <div className="inline-flex items-center gap-2 text-xs text-purple-300 font-medium">
               Role-Based Level Enforced
             </div>

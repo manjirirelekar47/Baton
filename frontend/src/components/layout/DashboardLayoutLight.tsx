@@ -13,6 +13,7 @@
 import React, { useState, useEffect, type ReactNode, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   FileText,
@@ -50,11 +51,18 @@ interface DashboardLayoutLightProps {
 
 export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
   children,
-  pendingReviewCount = 3,
+  pendingReviewCount,
 }) => {
   const { user, loading, switchRole, resetDemo, logout } = useAuth();
   const { toggleTheme } = useTheme();
   const location = useLocation();
+
+  const { data: queueData } = useQuery({
+    queryKey: ["review-queue", user?.project_id],
+    queryFn: () => batonApi.getReviewQueue(),
+    enabled: pendingReviewCount === undefined && !!user,
+  });
+  const effectiveReviewCount = pendingReviewCount !== undefined ? pendingReviewCount : (queueData?.items?.length ?? 0);
 
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
@@ -174,7 +182,7 @@ export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
       { name: "Claim Ledger", path: "/ledger", icon: FileText },
       { name: "Knowledge Graph", path: "/graph", icon: Share2 },
       { name: "Risk Radar", path: "/risk", icon: Compass },
-      { name: "Review Queue", path: "/review", badge: pendingReviewCount, icon: CheckSquare },
+      { name: "Review Queue", path: "/review", badge: effectiveReviewCount, icon: CheckSquare },
       { name: "Handover", path: "/handover", icon: Download },
       { name: "Access Control", path: "/access", icon: ShieldCheck },
       { name: "Audit Logs", path: "/audit", icon: History },
@@ -183,7 +191,7 @@ export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
     if (!user?.role) return all;
     const allowed = roleNavAllowed[user.role] || roleNavAllowed.approver;
     return all.filter((item) => allowed.includes(item.path));
-  }, [user?.role, pendingReviewCount]);
+  }, [user?.role, effectiveReviewCount]);
 
   return (
     <div className="min-h-screen flex bg-[#f8fafc] text-slate-900 font-sans selection:bg-purple-500 selection:text-white relative overflow-x-hidden">
