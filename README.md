@@ -47,14 +47,84 @@
 
 ---
 
-### 👑 Project Leadership & Core Team
+### 👥 Team Contributions Across the Whole Project
 
-| Leader / Author | Role & Subsystem Ownership | GitHub | Badges |
-| :--- | :--- | :--- | :--- |
-| **Manjiri Relekar** | 🚀 **Lead Architect & Submission Lead**<br>Project scoping, integration review, core orchestration | [@manjirirelekar47](https://github.com/manjirirelekar47) | [![GitHub Profile](https://img.shields.io/badge/GitHub-Profile-181717?style=flat-square&logo=github)](https://github.com/manjirirelekar47) |
-| **Bhavesh Patil** | 🛡️ **Ingestion, Risk Radar & UI Architecture**<br>Sources engine (F1/F2), Risk radar (F6), Cytoscape graph, live connectors, telemetry | [@bhavesh-patil2007](https://github.com/bhavesh-patil2007) | [![GitHub Profile](https://img.shields.io/badge/GitHub-Profile-181717?style=flat-square&logo=github)](https://github.com/bhavesh-patil2007) |
-| **Samiksha Patil** | 🔍 **Reconstruct & Verify Core**<br>Extraction pipeline (F3), Claim ledger (F4), Verification engine (F5) | [@samiksha-patil](https://github.com/samiksha-patil) | [![GitHub Profile](https://img.shields.io/badge/GitHub-Profile-181717?style=flat-square&logo=github)](https://github.com/samiksha-patil) |
-| **Samruddhi Gangane**| 📋 **Review Queue & Release Readiness**<br>Disagreement solver, gap interview, handover sealing, E2E tests | [@samruddhigangane17](https://github.com/samruddhigangane17) | [![GitHub Profile](https://img.shields.io/badge/GitHub-Profile-181717?style=flat-square&logo=github)](https://github.com/samruddhigangane17) |
+> **Four owners, one product: every area of Baton has a clear owner and a shared quality bar.**
+
+<table width="100%">
+  <tr>
+    <td width="25%" valign="top">
+      <div align="center">
+        <br/>
+        <b>Manjiri Relekar</b> 🖥️<br/><br/>
+        <a href="https://github.com/manjirirelekar47"><img src="https://img.shields.io/badge/TEAM%20LEADER-FRONTEND%20%2B%20AUTH-22c55e?style=for-the-badge&labelColor=15803d" alt="Team Leader - Frontend + Auth" /></a><br/><br/>
+        <a href="https://github.com/manjirirelekar47"><img src="https://img.shields.io/badge/GitHub-@manjirirelekar47-181717?style=flat-square&logo=github" alt="GitHub Profile" /></a>
+      </div>
+      <br/>
+      <ul>
+        <li><b>Leads the team</b> and coordinates delivery</li>
+        <li><b>Frontend UI and UX:</b> role views, Day-1 plan, acknowledgement</li>
+        <li><b>GitHub authentication</b> and sign-in flows</li>
+        <li><b>Repo setup, CI, deployment</b> on Vercel, Render, Supabase</li>
+        <li><b>Demo-role JWT login</b> and server-side access filter</li>
+      </ul>
+    </td>
+    <td width="25%" valign="top">
+      <div align="center">
+        <br/>
+        <b>Bhavesh Patil</b> 🗄️<br/><br/>
+        <a href="https://github.com/bhavesh-patil2007"><img src="https://img.shields.io/badge/BACKEND-AND%20VERIFICATION-3b82f6?style=for-the-badge&labelColor=1d4ed8" alt="Backend and Verification" /></a><br/><br/>
+        <a href="https://github.com/bhavesh-patil2007"><img src="https://img.shields.io/badge/GitHub-@bhavesh--patil2007-181717?style=flat-square&logo=github" alt="GitHub Profile" /></a>
+      </div>
+      <br/>
+      <ul>
+        <li><b>Backend API architecture</b> and contracts</li>
+        <li><b>Parsers, secret redaction</b> and chunking</li>
+        <li><b>Source viewer</b> with highlighted quotes</li>
+        <li><b>Risk Radar, timeline</b> and delivery status</li>
+        <li><b>Access control</b> and verification hardening</li>
+      </ul>
+    </td>
+    <td width="25%" valign="top">
+      <div align="center">
+        <br/>
+        <b>Samiksha Patil</b> 🧠<br/><br/>
+        <a href="https://github.com/samiksha-patil"><img src="https://img.shields.io/badge/DATA%2C%20AI-PROJECT%20FEATURES-a855f7?style=for-the-badge&labelColor=7e22ce" alt="Data, AI and Project Features" /></a><br/><br/>
+        <a href="https://github.com/samiksha-patil"><img src="https://img.shields.io/badge/GitHub-@samiksha--patil-181717?style=flat-square&logo=github" alt="GitHub Profile" /></a>
+      </div>
+      <br/>
+      <ul>
+        <li><b>Data model, permissions,</b> synthetic dataset</li>
+        <li><b>AI extraction</b> with a JSON schema</li>
+        <li><b>Quote and conflict verifier</b></li>
+        <li><b>Claim ledger interface</b></li>
+        <li><b>Create project</b> and invite-by-code flows</li>
+        <li><b>Per-claim</b> access labels</li>
+      </ul>
+    </td>
+    <td width="25%" valign="top">
+      <div align="center">
+        <br/>
+        <b>Samruddhi Gangane</b> 📋<br/><br/>
+        <a href="https://github.com/samruddhigangane17"><img src="https://img.shields.io/badge/REVIEW-TESTING%20%26%20QUALITY-eab308?style=for-the-badge&labelColor=a16207" alt="Review, Testing and Quality" /></a><br/><br/>
+        <a href="https://github.com/samruddhigangane17"><img src="https://img.shields.io/badge/GitHub-@samruddhigangane17-181717?style=flat-square&logo=github" alt="GitHub Profile" /></a>
+      </div>
+      <br/>
+      <ul>
+        <li><b>Review queue, approval gate,</b> versions</li>
+        <li><b>Audit trail</b> and Gap Interview form</li>
+        <li><b>End-to-end</b> and leakage tests</li>
+        <li><b>Release verification</b> and failure path tests</li>
+        <li><b>CI/CD</b> and deployment planning</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <b>One owner per area &bull; PR review on every change &bull; Everyone owns their own tests</b><br/>
+  <sub><i>Baton | Team Modak_v21</i></sub>
+</p>
 
 ---
 
