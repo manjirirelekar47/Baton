@@ -161,26 +161,6 @@ def approve(ctx: Ctx, req: ApproveRequest) -> VersionOut:
     ctx.claims.mark_review_state(
         ctx.project_id, [i["claim_id"] for i in items if not i["unknown"]], APPROVED_STATE
     )
-    # Automatic transition completion for Leavers: active project membership ends upon handover approval
-    try:
-        session.execute(
-            text("""
-                update project_memberships
-                set active = 0, handover_status = 'completed'
-                where project_id = :pid and role = 'leaver' and active = 1
-            """),
-            {"pid": ctx.project_id},
-        )
-        session.execute(
-            text("""
-                update members
-                set active = 0, handover_status = 'completed'
-                where project_id = :pid and role = 'leaver' and active = 1
-            """),
-            {"pid": ctx.project_id},
-        )
-    except Exception:
-        pass
     record_event(
         session, ctx.actor, "version.approve", "version", version.id,
         {"version_number": number, "hash": version.snapshot_hash,
@@ -218,6 +198,7 @@ def list_versions(ctx: Ctx) -> list[VersionOut]:
         Role.LEAVER,
         Role.INCOMING_MAINTAINER,
         Role.INCOMING_CONTRIBUTOR,
+        Role.CONTRIBUTOR,
     )
     rows = ctx.session.scalars(
         select(Version)
@@ -225,8 +206,13 @@ def list_versions(ctx: Ctx) -> list[VersionOut]:
         .order_by(Version.version_number.desc())
     ).all()
     results = [VersionOut.model_validate(v) for v in rows]
-    if ctx.actor.role in (Role.INCOMING_MAINTAINER.value, Role.INCOMING_CONTRIBUTOR.value):
-        results = [v for v in results if ctx.actor.role in v.shared_roles]
+    if ctx.actor.role in (Role.INCOMING_MAINTAINER.value, Role.INCOMING_CONTRIBUTOR.value, Role.CONTRIBUTOR.value):
+        results = [
+            v for v in results
+            if ctx.actor.role in v.shared_roles
+            or (ctx.actor.role == Role.CONTRIBUTOR.value and Role.INCOMING_CONTRIBUTOR.value in v.shared_roles)
+            or (ctx.actor.role == Role.INCOMING_CONTRIBUTOR.value and Role.CONTRIBUTOR.value in v.shared_roles)
+        ]
     return results
 
 

@@ -107,7 +107,7 @@ def ensure_identity_mappings_table(session: Session) -> None:
                 "  supabase_sub text primary key,"
                 "  member_id text not null,"
                 "  project_id text not null,"
-                "  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'incoming_contributor')),"
+                "  role text not null check (role in ('approver', 'leaver', 'incoming_maintainer', 'contributor', 'incoming_contributor')),"
                 "  email text,"
                 "  created_at text not null,"
                 "  updated_at text not null"
@@ -149,7 +149,30 @@ def record_identity_mapping(
         )
         session.commit()
     except Exception:
-        pass
+        try:
+            session.rollback()
+            # If check constraint on pre-existing table rejects 'contributor', fallback to 'incoming_contributor'
+            fallback_role = "incoming_contributor" if role == "contributor" else role
+            session.execute(
+                text(
+                    "insert into identity_mappings (supabase_sub, member_id, project_id, role, email, created_at, updated_at) "
+                    "values (:sub, :mid, :pid, :role, :email, :created_at, :updated_at) "
+                    "on conflict (supabase_sub) do update set "
+                    "member_id = excluded.member_id, project_id = excluded.project_id, role = excluded.role, email = excluded.email, updated_at = excluded.updated_at"
+                ),
+                {
+                    "sub": str(supabase_sub),
+                    "mid": str(member_id),
+                    "pid": str(project_id),
+                    "role": str(fallback_role),
+                    "email": email,
+                    "created_at": now_iso,
+                    "updated_at": now_iso,
+                },
+            )
+            session.commit()
+        except Exception:
+            session.rollback()
 
 
 def _provision_workspace(user_id: str, claims: dict, session: Session, role: str = "incoming_contributor") -> User:
