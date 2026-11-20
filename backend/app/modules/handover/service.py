@@ -112,14 +112,14 @@ def _get_version_tasks_graph(session: Session, user: User, version_id: str) -> d
 
     deleted_ids = {
         r[0] for r in session.execute(
-            text("select task_id from plan_deleted_tasks where version_id = :v"),
-            {"v": version_id},
+            text("select task_id from plan_deleted_tasks where version_id = :v and project_id = :p"),
+            {"v": version_id, "p": user.project_id},
         ).fetchall()
     }
 
     dep_rows = session.execute(
-        text("select task_id, blocked_by_id from task_dependencies where version_id = :v"),
-        {"v": version_id},
+        text("select task_id, blocked_by_id from task_dependencies where version_id = :v and project_id = :p"),
+        {"v": version_id, "p": user.project_id},
     ).mappings().all()
     custom_deps: dict[str, list[str]] = {}
     for d in dep_rows:
@@ -135,8 +135,8 @@ def _get_version_tasks_graph(session: Session, user: User, version_id: str) -> d
                 graph[cid] = list(c.get("blocked_by") or [])
 
     custom_tasks = session.execute(
-        text("select id, blocked_by from handover_tasks where version_id = :v and id not in (select task_id from plan_deleted_tasks where version_id = :v)"),
-        {"v": version_id},
+        text("select id, blocked_by from handover_tasks where version_id = :v and project_id = :p and id not in (select task_id from plan_deleted_tasks where version_id = :v and project_id = :p)"),
+        {"v": version_id, "p": user.project_id},
     ).mappings().all()
     for ct in custom_tasks:
         cid = ct["id"]
@@ -153,23 +153,23 @@ def _get_version_tasks_graph(session: Session, user: User, version_id: str) -> d
 
 def _get_task(session: Session, user: User, version_id: str, task_id: str) -> dict | None:
     is_deleted = session.execute(
-        text("select 1 from plan_deleted_tasks where version_id = :v and task_id = :t"),
-        {"v": version_id, "t": task_id},
+        text("select 1 from plan_deleted_tasks where version_id = :v and task_id = :t and project_id = :p"),
+        {"v": version_id, "t": task_id, "p": user.project_id},
     ).first()
     if is_deleted:
         return None
 
     custom_deps = [
         r[0] for r in session.execute(
-            text("select blocked_by_id from task_dependencies where version_id = :v and task_id = :t"),
-            {"v": version_id, "t": task_id},
+            text("select blocked_by_id from task_dependencies where version_id = :v and task_id = :t and project_id = :p"),
+            {"v": version_id, "t": task_id, "p": user.project_id},
         ).fetchall()
     ]
 
     ct = session.execute(
         text("select id, version_id, project_id, title, kind, status, owner, due_date, notes, blocked_by, created_by, created_at, updated_by, updated_at "
-             "from handover_tasks where version_id = :v and id = :t"),
-        {"v": version_id, "t": task_id},
+             "from handover_tasks where version_id = :v and id = :t and project_id = :p"),
+        {"v": version_id, "t": task_id, "p": user.project_id},
     ).mappings().first()
     if ct:
         b_by = custom_deps if custom_deps else (json.loads(ct["blocked_by"]) if ct["blocked_by"] else [])
@@ -194,8 +194,8 @@ def _get_task(session: Session, user: User, version_id: str, task_id: str) -> di
     claim = next((c for c in filtered.visible if c.get("claim_id") == task_id), None)
     if claim:
         status_row = session.execute(
-            text("select status, owner, due_date, notes, updated_by, updated_at from plan_action_status where version_id = :v and claim_id = :t"),
-            {"v": version_id, "t": task_id},
+            text("select status, owner, due_date, notes, updated_by, updated_at from plan_action_status where version_id = :v and claim_id = :t and project_id = :p"),
+            {"v": version_id, "t": task_id, "p": user.project_id},
         ).mappings().first()
 
         b_by = custom_deps if custom_deps else list(claim.get("blocked_by") or [])
@@ -235,7 +235,7 @@ def _load(user: User, version_id: str) -> tuple[dict, acl.FilterResult]:
         version is None
         or version.get("project_id") != user.project_id
         or version.get("status") != "approved"
-        or (user.role != "approver" and user.role not in version.get("shared_with", []))
+        or (user.role not in ("approver", "leaver") and user.role not in version.get("shared_with", []))
     ):
         raise HTTPException(status_code=404, detail=NOT_FOUND)
     return version, acl.filter_for_role(user.role, version.get("claims", []))
@@ -282,22 +282,22 @@ def get_plan(session: Session, user: User, version_id: str) -> dict:
 
     deleted_ids = {
         r[0] for r in session.execute(
-            text("select task_id from plan_deleted_tasks where version_id = :v"),
-            {"v": version_id},
+            text("select task_id from plan_deleted_tasks where version_id = :v and project_id = :p"),
+            {"v": version_id, "p": user.project_id},
         ).fetchall()
     }
 
     dep_rows = session.execute(
-        text("select task_id, blocked_by_id from task_dependencies where version_id = :v"),
-        {"v": version_id},
+        text("select task_id, blocked_by_id from task_dependencies where version_id = :v and project_id = :p"),
+        {"v": version_id, "p": user.project_id},
     ).mappings().all()
     custom_deps: dict[str, list[str]] = {}
     for d in dep_rows:
         custom_deps.setdefault(d["task_id"], []).append(d["blocked_by_id"])
 
     status_rows = session.execute(
-        text("select claim_id, status, owner, due_date, notes, updated_by, updated_at, transferred_from, original_owner, is_transferred from plan_action_status where version_id = :v"),
-        {"v": version_id},
+        text("select claim_id, status, owner, due_date, notes, updated_by, updated_at, transferred_from, original_owner, is_transferred from plan_action_status where version_id = :v and project_id = :p"),
+        {"v": version_id, "p": user.project_id},
     ).mappings().all()
     status_map = {r["claim_id"]: dict(r) for r in status_rows}
 
@@ -327,8 +327,8 @@ def get_plan(session: Session, user: User, version_id: str) -> dict:
     # Add custom tasks
     custom_tasks = session.execute(
         text("select id, version_id, project_id, title, kind, status, owner, due_date, notes, blocked_by, created_by, created_at, updated_by, updated_at, transferred_from, original_owner, is_transferred "
-             "from handover_tasks where version_id = :v and id not in (select task_id from plan_deleted_tasks where version_id = :v)"),
-        {"v": version_id},
+             "from handover_tasks where version_id = :v and project_id = :p and id not in (select task_id from plan_deleted_tasks where version_id = :v and project_id = :p)"),
+        {"v": version_id, "p": user.project_id},
     ).mappings().all()
     for ct in custom_tasks:
         cid = ct["id"]
@@ -397,8 +397,8 @@ def get_plan(session: Session, user: User, version_id: str) -> dict:
 
 
 def create_task(session: Session, user: User, version_id: str, body: TaskCreateRequest) -> dict:
-    if user.role != "approver":
-        raise HTTPException(status_code=403, detail="Only approvers can create handover tasks.")
+    if user.role not in ("approver", "leaver"):
+        raise HTTPException(status_code=403, detail="Only approvers and leavers can create handover tasks.")
 
     _load(user, version_id)
 
@@ -486,7 +486,7 @@ def update_task(session: Session, user: User, version_id: str, task_id: str, bod
 
     is_approver = user.role == "approver"
     if not is_approver:
-        if not is_task_assigned_to_user(task, user):
+        if not is_task_assigned_to_user(task, user) and user.role != "leaver":
             raise HTTPException(status_code=403, detail="You can only update tasks explicitly assigned to you.")
 
         if body.owner is not None and body.owner != task.get("owner"):
@@ -648,8 +648,8 @@ def update_task(session: Session, user: User, version_id: str, task_id: str, bod
 
 
 def delete_task(session: Session, user: User, version_id: str, task_id: str) -> dict:
-    if user.role != "approver":
-        raise HTTPException(status_code=403, detail="Only approvers can delete handover tasks.")
+    if user.role not in ("approver", "leaver"):
+        raise HTTPException(status_code=403, detail="Only approvers and leavers can delete handover tasks.")
 
     task = _get_task(session, user, version_id, task_id)
     if task is None:
@@ -678,8 +678,12 @@ def delete_task(session: Session, user: User, version_id: str, task_id: str) -> 
         )
 
     session.execute(
-        text("delete from task_dependencies where version_id = :v and (task_id = :t or blocked_by_id = :t)"),
-        {"v": version_id, "t": task_id},
+        text("delete from task_dependencies where version_id = :v and (task_id = :t or blocked_by_id = :t) and project_id = :p"),
+        {"v": version_id, "t": task_id, "p": user.project_id},
+    )
+    session.execute(
+        text("delete from plan_action_status where version_id = :v and claim_id = :t and project_id = :p"),
+        {"v": version_id, "t": task_id, "p": user.project_id},
     )
 
     record_activity(session, user, version_id, task_id, "deleted", "task", task.get("title"), None)
