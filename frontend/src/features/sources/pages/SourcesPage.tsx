@@ -362,7 +362,7 @@ export function SourcesPage() {
     });
   }
 
-  const isApprover = user?.role === "approver";
+  const isApprover = user?.role === "approver" || user?.role === "leaver";
   const connections = connectionsQuery.data ?? [];
 
   return (
@@ -808,11 +808,11 @@ export function SourcesPage() {
         </form>
       ) : (
         <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/40 backdrop-blur-2xl p-4 sm:p-5 text-xs text-slate-600 dark:text-gray-400 shadow-sm">
-          Only the project approver can connect new sources. You can inspect the sources available to your role below.
+          Only the project approver or leaver can connect new sources. You can inspect the sources available to your role below.
         </div>
       )}
 
-      {user?.role === "approver" && (
+      {(user?.role === "approver" || user?.role === "leaver") && (
         <form onSubmit={handleCapture} className="space-y-4 rounded-2xl border border-purple-200 dark:border-purple-500/20 bg-purple-50/50 dark:bg-purple-950/10 p-4 sm:p-6 shadow-sm">
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Capture a decision or handover note</h2>
