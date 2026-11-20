@@ -1,4 +1,5 @@
 import React from "react";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 const LOGO_ASSET_PATH = "/assets/baton-logo.png";
 
@@ -19,15 +20,15 @@ export const FallbackHero: React.FC<{ className?: string; isDark?: boolean }> = 
 
     <div className="relative w-48 h-48 sm:w-52 sm:h-52 rounded-full bg-gradient-to-tr from-white/70 via-purple-100/40 to-indigo-100/60 dark:from-slate-900/80 dark:via-purple-950/40 dark:to-indigo-950/60 backdrop-blur-2xl border border-white/80 dark:border-white/20 shadow-[0_20px_50px_rgba(79,70,229,0.25)] flex items-center justify-center p-4">
       <div className="absolute top-2 left-6 w-14 h-7 rounded-full bg-white/60 dark:bg-white/30 blur-[2px] rotate-[-25deg] pointer-events-none" />
-      <img
+      <OptimizedImage
         src={LOGO_ASSET_PATH}
         alt="Baton"
+        width={144}
+        height={144}
+        priority
         className={`w-32 h-32 sm:w-36 sm:h-36 object-contain drop-shadow-md transition-all duration-300 ${
           isDark ? "drop-shadow-[0_0_16px_rgba(168,85,247,0.6)]" : ""
         }`}
-        onError={(event) => {
-          event.currentTarget.src = "/logo.png";
-        }}
       />
     </div>
   </div>

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /sources
+Allow: /signup
+Allow: /login
+Disallow: /api/
+
+Sitemap: https://baton-pearl.vercel.app/sitemap.xml
