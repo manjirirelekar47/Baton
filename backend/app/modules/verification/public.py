@@ -106,3 +106,14 @@ def reset_demo(session: Session) -> None:
     session.execute(text("delete from gaps where project_id = 'proj-campus-event-portal'"))
     session.execute(text("delete from claims where project_id = 'proj-campus-event-portal'"))
     session.commit()
+
+    # Re-seed demo claims into initial resolvable state (c-009 and c-018 in conflicting state)
+    try:
+        from app.modules.extraction.service import load_replay_claims
+        raw = load_replay_claims()
+        if raw:
+            verified_claims, gaps = service.verify_all_claims(session, "proj-campus-event-portal", raw)
+            service.persist_claims_and_gaps(session, "proj-campus-event-portal", verified_claims, gaps)
+            session.commit()
+    except Exception:
+        session.rollback()

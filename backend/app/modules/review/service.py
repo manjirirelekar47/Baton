@@ -293,7 +293,20 @@ def apply_action(ctx: Ctx, claim_id: str, req: ActionRequest) -> ActionResult:
         primary = _record(ctx, claim.id, action, req.note, before, before)
 
     elif action == ReviewAction.RESOLVE_CONFLICT:
-        if claim.state != ClaimState.CONFLICTING:
+        if claim.state != ClaimState.CONFLICTING or not claim.conflict_with:
+            latest = latest_reviews(ctx.session, ctx.project_id).get(claim.id)
+            if (
+                (latest and latest.action in (ReviewAction.RESOLVE_CONFLICT.value, ReviewAction.REJECT.value))
+                or claim.state in (ClaimState.VERIFIED, "verified", "Verified")
+                or not claim.conflict_with
+            ):
+                raise ReviewError(
+                    409,
+                    "already_resolved",
+                    "This conflict has already been resolved.",
+                    claim_id=claim.id,
+                    chosen_claim_id=req.chosen_claim_id,
+                )
             raise ReviewError(409, "not_conflicting", "This claim is not in conflict.")
         group = {claim.id, *claim.conflict_with}
         chosen_id = req.chosen_claim_id or ""

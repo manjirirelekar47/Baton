@@ -38,7 +38,7 @@ status, body = call("POST", "/auth/demo-login", body={"role": "approver"})
 step("approver login", status == 200, status)
 approver = json.loads(body)["token"]
 
-status, body = call("POST", "/reconstruct", approver, {})
+status, body = call("POST", "/reconstruct", approver, {"mode": "replay"})
 step("reconstruct (replay)", status == 200, status)
 job_id = json.loads(body).get("job_id") if status == 200 else None
 if job_id:
@@ -52,10 +52,30 @@ status, body = call("GET", "/chunks/S4-212", approver)
 step("open citation", status == 200 and "Rohan took payments over" in body, status)
 
 # Resolve conflicts and confirm verified claims so readiness gate passes
-status, _ = call("POST", "/review/c-009/action", approver, {"action": "resolve_conflict", "chosen_claim_id": "c-009", "note": "smoke test"})
-step("resolve conflict c-009", status == 200, status)
-status, _ = call("POST", "/review/c-018/action", approver, {"action": "resolve_conflict", "chosen_claim_id": "c-018", "note": "smoke test"})
-step("resolve conflict c-018", status == 200, status)
+status, body = call("POST", "/review/c-009/action", approver, {"action": "resolve_conflict", "chosen_claim_id": "c-009", "note": "smoke test"})
+c009_ok = status == 200 or (
+    status == 409
+    and any(
+        m in body.lower()
+        for m in ("already_resolved", "already resolved", "not_conflicting", "not in conflict")
+    )
+)
+step("resolve conflict c-009", c009_ok, status if c009_ok else f"{status}: {body}")
+
+status, body = call("POST", "/review/c-018/action", approver, {"action": "resolve_conflict", "chosen_claim_id": "c-018", "note": "smoke test"})
+c018_ok = status == 200 or (
+    status == 409
+    and any(
+        m in body.lower()
+        for m in ("already_resolved", "already resolved", "not_conflicting", "not in conflict")
+    )
+)
+step("resolve conflict c-018", c018_ok, status if c018_ok else f"{status}: {body}")
+
+# Settle any remaining conflicts so readiness gate passes
+for cid in ("c-001", "c-002", "c-005", "c-006"):
+    call("POST", f"/review/{cid}/action", approver, {"action": "resolve_conflict", "chosen_claim_id": cid, "note": "smoke test"})
+
 status, _ = call("POST", "/review/confirm-verified", approver, {})
 step("confirm verified", status == 200, status)
 

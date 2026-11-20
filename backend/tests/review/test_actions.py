@@ -86,6 +86,16 @@ def test_resolve_on_non_conflicting_claim_refused(act):
     assert r.status_code == 409
 
 
+def test_resolve_conflict_already_resolved_returns_409_already_resolved(act):
+    # First resolution succeeds
+    r1 = act("c-pay-A", "resolve_conflict", chosen_claim_id="c-pay-B", note="pick B")
+    assert r1.status_code == 200
+    # Second resolution against already resolved conflict returns 409 already_resolved
+    r2 = act("c-pay-A", "resolve_conflict", chosen_claim_id="c-pay-B", note="pick B again")
+    assert r2.status_code == 409
+    assert r2.json()["detail"]["code"] == "already_resolved"
+
+
 def test_accept_uncertainty_only_for_conflict_or_inferred(act):
     assert act("c-test", "accept_uncertainty", note="x").status_code == 409
     assert act("c-staging", "accept_uncertainty", note="x").status_code == 200

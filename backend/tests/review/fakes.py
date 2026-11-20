@@ -40,6 +40,10 @@ class FakeClaims:
         self.calls.append(("resolve", chosen_claim_id, tuple(other_claim_ids)))
         k = (project_id, chosen_claim_id)
         self.claims[k] = replace(self.claims[k], state="Verified", conflict_with=(), suggested_claim_id=None)
+        for oid in other_claim_ids:
+            ok = (project_id, oid)
+            if ok in self.claims:
+                self.claims[ok] = replace(self.claims[ok], state="Inferred", conflict_with=(), suggested_claim_id=None)
         return self.claims[k]
 
     def mark_review_state(self, project_id, claim_ids, review_state):

@@ -57,9 +57,10 @@ def test_invited_leaver_joins_shared_workspace_and_exercises_permissions(client)
     assert recon_res.status_code == 200
     job_id = recon_res.json()["job_id"]
 
-    for _ in range(30):
+    for _ in range(60):
         job_res = client.get(f"/jobs/{job_id}", headers=appr_auth)
         if job_res.status_code == 200 and job_res.json().get("status") in ("done", "failed"):
+            assert job_res.json().get("status") == "done"
             break
         time.sleep(0.1)
 
@@ -246,9 +247,10 @@ def test_invited_reviewer_sees_shared_workspace_and_updates_team_count(client):
     assert recon_res.status_code == 200
     job_id = recon_res.json()["job_id"]
 
-    for _ in range(30):
+    for _ in range(60):
         job_res = client.get(f"/jobs/{job_id}", headers=appr_auth)
         if job_res.status_code == 200 and job_res.json().get("status") in ("done", "failed"):
+            assert job_res.json().get("status") == "done"
             break
         time.sleep(0.1)
 
