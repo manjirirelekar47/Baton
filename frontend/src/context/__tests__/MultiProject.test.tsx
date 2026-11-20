@@ -446,6 +446,26 @@ describe("Multi-Project Frontend Regression Tests", () => {
     sessionStorage.setItem("baton.session_active", "true");
     sessionStorage.setItem("baton.pending_invite", "INV-123");
 
+    // Simulate in-flight initialization call that resolves with delay
+    vi.mocked(batonApi.getMe).mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                id: "usr-123",
+                name: "Slow User",
+                role: "approver",
+                project_id: "proj-active-1",
+              }),
+            50
+          )
+        )
+    );
+    vi.mocked(batonApi.getProjects).mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve([]), 50))
+    );
+
     function LogoutComponent() {
       const { logout, user, activeProject, requiresProject } = useAuth();
       return (
@@ -479,6 +499,13 @@ describe("Multi-Project Frontend Regression Tests", () => {
       expect(screen.getByTestId("requires-project").textContent).toBe("no");
       expect(clearSpy).toHaveBeenCalled();
     });
+
+    // Verify that subsequent resolution of in-flight promises does not overwrite logout state
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    expect(screen.getByTestId("requires-project").textContent).toBe("no");
+    expect(screen.getByTestId("user-state").textContent).toBe("logged-out");
+    expect(screen.getByTestId("project-state").textContent).toBe("none");
   });
 
   it("page reload preserves active project from localStorage without resetting workspace", async () => {

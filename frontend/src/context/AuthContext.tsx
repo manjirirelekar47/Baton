@@ -10,6 +10,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -177,33 +178,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Auth generation / epoch tracker to prevent stale async resolutions (e.g. initializeAuth, syncSession)
+  // from overwriting logout() or concurrent session transitions.
+  const authEpochRef = useRef<number>(0);
+
   /**
    * Logs in using a demo role and saves the signed JWT
    */
   const loginDemo = useCallback(async (role: Role = "approver") => {
+    authEpochRef.current += 1;
+    const epoch = authEpochRef.current;
     setLoading(true);
     setError(null);
     try {
       const response = await batonApi.demoLogin(role);
+      if (authEpochRef.current !== epoch) return;
       setStoredToken(response.token);
       queryClient.clear();
       const authedEmail = await getAuthenticatedEmail();
+      if (authEpochRef.current !== epoch) return;
       const formatted = formatUser(response.user, authedEmail);
       setUser(formatted);
       const projs = await batonApi.getProjects().catch(() => [
         { id: "proj-campus-event-portal", name: "Campus Event Portal", role: response.user.role },
       ]);
+      if (authEpochRef.current !== epoch) return;
       setProjects(projs);
       const active = projs.find((p) => p.id === response.user.project_id) || projs[0] || null;
       setActiveProject(active);
       setStoredProjectId(active?.id || response.user.project_id || null, response.user.id);
       setRequiresProject(false);
     } catch (err: unknown) {
+      if (authEpochRef.current !== epoch) return;
       const message = err instanceof ApiError ? err.message : "Failed to sign in via demo role";
       setError(message);
       throw err;
     } finally {
-      setLoading(false);
+      if (authEpochRef.current === epoch) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -211,18 +224,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * Registers a new user with chosen role and saves the signed JWT
    */
   const register = useCallback(async (payload: RegisterParams) => {
+    authEpochRef.current += 1;
+    const epoch = authEpochRef.current;
     setLoading(true);
     setError(null);
     try {
       const activeSession = (await supabase?.auth.getSession())?.data.session;
+      if (authEpochRef.current !== epoch) return null as any;
       const token = payload.supabase_token || activeSession?.access_token;
       const response = await batonApi.register({ ...payload, supabase_token: token });
+      if (authEpochRef.current !== epoch) return null as any;
       setStoredToken(response.token);
       queryClient.clear();
       const authedEmail = await getAuthenticatedEmail();
+      if (authEpochRef.current !== epoch) return null as any;
       const formatted = formatUser(response.user, authedEmail || payload.email);
       setUser(formatted);
       const projs = await batonApi.getProjects().catch(() => []);
+      if (authEpochRef.current !== epoch) return null as any;
       setProjects(projs);
       const active = projs.find((p) => p.id === response.user.project_id) || projs[0] || null;
       setActiveProject(active);
@@ -230,11 +249,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setRequiresProject(false);
       return formatted;
     } catch (err: unknown) {
+      if (authEpochRef.current !== epoch) return null as any;
       const message = err instanceof ApiError ? err.message : "Registration failed";
       setError(message);
       throw err;
     } finally {
-      setLoading(false);
+      if (authEpochRef.current === epoch) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -242,10 +264,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * Synchronizes an authenticated Supabase user with their assigned role in Baton
    */
   const syncSession = useCallback(async (user_id: string, email: string, name?: string) => {
+    const epoch = authEpochRef.current;
     setLoading(true);
     setError(null);
     try {
       const activeSession = (await supabase?.auth.getSession())?.data.session;
+      if (authEpochRef.current !== epoch) return { registered: false };
       const token = activeSession?.access_token;
       const storedPid = getStoredProjectId(user_id);
       const res = await batonApi.syncSession({
@@ -255,17 +279,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         project_id: storedPid || undefined,
         supabase_token: token,
       });
+      if (authEpochRef.current !== epoch) return { registered: false };
       if (res.requires_project) {
         if (res.token) setStoredToken(res.token);
-        setRequiresProject(true);
-        setProjects([]);
-        setActiveProject(null);
+        if (authEpochRef.current === epoch && getStoredToken()) {
+          setRequiresProject(true);
+          setProjects([]);
+          setActiveProject(null);
+        }
         return { registered: true, requires_project: true };
       }
       if (res.registered && res.token && res.user) {
         setStoredToken(res.token);
         queryClient.clear();
         const authedEmail = await getAuthenticatedEmail();
+        if (authEpochRef.current !== epoch) return { registered: false };
         setUser(formatUser(res.user, authedEmail || email));
         if (res.projects) {
           setProjects(res.projects);
@@ -282,11 +310,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       return { registered: false, requires_role: Boolean(res.requires_role) };
     } catch (err: unknown) {
+      if (authEpochRef.current !== epoch) return { registered: false };
       const message = err instanceof ApiError ? err.message : "Session sync failed";
       setError(message);
       throw err;
     } finally {
-      setLoading(false);
+      if (authEpochRef.current === epoch) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -294,9 +325,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * Fetch all active projects
    */
   const fetchProjects = useCallback(async () => {
+    const epoch = authEpochRef.current;
     try {
       const projs = await batonApi.getProjects();
-      setProjects(projs);
+      if (authEpochRef.current === epoch) {
+        setProjects(projs);
+      }
       return projs;
     } catch {
       return [];
@@ -307,26 +341,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * Switch between projects and invalidate React Query cache
    */
   const switchProject = useCallback(async (projectId: string) => {
+    authEpochRef.current += 1;
+    const epoch = authEpochRef.current;
     setLoading(true);
     setError(null);
     try {
       const res = await batonApi.switchProject(projectId);
+      if (authEpochRef.current !== epoch) return;
       setStoredToken(res.token);
       queryClient.clear();
       const authedEmail = await getAuthenticatedEmail();
+      if (authEpochRef.current !== epoch) return;
       const updatedUser = formatUser(res.user, authedEmail);
       setUser(updatedUser);
       setActiveProject(res.project);
       setStoredProjectId(res.project.id, res.user.id);
       const projs = await batonApi.getProjects().catch(() => []);
+      if (authEpochRef.current !== epoch) return;
       setProjects(projs);
       setRequiresProject(false);
     } catch (err: unknown) {
+      if (authEpochRef.current !== epoch) return;
       const message = err instanceof ApiError ? err.message : "Failed to switch project";
       setError(message);
       throw err;
     } finally {
-      setLoading(false);
+      if (authEpochRef.current === epoch) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -334,18 +376,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * Create a new project (caller becomes Approver)
    */
   const createProject = useCallback(async (name: string) => {
+    authEpochRef.current += 1;
+    const epoch = authEpochRef.current;
     setLoading(true);
     setError(null);
     try {
       const res = await batonApi.createProject(name);
+      if (authEpochRef.current !== epoch) return null as any;
       setStoredToken(res.token);
       queryClient.clear();
       const authedEmail = await getAuthenticatedEmail();
+      if (authEpochRef.current !== epoch) return null as any;
       const updatedUser = formatUser(res.user, authedEmail);
       setUser(updatedUser);
       setActiveProject(res.project);
       setStoredProjectId(res.project.id, res.user.id);
       const projs = await batonApi.getProjects().catch(() => []);
+      if (authEpochRef.current !== epoch) return null as any;
       setProjects(projs);
       setRequiresProject(false);
       try {
@@ -356,11 +403,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       return res.project;
     } catch (err: unknown) {
+      if (authEpochRef.current !== epoch) return null as any;
       const message = err instanceof ApiError ? err.message : "Failed to create project";
       setError(message);
       throw err;
     } finally {
-      setLoading(false);
+      if (authEpochRef.current === epoch) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -368,18 +418,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * Join an existing project via invitation code
    */
   const joinProject = useCallback(async (invitationCode: string) => {
+    authEpochRef.current += 1;
+    const epoch = authEpochRef.current;
     setLoading(true);
     setError(null);
     try {
       const res = await batonApi.joinProject(invitationCode);
+      if (authEpochRef.current !== epoch) return null as any;
       setStoredToken(res.token);
       queryClient.clear();
       const authedEmail = await getAuthenticatedEmail();
+      if (authEpochRef.current !== epoch) return null as any;
       const updatedUser = formatUser(res.user, authedEmail);
       setUser(updatedUser);
       setActiveProject(res.project);
       setStoredProjectId(res.project.id, res.user.id);
       const projs = await batonApi.getProjects().catch(() => []);
+      if (authEpochRef.current !== epoch) return null as any;
       setProjects(projs);
       setRequiresProject(false);
       try {
@@ -390,11 +445,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       return res.project;
     } catch (err: unknown) {
+      if (authEpochRef.current !== epoch) return null as any;
       const message = err instanceof ApiError ? err.message : "Failed to join project";
       setError(message);
       throw err;
     } finally {
-      setLoading(false);
+      if (authEpochRef.current === epoch) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -402,6 +460,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * Refetches user profile from GET /me using active JWT
    */
   const refreshProfile = useCallback(async () => {
+    const epoch = authEpochRef.current;
     const token = getStoredToken();
     if (!token) {
       setUser(null);
@@ -413,8 +472,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         batonApi.getMe(),
         getAuthenticatedEmail(),
       ]);
-      setUser(formatUser(rawUser, authenticatedEmail));
+      if (authEpochRef.current === epoch) {
+        setUser(formatUser(rawUser, authenticatedEmail));
+      }
     } catch (err) {
+      if (authEpochRef.current !== epoch) return;
       if (err instanceof ApiError && err.status === 401) {
         setStoredToken(null);
         setUser(null);
@@ -429,6 +491,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    */
   useEffect(() => {
     let isMounted = true;
+    const epoch = authEpochRef.current;
+
+    const isActive = () => isMounted && authEpochRef.current === epoch;
+
     const initializeAuth = async () => {
       setLoading(true);
       setError(null);
@@ -437,6 +503,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!token && supabase) {
           // If Baton token is missing from localStorage, check if Supabase has an active session
           const { data } = await supabase.auth.getSession();
+          if (!isActive()) return;
           if (data.session?.user) {
             const sUser = data.session.user;
             const storedPid = getStoredProjectId(sUser.id);
@@ -448,15 +515,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 project_id: storedPid || undefined,
                 supabase_token: data.session.access_token,
               });
+              if (!isActive()) return;
               const resUser = res.user;
               if (res.registered && res.token && resUser) {
                 setStoredToken(res.token);
                 token = res.token;
                 queryClient.clear();
-                if (isMounted) {
+                if (isActive()) {
                   const formatted = formatUser(resUser, sUser.email);
                   setUser(formatted);
                   const projs = res.projects || (await batonApi.getProjects().catch(() => []));
+                  if (!isActive()) return;
                   setProjects(projs);
                   const active =
                     (storedPid ? projs.find((p) => p.id === storedPid) : null) ||
@@ -468,7 +537,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                   setRequiresProject(false);
                 }
                 return;
-              } else if (res.requires_project && isMounted) {
+              } else if (res.requires_project && isActive() && getStoredToken()) {
                 if (res.token) setStoredToken(res.token);
                 setRequiresProject(true);
                 setProjects([]);
@@ -481,6 +550,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
         }
 
+        if (!isActive()) return;
+
         if (token) {
           try {
             const [raw, authenticatedEmail, projs] = await Promise.all([
@@ -488,53 +559,62 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               getAuthenticatedEmail(),
               batonApi.getProjects().catch(() => []),
             ]);
-            if (isMounted) {
-              const formatted = formatUser(raw, authenticatedEmail);
-              setUser(formatted);
-              setProjects(projs);
+            if (!isActive()) return;
 
-              // Reconcile stored project with accessible projects
-              const storedPid = getStoredProjectId(raw.id);
-              let active =
-                (storedPid ? projs.find((p) => p.id === storedPid) : null) ||
-                projs.find((p) => p.id === raw.project_id) ||
-                projs[0] ||
-                null;
+            const formatted = formatUser(raw, authenticatedEmail);
+            setUser(formatted);
+            setProjects(projs);
 
-              // If stored project is valid but token was scoped to a different project, switch to sync JWT
-              if (storedPid && active && active.id === storedPid && raw.project_id !== storedPid) {
-                try {
-                  const switchRes = await batonApi.switchProject(storedPid);
-                  setStoredToken(switchRes.token);
-                  active = switchRes.project || active;
-                  const refreshed = formatUser(switchRes.user, authenticatedEmail);
-                  setUser(refreshed);
-                } catch {
-                  // Fall back to active
-                }
+            // Reconcile stored project with accessible projects
+            const storedPid = getStoredProjectId(raw.id);
+            let active =
+              (storedPid ? projs.find((p) => p.id === storedPid) : null) ||
+              projs.find((p) => p.id === raw.project_id) ||
+              projs[0] ||
+              null;
+
+            // If stored project is valid but token was scoped to a different project, switch to sync JWT
+            if (storedPid && active && active.id === storedPid && raw.project_id !== storedPid) {
+              try {
+                const switchRes = await batonApi.switchProject(storedPid);
+                if (!isActive()) return;
+                setStoredToken(switchRes.token);
+                active = switchRes.project || active;
+                const refreshed = formatUser(switchRes.user, authenticatedEmail);
+                setUser(refreshed);
+              } catch {
+                // Fall back to active
               }
-
-              setActiveProject(active);
-              setStoredProjectId(active?.id || raw.project_id || null, raw.id);
-              setRequiresProject(projs.length === 0);
-              queryClient.clear();
             }
+
+            if (!isActive()) return;
+
+            setActiveProject(active);
+            setStoredProjectId(active?.id || raw.project_id || null, raw.id);
+            setRequiresProject(projs.length === 0);
+            queryClient.clear();
             return;
           } catch (e) {
+            if (!isActive()) return;
+
             try {
               const projs = await batonApi.getProjects();
-              if (projs.length === 0 && isMounted) {
+              if (!isActive()) return;
+
+              if (projs.length === 0 && isActive() && getStoredToken()) {
                 setRequiresProject(true);
                 setProjects([]);
                 return;
-              } else if (projs.length > 0 && isMounted) {
+              } else if (projs.length > 0 && isActive()) {
                 // If user has existing projects, restore selected or first active project session seamlessly
                 const storedPid = getStoredProjectId();
                 const targetProj = (storedPid ? projs.find((p) => p.id === storedPid) : null) || projs[0];
                 try {
                   const switchRes = await batonApi.switchProject(targetProj.id);
+                  if (!isActive()) return;
                   setStoredToken(switchRes.token);
                   const authedEmail = await getAuthenticatedEmail();
+                  if (!isActive()) return;
                   setUser(formatUser(switchRes.user, authedEmail));
                   setProjects(projs);
                   setActiveProject(switchRes.project || targetProj);
@@ -543,39 +623,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                   queryClient.clear();
                   return;
                 } catch {
-                  setProjects(projs);
-                  setRequiresProject(false);
+                  if (isActive()) {
+                    setProjects(projs);
+                    setRequiresProject(false);
+                  }
                 }
               }
             } catch {
               // Ignore
             }
+
+            if (!isActive()) return;
+
             setStoredToken(null);
-            if (isMounted) {
-              setUser(null);
-              setActiveProject(null);
-              setProjects([]);
-            }
+            setUser(null);
+            setActiveProject(null);
+            setProjects([]);
+            setRequiresProject(false);
             if (!(e instanceof ApiError && e.status === 401)) {
               throw e;
             }
           }
         } else {
-          if (isMounted) {
+          if (isActive()) {
             setUser(null);
             setActiveProject(null);
             setProjects([]);
+            setRequiresProject(false);
           }
         }
       } catch (err) {
-        if (isMounted) {
+        if (isActive()) {
           setError(
             err instanceof Error ? err.message : "Failed to initialize authentication"
           );
           setUser(null);
+          setRequiresProject(false);
         }
       } finally {
-        if (isMounted) setLoading(false);
+        if (isActive()) setLoading(false);
       }
     };
 
@@ -610,6 +696,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * Logout and clear session
    */
   const logout = useCallback(async () => {
+    authEpochRef.current += 1;
     const currentUserId = user?.id;
     if (supabase) {
       await supabase.auth.signOut({ scope: "local" });
@@ -631,6 +718,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setProjects([]);
     setActiveProject(null);
     setRequiresProject(false);
+    setError(null);
+    setLoading(false);
     try {
       sessionStorage.removeItem("baton.pending_invite");
       sessionStorage.removeItem("baton.pending_role");
