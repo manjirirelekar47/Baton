@@ -33,6 +33,7 @@ import {
   FolderGit2,
 } from "lucide-react";
 import { useAuth } from "@/app/auth";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { useTheme } from "@/context/ThemeContext";
 import { isSupabaseConfigured, supabase } from "@/features/auth/supabase";
 import type { Role } from "@/shared/types";
@@ -237,13 +238,13 @@ function KnowledgeOrbit() {
           <div className="absolute top-2 left-4 w-12 h-6 rounded-full bg-white/40 blur-xs rotate-[-25deg] pointer-events-none" />
 
           {/* Baton Logo Asset */}
-          <img
+          <OptimizedImage
             src="/assets/baton-logo.png"
             alt="Baton Knowledge Emblem"
+            width={96}
+            height={96}
+            priority
             className="w-20 h-20 sm:w-24 sm:h-24 object-contain relative z-10 drop-shadow-md select-none"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "/logo.png";
-            }}
           />
         </div>
       </motion.div>
@@ -726,9 +727,12 @@ export function SignUp() {
           className="flex items-center gap-3.5 group focus:outline-none"
           aria-label="Baton Home"
         >
-          <img
+          <OptimizedImage
             src="/assets/baton-logo.png"
             alt="Baton Logo"
+            width={36}
+            height={36}
+            priority
             className="w-9 h-9 object-contain transition-transform group-hover:scale-105 drop-shadow-sm select-none"
           />
           <div className="flex flex-col">

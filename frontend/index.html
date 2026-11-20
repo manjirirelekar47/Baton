@@ -4,11 +4,76 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Baton — AI Project Handover Platform</title>
+    <meta name="description" content="Baton is an AI-powered project handover and knowledge transfer platform that captures claims, resolves drift, and streamlines developer transitions." />
+    <meta name="theme-color" content="#030712" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="canonical" href="https://baton-pearl.vercel.app/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://baton-pearl.vercel.app/" />
+    <meta property="og:title" content="Baton — AI Project Handover Platform" />
+    <meta property="og:description" content="Baton is an AI-powered project handover and knowledge transfer platform that captures claims, resolves drift, and streamlines developer transitions." />
+    <meta property="og:image" content="https://baton-pearl.vercel.app/assets/baton-logo.png" />
+    <meta property="og:image:alt" content="Baton Platform Logo" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://baton-pearl.vercel.app/" />
+    <meta name="twitter:title" content="Baton — AI Project Handover Platform" />
+    <meta name="twitter:description" content="Baton is an AI-powered project handover and knowledge transfer platform that captures claims, resolves drift, and streamlines developer transitions." />
+    <meta name="twitter:image" content="https://baton-pearl.vercel.app/assets/baton-logo.png" />
+
+    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/webp" href="/baton-logo.webp" />
     <link rel="apple-touch-icon" href="/assets/baton-logo.png" />
+
+    <!-- LCP Critical Image Preload -->
+    <link rel="preload" as="image" href="/assets/baton-logo.webp" type="image/webp" fetchpriority="high" />
+
+    <!-- Non-render-blocking Google Fonts with Display Swap & Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+      />
+    </noscript>
+
+    <!-- Critical CSS for rapid FCP / LCP paint and preventing CLS -->
+    <style>
+      :root {
+        color-scheme: dark light;
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background-color: #030712;
+        color: #f8fafc;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

@@ -12,6 +12,7 @@
 
 import React, { useState, useEffect, type ReactNode, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import {
   LayoutDashboard,
   FileText,
@@ -238,13 +239,13 @@ export const DashboardLayoutDark: React.FC<DashboardLayoutDarkProps> = ({
               className="flex items-center gap-3 px-3 py-3 focus:outline-none transition-all duration-200"
               aria-label="Baton Dashboard"
             >
-              <img
+              <OptimizedImage
                 src="/assets/baton-logo.png"
                 alt="Baton"
+                width={36}
+                height={36}
+                priority
                 className="h-9 w-9 object-contain flex-shrink-0 brightness-110 drop-shadow-[0_0_12px_rgba(168,85,247,0.4)]"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "/logo.png";
-                }}
               />
               {showLabels && (
                 <span className="text-2xl font-extrabold text-indigo-950 dark:text-white tracking-tight whitespace-nowrap">

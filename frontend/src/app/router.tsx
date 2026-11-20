@@ -1,30 +1,27 @@
 /**
  * router.tsx
  * Production Router configuration enforcing strict authentication guards.
- * 
- * Routing Rules:
- * - Root path (/) redirects to /dashboard if authenticated, or /signup if unauthenticated.
- * - Public routes: /login (LoginPage) and /signup (SignUp).
- * - Protected routes: Wrapped in <ProtectedRoute> requiring valid session/JWT before mounting
- *   <Shell> (hosting DashboardLayout) and all sub-routes (Dashboard, Ledger, Risk, Review,
- *   Graph, Access, Audit, Settings, Handover, Sources).
+ * Optimized with React.lazy code-splitting for high-speed initial loads.
  */
 
+import React, { Suspense, lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { SignUp } from "@/pages/SignUp";
 import { Shell } from "./Shell";
-import { Dashboard } from "@/pages/Dashboard";
-import { NotFoundPage } from "@/pages/NotFoundPage";
-import { PlaceholderPage } from "@/pages/PlaceholderPage";
-import { GraphPage } from "@/features/graph/pages/GraphPage";
-import { AccessPage } from "@/features/access/pages/AccessPage";
-import { AuditPage } from "@/features/audit/pages/AuditPage";
-import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { RouteErrorBoundary } from "@/components/common/RouteErrorBoundary";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/app/auth";
 import { featureRoutes } from "./features";
+import { PageSkeleton } from "@/components/common/PageSkeleton";
 import type { Role } from "@/shared/types";
+
+// Lazy-loaded routes for performance & code-splitting
+const SignUp = lazy(() => import("@/pages/SignUp").then((m) => ({ default: m.SignUp })));
+const Dashboard = lazy(() => import("@/pages/Dashboard").then((m) => ({ default: m.Dashboard })));
+const GraphPage = lazy(() => import("@/features/graph/pages/GraphPage").then((m) => ({ default: m.GraphPage })));
+const AccessPage = lazy(() => import("@/features/access/pages/AccessPage").then((m) => ({ default: m.AccessPage })));
+const AuditPage = lazy(() => import("@/features/audit/pages/AuditPage").then((m) => ({ default: m.AuditPage })));
+const SettingsPage = lazy(() => import("@/features/settings/pages/SettingsPage").then((m) => ({ default: m.SettingsPage })));
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })));
 
 const roleGuardedFeatureRoutes = featureRoutes
   .filter((r) => r.path !== "dashboard")
@@ -75,12 +72,20 @@ export const router = createBrowserRouter([
   // Public Authentication Routes (Unified Auth Page for both Login & Sign Up)
   {
     path: "/login",
-    element: <SignUp />,
+    element: (
+      <Suspense fallback={<PageSkeleton />}>
+        <SignUp />
+      </Suspense>
+    ),
     errorElement: <RouteErrorBoundary />,
   },
   {
     path: "/signup",
-    element: <SignUp />,
+    element: (
+      <Suspense fallback={<PageSkeleton />}>
+        <SignUp />
+      </Suspense>
+    ),
     errorElement: <RouteErrorBoundary />,
   },
 
@@ -93,14 +98,23 @@ export const router = createBrowserRouter([
     ),
     errorElement: <RouteErrorBoundary />,
     children: [
-      { path: "dashboard", element: <Dashboard /> },
+      {
+        path: "dashboard",
+        element: (
+          <Suspense fallback={<PageSkeleton />}>
+            <Dashboard />
+          </Suspense>
+        ),
+      },
 
       // Feature preview views with role protections
       {
         path: "graph",
         element: (
           <ProtectedRoute allowedRoles={["approver", "leaver", "incoming_maintainer", "contributor", "incoming_contributor"]}>
-            <GraphPage />
+            <Suspense fallback={<PageSkeleton />}>
+              <GraphPage />
+            </Suspense>
           </ProtectedRoute>
         ),
       },
@@ -108,7 +122,9 @@ export const router = createBrowserRouter([
         path: "access",
         element: (
           <ProtectedRoute allowedRoles={["approver"]}>
-            <AccessPage />
+            <Suspense fallback={<PageSkeleton />}>
+              <AccessPage />
+            </Suspense>
           </ProtectedRoute>
         ),
       },
@@ -116,17 +132,33 @@ export const router = createBrowserRouter([
         path: "audit",
         element: (
           <ProtectedRoute allowedRoles={["approver", "leaver"]}>
-            <AuditPage />
+            <Suspense fallback={<PageSkeleton />}>
+              <AuditPage />
+            </Suspense>
           </ProtectedRoute>
         ),
       },
-      { path: "settings", element: <SettingsPage /> },
+      {
+        path: "settings",
+        element: (
+          <Suspense fallback={<PageSkeleton />}>
+            <SettingsPage />
+          </Suspense>
+        ),
+      },
 
       // Registered feature routes guarded by role
       ...roleGuardedFeatureRoutes,
 
       // Friendly 404 page for unmatched routes
-      { path: "*", element: <NotFoundPage /> },
+      {
+        path: "*",
+        element: (
+          <Suspense fallback={<PageSkeleton />}>
+            <NotFoundPage />
+          </Suspense>
+        ),
+      },
     ],
   },
 ]);
