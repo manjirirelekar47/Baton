@@ -418,6 +418,7 @@ def register(
 def sync_session(
     body: SessionRequest,
     authorization: str | None = Header(default=None),
+    x_project_id: str | None = Header(default=None, alias="X-Project-Id"),
     session: Session = Depends(get_session),
 ):
     """Authenticate or sync an existing Supabase authenticated user with Baton."""
@@ -451,6 +452,31 @@ def sync_session(
                 order by pm.created_at asc
             """),
             {"email": email_clean},
+        ).mappings().all()
+
+    if not p_rows:
+        # Fallback to projects owned by user
+        p_rows = session.execute(
+            text("""
+                select p.id, p.name, p.owner_id, 'approver' as role, 1 as active
+                from projects p
+                where p.owner_id = :uid or p.owner_id in (select id from users where lower(email) = :email)
+                order by p.created_at asc
+            """),
+            {"uid": uid, "email": email_clean},
+        ).mappings().all()
+
+    if not p_rows:
+        # Fallback to identity_mappings
+        p_rows = session.execute(
+            text("""
+                select p.id, p.name, p.owner_id, im.role, 1 as active
+                from identity_mappings im
+                join projects p on p.id = im.project_id
+                where (im.supabase_sub = :uid or im.member_id = :uid or lower(im.email) = :email)
+                order by im.created_at asc
+            """),
+            {"uid": uid, "email": email_clean},
         ).mappings().all()
 
     if not p_rows:
@@ -512,10 +538,17 @@ def sync_session(
             "projects": [],
         }
 
-    projects_list = [{"id": r["id"], "name": r["name"], "role": r["role"]} for r in p_rows]
+    # Deduplicate projects list
+    seen_pids = set()
+    projects_list = []
+    for r in p_rows:
+        if r["id"] not in seen_pids:
+            seen_pids.add(r["id"])
+            projects_list.append({"id": r["id"], "name": r["name"], "role": r["role"]})
 
-    # Select active project: requested project_id if valid for this user, else first project
-    active_row = next((r for r in p_rows if body.project_id and r["id"] == body.project_id), p_rows[0])
+    # Select active project: requested project_id / X-Project-Id if valid for this user, else first project
+    requested_pid = (x_project_id.strip() if x_project_id and x_project_id.strip() else None) or (body.project_id.strip() if body.project_id and body.project_id.strip() else None)
+    active_row = next((r for r in p_rows if requested_pid and r["id"] == requested_pid), p_rows[0])
 
     user_name = name_clean
     u_row = session.execute(
@@ -569,39 +602,73 @@ def list_projects(
     account: AccountUser = Depends(current_account_user),
     session: Session = Depends(get_session),
 ):
-    """List all active projects the user has membership in."""
+    """List all active projects the user has membership in or owns."""
+    email_clean = (account.email or "").strip().lower()
+
+    # 1. Project memberships by user_id or linked email
     rows = session.execute(
         text("""
-            select p.id, p.name, p.owner_id, pm.role, pm.active
+            select distinct p.id, p.name, p.owner_id, pm.role, pm.active
             from project_memberships pm
             join projects p on p.id = pm.project_id
-            where pm.user_id = :uid and pm.active = 1
+            left join users u on u.id = pm.user_id
+            where (pm.user_id = :uid or (pm.user_id in (select id from users where lower(email) = :email)) or lower(u.email) = :email)
+              and pm.active = 1
             order by p.name asc
         """),
-        {"uid": account.id},
+        {"uid": account.id, "email": email_clean},
     ).mappings().all()
 
-    if not rows:
-        # Fallback to members table
-        rows = session.execute(
-            text("""
-                select p.id, p.name, m.role, m.active
-                from members m
-                join projects p on p.id = m.project_id
-                where m.id = :uid and m.active = 1
-            """),
-            {"uid": account.id},
-        ).mappings().all()
+    # 2. Projects owned by user
+    owned_rows = session.execute(
+        text("""
+            select distinct p.id, p.name, p.owner_id, 'approver' as role, 1 as active
+            from projects p
+            where p.owner_id = :uid or (p.owner_id in (select id from users where lower(email) = :email))
+            order by p.name asc
+        """),
+        {"uid": account.id, "email": email_clean},
+    ).mappings().all()
 
-    return [
-        {
-            "id": r["id"],
-            "name": r["name"],
-            "role": r["role"],
-            "owner_id": r.get("owner_id"),
-        }
-        for r in rows
-    ]
+    # 3. Add projects from identity_mappings
+    im_rows = session.execute(
+        text("""
+            select distinct p.id, p.name, p.owner_id, im.role, 1 as active
+            from identity_mappings im
+            join projects p on p.id = im.project_id
+            where (im.supabase_sub = :uid or im.member_id = :uid or (im.email is not null and lower(im.email) = :email))
+            order by p.name asc
+        """),
+        {"uid": account.id, "email": email_clean},
+    ).mappings().all()
+
+    # 4. Fallback to legacy members table
+    m_rows = session.execute(
+        text("""
+            select distinct p.id, p.name, p.owner_id, m.role, m.active
+            from members m
+            join projects p on p.id = m.project_id
+            where (m.id = :uid or lower(m.email) = :email) and m.active = 1 and m.is_demo = 0
+            order by p.name asc
+        """),
+        {"uid": account.id, "email": email_clean},
+    ).mappings().all()
+
+    merged: dict[str, dict] = {}
+    for r in list(rows) + list(owned_rows) + list(im_rows) + list(m_rows):
+        pid = r["id"]
+        if pid not in merged:
+            merged[pid] = {
+                "id": r["id"],
+                "name": r["name"],
+                "role": r["role"],
+                "owner_id": r.get("owner_id"),
+            }
+        else:
+            if r["role"] == "approver":
+                merged[pid]["role"] = "approver"
+
+    return sorted(merged.values(), key=lambda x: str(x.get("name", "")).lower())
 
 
 @router.post("/projects", tags=["projects"])
@@ -848,6 +915,7 @@ def switch_project(
     session: Session = Depends(get_session),
 ):
     """Switch active project and return a new project-scoped Baton token."""
+    email_clean = (account.email or "").strip().lower()
     membership = session.execute(
         text("""
             select pm.role, pm.active, p.id, p.name
@@ -859,14 +927,52 @@ def switch_project(
     ).mappings().first()
 
     if not membership:
+        # Check by email in project_memberships
+        membership = session.execute(
+            text("""
+                select pm.role, pm.active, p.id, p.name
+                from project_memberships pm
+                join projects p on p.id = pm.project_id
+                join users u on u.id = pm.user_id
+                where lower(u.email) = :email and pm.project_id = :pid and pm.active = 1
+            """),
+            {"email": email_clean, "pid": body.project_id},
+        ).mappings().first()
+
+    if not membership:
+        # Check projects table for owner
+        membership = session.execute(
+            text("""
+                select 'approver' as role, 1 as active, p.id, p.name
+                from projects p
+                where (p.owner_id = :uid or (p.owner_id in (select id from users where lower(email) = :email)))
+                  and p.id = :pid
+            """),
+            {"uid": account.id, "email": email_clean, "pid": body.project_id},
+        ).mappings().first()
+
+    if not membership:
+        # Check identity_mappings
+        membership = session.execute(
+            text("""
+                select im.role, 1 as active, p.id, p.name
+                from identity_mappings im
+                join projects p on p.id = im.project_id
+                where (im.supabase_sub = :uid or im.member_id = :uid or (im.email is not null and lower(im.email) = :email))
+                  and p.id = :pid
+            """),
+            {"uid": account.id, "email": email_clean, "pid": body.project_id},
+        ).mappings().first()
+
+    if not membership:
         membership = session.execute(
             text("""
                 select m.role, m.active, p.id, p.name
                 from members m
                 join projects p on p.id = m.project_id
-                where m.id = :uid and m.project_id = :pid and m.active = 1
+                where (m.id = :uid or lower(m.email) = :email) and m.project_id = :pid and m.active = 1 and m.is_demo = 0
             """),
-            {"uid": account.id, "pid": body.project_id},
+            {"uid": account.id, "email": email_clean, "pid": body.project_id},
         ).mappings().first()
 
     if not membership:

@@ -241,3 +241,87 @@ def test_personal_project_extracts_claims_from_synced_github_commits_and_prs_onl
         assert "meera" not in s_lower
         assert "campus event" not in s_lower
 
+
+def test_project_persistence_and_session_restore_across_visits(client):
+    """Verifies created and joined projects persist across visits/reloads and reconcile correctly."""
+    uid = f"user-{uuid.uuid4().hex[:8]}"
+    email = f"eng-{uuid.uuid4().hex[:6]}@example.com"
+    jwt_token = make_supabase_token(user_id=uid, email=email)
+
+    # Initial session sync
+    session_res = client.post(
+        "/auth/session",
+        json={"user_id": uid, "email": email, "name": "Persistent Developer"},
+        headers={"Authorization": f"Bearer {jwt_token}"},
+    )
+    assert session_res.status_code == 200
+    account_token = session_res.json()["token"]
+
+    # 1. Create Project Alpha
+    res1 = client.post(
+        "/projects",
+        json={"name": "Project Alpha Core"},
+        headers={"Authorization": f"Bearer {account_token}"},
+    )
+    assert res1.status_code == 200
+    p1_id = res1.json()["project"]["id"]
+
+    # 2. Create Project Beta
+    res2 = client.post(
+        "/projects",
+        json={"name": "Project Beta Gateway"},
+        headers={"Authorization": f"Bearer {account_token}"},
+    )
+    assert res2.status_code == 200
+    p2_id = res2.json()["project"]["id"]
+    p2_token = res2.json()["token"]
+
+    # Upload a source specifically to Project Beta
+    upload_res = client.post(
+        "/sources",
+        files={"file": ("readme.md", b"# Beta Gateway\nRouting logic for services.", "text/markdown")},
+        data={"consent": "true", "acl_label": "L1"},
+        headers={"Authorization": f"Bearer {p2_token}", "X-Project-Id": p2_id},
+    )
+    assert upload_res.status_code in (200, 201)
+
+    # 3. List projects - both must be returned and persisted
+    list_res = client.get("/projects", headers={"Authorization": f"Bearer {p2_token}"})
+    assert list_res.status_code == 200
+    p_ids = [p["id"] for p in list_res.json()]
+    assert p1_id in p_ids
+    assert p2_id in p_ids
+
+    # 4. Simulate returning later to the site (reload / new visit)
+    # The client sends stored project_id for Project Beta in session sync
+    sync_res = client.post(
+        "/auth/session",
+        json={"user_id": uid, "email": email, "project_id": p2_id},
+        headers={"Authorization": f"Bearer {jwt_token}", "X-Project-Id": p2_id},
+    )
+    assert sync_res.status_code == 200
+    sync_data = sync_res.json()
+    assert sync_data["registered"] is True
+    assert sync_data["user"]["project_id"] == p2_id
+
+    # Restored token should access Project Beta's saved sources
+    restored_token = sync_data["token"]
+    sources_res = client.get("/sources", headers={"Authorization": f"Bearer {restored_token}", "X-Project-Id": p2_id})
+    assert sources_res.status_code == 200
+    sources = sources_res.json()
+    assert len(sources) >= 1
+    assert any("readme.md" in s["title"].lower() or "beta" in s["title"].lower() for s in sources)
+
+    # 5. Switch to Project Alpha and verify data isolation
+    switch_res = client.post(
+        "/auth/switch-project",
+        json={"project_id": p1_id},
+        headers={"Authorization": f"Bearer {restored_token}"},
+    )
+    assert switch_res.status_code == 200
+    p1_switched_token = switch_res.json()["token"]
+
+    p1_sources = client.get("/sources", headers={"Authorization": f"Bearer {p1_switched_token}", "X-Project-Id": p1_id}).json()
+    assert len(p1_sources) == 0  # Project Alpha has no sources yet; strictly isolated
+
+

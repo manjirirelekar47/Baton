@@ -21,7 +21,7 @@ import { ClaimDetailModal } from "../components/ClaimDetailModal";
 import { GapsList } from "../components/GapsList";
 
 export function LedgerPage() {
-  const { user } = useAuth();
+  const { user, activeProject } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"claims" | "gaps">("claims");
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
@@ -33,7 +33,7 @@ export function LedgerPage() {
     error: claimsError,
     refetch: refetchClaims,
   } = useQuery({
-    queryKey: ["claims", user?.id, user?.role],
+    queryKey: ["claims", activeProject?.id || user?.id, user?.role],
     queryFn: fetchClaims,
   });
 
@@ -43,7 +43,7 @@ export function LedgerPage() {
     error: gapsError,
     refetch: refetchGaps,
   } = useQuery({
-    queryKey: ["gaps", user?.id],
+    queryKey: ["gaps", activeProject?.id || user?.id],
     queryFn: fetchGaps,
   });
 

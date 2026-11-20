@@ -55,32 +55,32 @@ export function DashboardPage() {
 
   // Queries for live backend data
   const { data: radarData } = useQuery({
-    queryKey: ["risk-radar", user?.id],
+    queryKey: ["risk-radar", activeProject?.id || user?.id],
     queryFn: () => api<RiskSignal[]>("/risk-radar").catch(() => []),
   });
 
   const { data: timelineData } = useQuery({
-    queryKey: ["timeline", user?.id],
+    queryKey: ["timeline", activeProject?.id || user?.id],
     queryFn: () => api<TimelineEvent[]>("/timeline").catch(() => []),
   });
 
   const { data: deliveryData } = useQuery({
-    queryKey: ["delivery-status", user?.id],
+    queryKey: ["delivery-status", activeProject?.id || user?.id],
     queryFn: () => api<DeliveryItem[]>("/delivery-status").catch(() => []),
   });
 
   const { data: queueData } = useQuery({
-    queryKey: ["reviewQueue", user?.id],
+    queryKey: ["reviewQueue", activeProject?.id || user?.id],
     queryFn: () => api<ReviewQueue>("/review/queue").catch(() => null),
   });
 
   const { data: readinessData } = useQuery({
-    queryKey: ["readiness", user?.id],
+    queryKey: ["readiness", activeProject?.id || user?.id],
     queryFn: () => api<ReadinessReport>("/review/readiness").catch(() => null),
   });
 
   const { data: auditData } = useQuery({
-    queryKey: ["audit", user?.id],
+    queryKey: ["audit", activeProject?.id || user?.id],
     queryFn: () => api<AuditEntry[]>("/audit").catch(() => []),
   });
 

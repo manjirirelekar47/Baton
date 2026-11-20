@@ -99,7 +99,7 @@ async function uploadSource(file: File, consent: boolean, aclLabel: string): Pro
 }
 
 export function SourcesPage() {
-  const { user } = useAuth();
+  const { user, activeProject } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
 
@@ -167,12 +167,12 @@ export function SourcesPage() {
   }, [oauthStatus, oauthConnId, queryClient, searchParams, setSearchParams]);
 
   const { data, error, isLoading, refetch } = useQuery({
-    queryKey: ["sources", user?.id],
+    queryKey: ["sources", activeProject?.id || user?.id],
     queryFn: () => api<Source[]>("/sources"),
   });
 
   const { data: driftAlerts = [], error: driftError, isLoading: driftLoading, refetch: refetchDrift } = useQuery({
-    queryKey: ["drift-alerts", user?.id],
+    queryKey: ["drift-alerts", activeProject?.id || user?.id],
     queryFn: async () => {
       if (user?.role === "approver") await api<{ baselined: number; changed: number }>("/drift/scan", { method: "POST" });
       return api<DriftAlert[]>("/drift/alerts");
@@ -181,7 +181,7 @@ export function SourcesPage() {
   });
 
   const connectionsQuery = useQuery({
-    queryKey: ["source_connections", user?.id],
+    queryKey: ["source_connections", activeProject?.id || user?.id],
     queryFn: () => api<SourceConnection[]>("/sources/connections"),
   });
 

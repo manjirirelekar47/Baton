@@ -17,6 +17,7 @@ import {
   batonApi,
   getStoredToken,
   setStoredToken,
+  getStoredProjectId,
   setStoredProjectId,
   type Role,
   type UserProfile,
@@ -195,7 +196,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setProjects(projs);
       const active = projs.find((p) => p.id === response.user.project_id) || projs[0] || null;
       setActiveProject(active);
-      setStoredProjectId(active?.id || response.user.project_id || null);
+      setStoredProjectId(active?.id || response.user.project_id || null, response.user.id);
       setRequiresProject(false);
     } catch (err: unknown) {
       const message = err instanceof ApiError ? err.message : "Failed to sign in via demo role";
@@ -225,7 +226,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setProjects(projs);
       const active = projs.find((p) => p.id === response.user.project_id) || projs[0] || null;
       setActiveProject(active);
-      setStoredProjectId(active?.id || response.user.project_id || null);
+      setStoredProjectId(active?.id || response.user.project_id || null, response.user.id);
       setRequiresProject(false);
       return formatted;
     } catch (err: unknown) {
@@ -246,7 +247,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const activeSession = (await supabase?.auth.getSession())?.data.session;
       const token = activeSession?.access_token;
-      const res = await batonApi.syncSession({ user_id, email, name, supabase_token: token });
+      const storedPid = getStoredProjectId(user_id);
+      const res = await batonApi.syncSession({
+        user_id,
+        email,
+        name,
+        project_id: storedPid || undefined,
+        supabase_token: token,
+      });
       if (res.requires_project) {
         if (res.token) setStoredToken(res.token);
         setRequiresProject(true);
@@ -256,12 +264,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       if (res.registered && res.token && res.user) {
         setStoredToken(res.token);
+        queryClient.clear();
         const authedEmail = await getAuthenticatedEmail();
         setUser(formatUser(res.user, authedEmail || email));
         if (res.projects) {
           setProjects(res.projects);
-          const active = res.projects.find((p) => p.id === res.user?.project_id) || res.projects[0] || null;
+          const active =
+            (storedPid ? res.projects.find((p) => p.id === storedPid) : null) ||
+            res.projects.find((p) => p.id === res.user?.project_id) ||
+            res.projects[0] ||
+            null;
           setActiveProject(active);
+          setStoredProjectId(active?.id || res.user?.project_id || null, res.user.id);
         }
         setRequiresProject(false);
         return { registered: true };
@@ -303,7 +317,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const updatedUser = formatUser(res.user, authedEmail);
       setUser(updatedUser);
       setActiveProject(res.project);
-      setStoredProjectId(res.project.id);
+      setStoredProjectId(res.project.id, res.user.id);
       const projs = await batonApi.getProjects().catch(() => []);
       setProjects(projs);
       setRequiresProject(false);
@@ -330,7 +344,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const updatedUser = formatUser(res.user, authedEmail);
       setUser(updatedUser);
       setActiveProject(res.project);
-      setStoredProjectId(res.project.id);
+      setStoredProjectId(res.project.id, res.user.id);
       const projs = await batonApi.getProjects().catch(() => []);
       setProjects(projs);
       setRequiresProject(false);
@@ -364,7 +378,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const updatedUser = formatUser(res.user, authedEmail);
       setUser(updatedUser);
       setActiveProject(res.project);
-      setStoredProjectId(res.project.id);
+      setStoredProjectId(res.project.id, res.user.id);
       const projs = await batonApi.getProjects().catch(() => []);
       setProjects(projs);
       setRequiresProject(false);
@@ -419,7 +433,54 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(true);
       setError(null);
       try {
-        const token = getStoredToken();
+        let token = getStoredToken();
+        if (!token && supabase) {
+          // If Baton token is missing from localStorage, check if Supabase has an active session
+          const { data } = await supabase.auth.getSession();
+          if (data.session?.user) {
+            const sUser = data.session.user;
+            const storedPid = getStoredProjectId(sUser.id);
+            try {
+              const res = await batonApi.syncSession({
+                user_id: sUser.id,
+                email: sUser.email || "",
+                name: (sUser.user_metadata?.full_name as string) || (sUser.email ? sUser.email.split("@")[0] : "Member"),
+                project_id: storedPid || undefined,
+                supabase_token: data.session.access_token,
+              });
+              const resUser = res.user;
+              if (res.registered && res.token && resUser) {
+                setStoredToken(res.token);
+                token = res.token;
+                queryClient.clear();
+                if (isMounted) {
+                  const formatted = formatUser(resUser, sUser.email);
+                  setUser(formatted);
+                  const projs = res.projects || (await batonApi.getProjects().catch(() => []));
+                  setProjects(projs);
+                  const active =
+                    (storedPid ? projs.find((p) => p.id === storedPid) : null) ||
+                    projs.find((p) => p.id === resUser.project_id) ||
+                    projs[0] ||
+                    null;
+                  setActiveProject(active);
+                  setStoredProjectId(active?.id || resUser.project_id || null, resUser.id);
+                  setRequiresProject(false);
+                }
+                return;
+              } else if (res.requires_project && isMounted) {
+                if (res.token) setStoredToken(res.token);
+                setRequiresProject(true);
+                setProjects([]);
+                setActiveProject(null);
+                return;
+              }
+            } catch {
+              // Proceed with standard initialization
+            }
+          }
+        }
+
         if (token) {
           try {
             const [raw, authenticatedEmail, projs] = await Promise.all([
@@ -431,10 +492,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               const formatted = formatUser(raw, authenticatedEmail);
               setUser(formatted);
               setProjects(projs);
-              const active = projs.find((p) => p.id === raw.project_id) || projs[0] || null;
+
+              // Reconcile stored project with accessible projects
+              const storedPid = getStoredProjectId(raw.id);
+              let active =
+                (storedPid ? projs.find((p) => p.id === storedPid) : null) ||
+                projs.find((p) => p.id === raw.project_id) ||
+                projs[0] ||
+                null;
+
+              // If stored project is valid but token was scoped to a different project, switch to sync JWT
+              if (storedPid && active && active.id === storedPid && raw.project_id !== storedPid) {
+                try {
+                  const switchRes = await batonApi.switchProject(storedPid);
+                  setStoredToken(switchRes.token);
+                  active = switchRes.project || active;
+                  const refreshed = formatUser(switchRes.user, authenticatedEmail);
+                  setUser(refreshed);
+                } catch {
+                  // Fall back to active
+                }
+              }
+
               setActiveProject(active);
-              setStoredProjectId(active?.id || raw.project_id || null);
-              setRequiresProject(false);
+              setStoredProjectId(active?.id || raw.project_id || null, raw.id);
+              setRequiresProject(projs.length === 0);
+              queryClient.clear();
             }
             return;
           } catch (e) {
@@ -445,15 +528,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 setProjects([]);
                 return;
               } else if (projs.length > 0 && isMounted) {
-                // If user has existing projects, restore first active project session seamlessly
+                // If user has existing projects, restore selected or first active project session seamlessly
+                const storedPid = getStoredProjectId();
+                const targetProj = (storedPid ? projs.find((p) => p.id === storedPid) : null) || projs[0];
                 try {
-                  const switchRes = await batonApi.switchProject(projs[0].id);
+                  const switchRes = await batonApi.switchProject(targetProj.id);
                   setStoredToken(switchRes.token);
                   const authedEmail = await getAuthenticatedEmail();
                   setUser(formatUser(switchRes.user, authedEmail));
                   setProjects(projs);
-                  setActiveProject(switchRes.project || projs[0]);
+                  setActiveProject(switchRes.project || targetProj);
+                  setStoredProjectId(targetProj.id, switchRes.user.id);
                   setRequiresProject(false);
+                  queryClient.clear();
                   return;
                 } catch {
                   setProjects(projs);
@@ -523,17 +610,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    * Logout and clear session
    */
   const logout = useCallback(async () => {
+    const currentUserId = user?.id;
     if (supabase) {
       await supabase.auth.signOut({ scope: "local" });
     }
     setStoredToken(null);
-    setStoredProjectId(null);
+    setStoredProjectId(null, currentUserId);
     setUser(null);
     setProjects([]);
     setActiveProject(null);
     setRequiresProject(false);
     queryClient.clear();
-  }, []);
+  }, [user?.id]);
 
   /**
    * Reset backend demo database to seed state

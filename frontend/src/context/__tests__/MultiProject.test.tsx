@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { AuthProvider, useAuth } from "../AuthContext";
-import { batonApi, setStoredToken, getStoredToken } from "../../api/client";
+import { batonApi, setStoredToken, getStoredToken, getStoredProjectId, setStoredProjectId } from "../../api/client";
 import { queryClient } from "../../queryClient";
 import { ProjectSwitcher } from "../../components/layout/ProjectSwitcher";
 
@@ -12,6 +12,7 @@ vi.mock("../../api/client", async (importOriginal) => {
     ...actual,
     batonApi: {
       ...actual.batonApi,
+      getMe: vi.fn(),
       getProjects: vi.fn(),
       createProject: vi.fn(),
       joinProject: vi.fn(),
@@ -320,6 +321,120 @@ describe("Multi-Project Frontend Regression Tests", () => {
       expect(clearSpy).toHaveBeenCalled();
       expect(getStoredToken()).toBe("demo-jwt-reset-approver");
       expect(screen.getByTestId("reset-user").textContent).toBe("Approver");
+    });
+  });
+
+  it("persists active project per-user in localStorage and restores selection on reload", async () => {
+    const clearSpy = vi.spyOn(queryClient, "clear");
+
+    const projectsList = [
+      { id: "proj-1", name: "Alpha Service", role: "approver" as const },
+      { id: "proj-2", name: "Beta Service", role: "approver" as const },
+    ];
+
+    // Seed token and user-scoped stored project
+    setStoredToken("test-session-jwt");
+    setStoredProjectId("proj-2", "usr-1");
+    expect(getStoredProjectId("usr-1")).toBe("proj-2");
+
+    vi.mocked(batonApi.getMe).mockResolvedValueOnce({
+      id: "usr-1",
+      name: "Lead Dev",
+      role: "approver",
+      project_id: "proj-1", // Token was scoped to proj-1, but user had selected proj-2
+    });
+    vi.mocked(batonApi.getProjects).mockResolvedValueOnce(projectsList);
+    vi.mocked(batonApi.switchProject).mockResolvedValueOnce({
+      project: projectsList[1],
+      token: "aligned-beta-token",
+      user: {
+        id: "usr-1",
+        name: "Lead Dev",
+        role: "approver",
+        project_id: "proj-2",
+      },
+    });
+
+    function ReloadComponent() {
+      const { activeProject, projects, loading } = useAuth();
+      if (loading) return <div>Loading...</div>;
+      return (
+        <div>
+          <span data-testid="active-pid">{activeProject?.id || "none"}</span>
+          <span data-testid="active-name">{activeProject?.name || "none"}</span>
+          <span data-testid="project-count">{projects.length}</span>
+        </div>
+      );
+    }
+
+    render(
+      <AuthProvider>
+        <ReloadComponent />
+      </AuthProvider>
+    );
+
+    await waitFor(() => {
+      // Reconciled stored project with accessible projects and aligned token
+      expect(batonApi.switchProject).toHaveBeenCalledWith("proj-2");
+      expect(screen.getByTestId("active-pid").textContent).toBe("proj-2");
+      expect(screen.getByTestId("active-name").textContent).toBe("Beta Service");
+      expect(screen.getByTestId("project-count").textContent).toBe("2");
+      expect(clearSpy).toHaveBeenCalled();
+    });
+  });
+
+  it("syncSession respects user stored project and restores active project state", async () => {
+    setStoredProjectId("proj-custom", "usr-sync");
+
+    const userProjects = [
+      { id: "proj-default", name: "Default Service", role: "approver" as const },
+      { id: "proj-custom", name: "Custom Service", role: "approver" as const },
+    ];
+
+    vi.mocked(batonApi.syncSession).mockResolvedValueOnce({
+      registered: true,
+      token: "jwt-synced-token",
+      user: {
+        id: "usr-sync",
+        name: "Synced User",
+        role: "approver",
+        project_id: "proj-custom",
+      },
+      projects: userProjects,
+    });
+
+    function SyncComponent() {
+      const { syncSession, activeProject, user } = useAuth();
+      return (
+        <div>
+          <button onClick={() => syncSession("usr-sync", "sync@test.com", "Synced User")}>Sync</button>
+          <span data-testid="sync-pid">{activeProject?.id || "none"}</span>
+          <span data-testid="sync-uname">{user?.name || "none"}</span>
+        </div>
+      );
+    }
+
+    render(
+      <AuthProvider>
+        <SyncComponent />
+      </AuthProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Sync" }));
+    });
+
+    await waitFor(() => {
+      expect(batonApi.syncSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user_id: "usr-sync",
+          email: "sync@test.com",
+          project_id: "proj-custom",
+        })
+      );
+      expect(screen.getByTestId("sync-pid").textContent).toBe("proj-custom");
+      expect(screen.getByTestId("sync-uname").textContent).toBe("Synced User");
+      expect(getStoredProjectId("usr-sync")).toBe("proj-custom");
     });
   });
 });

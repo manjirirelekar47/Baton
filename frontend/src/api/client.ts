@@ -390,20 +390,30 @@ export function setStoredToken(token: string | null): void {
 
 export const PROJECT_ID_STORAGE_KEY = "baton_active_project_id";
 
-export function getStoredProjectId(): string | null {
+export function getStoredProjectId(userId?: string): string | null {
   try {
+    if (userId) {
+      const userSpecific = localStorage.getItem(`${PROJECT_ID_STORAGE_KEY}_${userId}`);
+      if (userSpecific) return userSpecific;
+    }
     return localStorage.getItem(PROJECT_ID_STORAGE_KEY);
   } catch {
     return null;
   }
 }
 
-export function setStoredProjectId(projectId: string | null): void {
+export function setStoredProjectId(projectId: string | null, userId?: string): void {
   try {
     if (projectId) {
       localStorage.setItem(PROJECT_ID_STORAGE_KEY, projectId);
+      if (userId) {
+        localStorage.setItem(`${PROJECT_ID_STORAGE_KEY}_${userId}`, projectId);
+      }
     } else {
       localStorage.removeItem(PROJECT_ID_STORAGE_KEY);
+      if (userId) {
+        localStorage.removeItem(`${PROJECT_ID_STORAGE_KEY}_${userId}`);
+      }
     }
   } catch {
     // Storage unavailable
