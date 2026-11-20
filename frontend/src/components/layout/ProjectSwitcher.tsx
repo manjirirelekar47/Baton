@@ -45,7 +45,9 @@ export function ProjectSwitcher() {
     };
   }, [isOpen]);
 
-  const currentProjectName = activeProject?.name || "Campus Event Portal";
+  const currentProjectName =
+    activeProject?.name ||
+    (user?.project_id && user.project_id !== "proj-campus-event-portal" ? "Active Project" : "Campus Event Portal");
   const currentRole = user?.role ? PROJECT_ROLE_TITLES[user.role] || user.role : "Member";
 
   const handleSwitch = async (projectId: string) => {

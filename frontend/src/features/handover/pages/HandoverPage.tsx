@@ -22,13 +22,14 @@ import { SectionBlock } from "../components/SectionBlock";
 type Tab = "handover" | "plan";
 
 export function HandoverPage() {
-  const { user } = useAuth();
+  const { user, activeProject } = useAuth();
   const projectName =
-    user?.project_id === "proj-campus-event-portal"
+    activeProject?.name ||
+    (user?.project_id === "proj-campus-event-portal"
       ? "Campus Event Portal"
       : user?.project_id
         ? user.project_id.replace(/^proj-/, "").replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-        : "Project";
+        : "Project");
   const queryClient = useQueryClient();
   const { version, isLoading: versionLoading, error: versionError, refetch } = useLatestVersion();
   const [tab, setTab] = useState<Tab>("handover");
@@ -155,7 +156,7 @@ export function HandoverPage() {
             plan={plan.data?.plan}
             versionId={versionId as string}
             isLoading={plan.isLoading}
-            isApprover={user?.role === "approver"}
+            isApprover={user?.role === "approver" || user?.role === "leaver"}
             currentUserId={user?.id}
             currentUserName={user?.name}
             currentUserRole={user?.role}

@@ -218,7 +218,7 @@ export function TaskModal({
                   value={owner}
                   onChange={(e) => setOwner(e.target.value)}
                   disabled={!isApprover}
-                  placeholder="e.g. Meera"
+                  placeholder="e.g. Sarah Connor"
                   className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-black/30 text-slate-900 dark:text-white text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>

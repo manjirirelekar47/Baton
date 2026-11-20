@@ -120,7 +120,7 @@ export function ReviewPage() {
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Handover Questions & Answers</h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-gray-300">
-            Welcome, Aarav. Help your team take over smoothly by answering open questions and clarifying project details.
+            Welcome{user?.name ? `, ${user.name}` : ""}. Help your team take over smoothly by answering open questions and clarifying project details.
           </p>
         </div>
         <GapInterviewView />
