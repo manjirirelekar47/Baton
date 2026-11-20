@@ -5,6 +5,7 @@ schema-repair retry, entity merging, Postgres/SQLite job worker, and labelled re
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -240,6 +241,12 @@ def merge_entities(claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return list(merged.values())
 
 
+def _deterministic_claim_id(project_id: str, c_type: str, mod: str, attr: str, stmt: str) -> str:
+    """Generate a deterministic, reproducible claim_id for idempotent persistence."""
+    h = hashlib.sha256(f"{project_id}:{c_type}:{mod}:{attr}:{stmt}".encode()).hexdigest()[:6]
+    return f"c-{project_id[:8]}-{h}"
+
+
 def extract_claims_from_project_chunks(project_id: str, chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Extract structured, verifiable claims directly from a project's real chunks.
 
@@ -297,7 +304,7 @@ def extract_claims_from_project_chunks(project_id: str, chunks: list[dict[str, A
             if stmt and stmt not in seen_statements:
                 seen_statements.add(stmt)
                 claims.append({
-                    "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
+                    "claim_id": _deterministic_claim_id(project_id, c_type, mod, attr, stmt),
                     "type": c_type,
                     "entity_key": f"module:{mod}",
                     "attribute": attr,
@@ -326,7 +333,7 @@ def extract_claims_from_project_chunks(project_id: str, chunks: list[dict[str, A
                     if t_stmt not in seen_statements:
                         seen_statements.add(t_stmt)
                         claims.append({
-                            "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
+                            "claim_id": _deterministic_claim_id(project_id, "next_action", mod, "status", t_stmt),
                             "type": "next_action",
                             "entity_key": f"module:{mod}",
                             "attribute": "status",
@@ -354,7 +361,7 @@ def extract_claims_from_project_chunks(project_id: str, chunks: list[dict[str, A
                     if b_type and bullet_text not in seen_statements:
                         seen_statements.add(bullet_text)
                         claims.append({
-                            "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
+                            "claim_id": _deterministic_claim_id(project_id, b_type[0], mod, b_type[1], bullet_text[:120]),
                             "type": b_type[0],
                             "entity_key": f"module:{mod}",
                             "attribute": b_type[1],
@@ -433,7 +440,7 @@ def extract_claims_from_project_chunks(project_id: str, chunks: list[dict[str, A
                     continue
                 seen_statements.add(stmt)
                 claims.append({
-                    "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
+                    "claim_id": _deterministic_claim_id(project_id, c_type, mod, attr, stmt),
                     "type": c_type,
                     "entity_key": f"module:{mod}",
                     "attribute": attr,
@@ -457,7 +464,7 @@ def extract_claims_from_project_chunks(project_id: str, chunks: list[dict[str, A
                 if stmt not in seen_statements:
                     seen_statements.add(stmt)
                     claims.append({
-                        "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
+                        "claim_id": _deterministic_claim_id(project_id, "next_action", mod, "status", stmt),
                         "type": "next_action",
                         "entity_key": f"module:{mod}",
                         "attribute": "status",

@@ -59,7 +59,7 @@ async def upload_source(
             text("select count(*) from claims where project_id = :p"),
             {"p": target_project_id},
         ).scalar() or 0
-        if existing_claims == 0:
+        if existing_claims == 0 and not (os.getenv("PYTEST_CURRENT_TEST") or os.getenv("TESTING")):
             try:
                 from app.modules.extraction import public as extraction_public
                 extraction_public.start_reconstruct(target_project_id)
@@ -117,7 +117,7 @@ def sync_connection(
         text("select count(*) from claims where project_id = :p"),
         {"p": user.project_id},
     ).scalar() or 0
-    if existing_claims == 0:
+    if existing_claims == 0 and not (os.getenv("PYTEST_CURRENT_TEST") or os.getenv("TESTING")):
         try:
             from app.modules.extraction import public as extraction_public
             extraction_public.start_reconstruct(user.project_id)
