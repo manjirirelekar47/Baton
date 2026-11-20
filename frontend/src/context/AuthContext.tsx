@@ -217,6 +217,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = payload.supabase_token || activeSession?.access_token;
       const response = await batonApi.register({ ...payload, supabase_token: token });
       setStoredToken(response.token);
+      queryClient.clear();
       const authedEmail = await getAuthenticatedEmail();
       const formatted = formatUser(response.user, authedEmail || payload.email);
       setUser(formatted);
@@ -333,6 +334,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const projs = await batonApi.getProjects().catch(() => []);
       setProjects(projs);
       setRequiresProject(false);
+      try {
+        sessionStorage.removeItem("baton.pending_invite");
+        sessionStorage.removeItem("baton.pending_role");
+      } catch {
+        // Ignore in non-browser envs
+      }
       return res.project;
     } catch (err: unknown) {
       const message = err instanceof ApiError ? err.message : "Failed to create project";
@@ -361,6 +368,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const projs = await batonApi.getProjects().catch(() => []);
       setProjects(projs);
       setRequiresProject(false);
+      try {
+        sessionStorage.removeItem("baton.pending_invite");
+        sessionStorage.removeItem("baton.pending_role");
+      } catch {
+        // Ignore in non-browser envs
+      }
       return res.project;
     } catch (err: unknown) {
       const message = err instanceof ApiError ? err.message : "Failed to join project";
