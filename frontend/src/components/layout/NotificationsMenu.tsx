@@ -19,7 +19,7 @@ function readNotifications(userId: string): string[] {
 }
 
 export function NotificationsMenu({ theme }: { theme: Theme }) {
-  const { user } = useAuth();
+  const { user, activeProject } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [readIds, setReadIds] = useState<string[]>([]);
@@ -47,7 +47,7 @@ export function NotificationsMenu({ theme }: { theme: Theme }) {
   }, [isOpen]);
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ["notification-review-queue", user?.id],
+    queryKey: ["notification-review-queue", activeProject?.id || user?.id],
     queryFn: () => api<ReviewQueue>("/review/queue"),
     enabled: Boolean(user),
     refetchInterval: 60_000,

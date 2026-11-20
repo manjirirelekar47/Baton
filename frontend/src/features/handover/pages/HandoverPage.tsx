@@ -38,12 +38,12 @@ export function HandoverPage() {
 
   const versionId = version?.version_id;
   const view = useQuery({
-    queryKey: ["handover", "view", versionId, user?.id],
+    queryKey: ["handover", "view", versionId, activeProject?.id || user?.id],
     queryFn: () => getView(versionId as string),
     enabled: !!versionId,
   });
   const plan = useQuery({
-    queryKey: ["handover", "plan", versionId, user?.id],
+    queryKey: ["handover", "plan", versionId, activeProject?.id || user?.id],
     queryFn: () => getPlan(versionId as string),
     enabled: !!versionId && tab === "plan",
   });

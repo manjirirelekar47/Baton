@@ -15,9 +15,9 @@ export interface VersionSummary {
 
 /** Latest approved version the signed-in role may open. The backend already filters /versions by role. */
 export function useLatestVersion() {
-  const { user } = useAuth();
+  const { user, activeProject } = useAuth();
   const query = useQuery({
-    queryKey: ["versions", user?.id],
+    queryKey: ["versions", activeProject?.id || user?.id],
     queryFn: () => api<VersionSummary[]>("/versions"),
     enabled: !!user,
   });

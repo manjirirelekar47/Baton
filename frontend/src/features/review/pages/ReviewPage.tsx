@@ -26,7 +26,7 @@ import { VersionHistoryModal } from "../components/VersionHistoryModal";
 type FilterTab = "all" | "pending" | "conflicts" | "inferred" | "decided";
 
 export function ReviewPage() {
-  const { user } = useAuth();
+  const { user, activeProject } = useAuth();
   const queryClient = useQueryClient();
 
   // Dialog & drawer states
@@ -45,19 +45,19 @@ export function ReviewPage() {
   const isApprover = user?.role === "approver";
 
   const queueQuery = useQuery({
-    queryKey: ["reviewQueue", user?.id],
+    queryKey: ["reviewQueue", activeProject?.id || user?.id],
     queryFn: getReviewQueue,
     enabled: isApprover,
   });
 
   const readinessQuery = useQuery({
-    queryKey: ["readiness", user?.id],
+    queryKey: ["readiness", activeProject?.id || user?.id],
     queryFn: getReadiness,
     enabled: isApprover,
   });
 
   const gapQuery = useQuery({
-    queryKey: ["gapInterview", user?.id],
+    queryKey: ["gapInterview", activeProject?.id || user?.id],
     queryFn: getGapInterview,
   });
 

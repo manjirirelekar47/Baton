@@ -53,12 +53,12 @@ export const DashboardLayoutLight: React.FC<DashboardLayoutLightProps> = ({
   children,
   pendingReviewCount,
 }) => {
-  const { user, loading, switchRole, resetDemo, logout } = useAuth();
+  const { user, activeProject, loading, switchRole, resetDemo, logout } = useAuth();
   const { toggleTheme } = useTheme();
   const location = useLocation();
 
   const { data: queueData } = useQuery({
-    queryKey: ["review-queue", user?.project_id],
+    queryKey: ["review-queue", activeProject?.id || user?.project_id],
     queryFn: () => batonApi.getReviewQueue(),
     enabled: pendingReviewCount === undefined && !!user,
   });

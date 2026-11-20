@@ -43,8 +43,8 @@ function DarkPanel({ title, children }: { title: string; children: ReactNode }) 
 }
 
 export function RiskPageDark() {
-  const { user } = useAuth();
-  const queryKey = ["risk", user?.id];
+  const { user, activeProject } = useAuth();
+  const queryKey = ["risk", activeProject?.id || user?.id];
   const radar = useQuery({ queryKey: [...queryKey, "radar"], queryFn: () => api<RiskSignal[]>("/risk-radar") });
   const timeline = useQuery({ queryKey: [...queryKey, "timeline"], queryFn: () => api<TimelineEvent[]>("/timeline") });
   const [activitySearch, setActivitySearch] = useState("");

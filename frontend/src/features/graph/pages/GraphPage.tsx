@@ -15,6 +15,7 @@ import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/app/auth";
 import { batonApi, GraphNode, GraphEdge, KnowledgeGraphData } from "@/api/client";
 import { GraphSummaryCards } from "../components/GraphSummaryCards";
 import { GraphControls, NodeFilterType } from "../components/GraphControls";
@@ -23,6 +24,7 @@ import { NodeDetailsPanel } from "../components/NodeDetailsPanel";
 import { SourceDrawer } from "@/features/sources/components/SourceDrawer";
 
 export const GraphPage: React.FC = () => {
+  const { user, activeProject } = useAuth();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -45,7 +47,7 @@ export const GraphPage: React.FC = () => {
     isError,
     refetch,
   } = useQuery<KnowledgeGraphData>({
-    queryKey: ["knowledge-graph"],
+    queryKey: ["knowledge-graph", activeProject?.id || user?.id],
     queryFn: async () => {
       return batonApi.getKnowledgeGraph();
     },

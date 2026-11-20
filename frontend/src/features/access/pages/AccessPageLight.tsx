@@ -10,9 +10,9 @@ import { batonApi } from "../../../api/client";
 import { useAuth } from "../../../context/AuthContext";
 
 export const AccessPageLight: React.FC = () => {
-  const { user } = useAuth();
+  const { user, activeProject } = useAuth();
   const { data: claimsData } = useQuery({
-    queryKey: ["claims", user?.project_id],
+    queryKey: ["claims", activeProject?.id || user?.project_id],
     queryFn: () => batonApi.getClaims(),
     enabled: !!user,
   });
