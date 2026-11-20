@@ -39,7 +39,7 @@ class RegisterRequest(BaseModel):
     name: str
     role: str = "incoming_contributor"
     invitation_code: str | None = None
-    project_id: str = DEMO_PROJECT_ID
+    project_id: str | None = None
     supabase_token: str | None = None
 
 
@@ -300,7 +300,9 @@ def register(
             raise HTTPException(status_code=403, detail="Invitation code was issued to a different email address.")
 
         assigned_role = inv_row["role"]
-        if inv_row.get("project_id") and not body.project_id:
+        if body.project_id:
+            target_project_id = body.project_id
+        elif inv_row.get("project_id"):
             target_project_id = inv_row["project_id"]
 
         res = session.execute(
@@ -319,7 +321,7 @@ def register(
         ).mappings().first()
         if admin_appr:
             assigned_role = "approver"
-            if admin_appr.get("project_id") and not body.project_id:
+            if admin_appr.get("project_id"):
                 target_project_id = admin_appr["project_id"]
             session.execute(
                 text("update invitations set status = 'used', used_by = :uid, used_at = :now where id = :id"),
@@ -330,6 +332,9 @@ def register(
                 status_code=403,
                 detail="Approver registration requires a valid invitation code or admin approval.",
             )
+
+    if not target_project_id:
+        target_project_id = f"proj-{uuid.uuid4().hex[:12]}"
 
     if existing_by_id:
         existing_role = existing_by_id["role"]
@@ -378,7 +383,14 @@ def register(
             {"id": uid, "project_id": target_project_id, "name": name_clean, "role": assigned_role, "email": email_clean, "handover_dl": handover_dl},
         )
     except Exception:
-        pass
+        try:
+            fallback_role = "incoming_contributor" if assigned_role == "contributor" else assigned_role
+            session.execute(
+                text("insert into members (id, project_id, name, role, active, email, is_demo, handover_deadline) values (:id, :project_id, :name, :role, 1, :email, 0, :handover_dl) on conflict (id) do update set project_id = :project_id, role = :role, active = 1, name = :name, email = :email, handover_deadline = coalesce(:handover_dl, handover_deadline)"),
+                {"id": uid, "project_id": target_project_id, "name": name_clean, "role": fallback_role, "email": email_clean, "handover_dl": handover_dl},
+            )
+        except Exception:
+            pass
 
     session.commit()
     user = User(
@@ -668,6 +680,14 @@ def create_project(
         email=account.email,
         is_demo=account.is_demo,
     )
+    record_identity_mapping(
+        session=session,
+        supabase_sub=account.id,
+        member_id=account.id,
+        project_id=project_id,
+        role="approver",
+        email=account.email,
+    )
     audit.log(session, user, "projects.create", obj=project_id, detail=f"Created project '{project_name}'")
     session.commit()
 
@@ -698,7 +718,10 @@ def join_project(
         if inv["email"].lower().strip() != account.email.lower().strip():
             raise HTTPException(status_code=403, detail="Invitation code was issued to a different email address.")
 
-    target_pid = inv.get("project_id") or DEMO_PROJECT_ID
+    target_pid = inv.get("project_id")
+    if not target_pid:
+        raise HTTPException(status_code=400, detail="Invitation is not associated with any project.")
+
     proj = session.execute(
         text("select id, name from projects where id = :pid"),
         {"pid": target_pid},
@@ -771,7 +794,26 @@ def join_project(
             },
         )
     except Exception:
-        pass
+        try:
+            fallback_role = "incoming_contributor" if inv["role"] == "contributor" else inv["role"]
+            session.execute(
+                text("""
+                    insert into members (id, project_id, name, role, active, email, is_demo, handover_deadline)
+                    values (:id, :pid, :name, :role, 1, :email, :demo, :handover_dl)
+                    on conflict (id) do update set project_id = :pid, role = :role, active = 1, handover_deadline = coalesce(:handover_dl, handover_deadline)
+                """),
+                {
+                    "id": account.id,
+                    "pid": target_pid,
+                    "name": account.name,
+                    "role": fallback_role,
+                    "email": account.email,
+                    "demo": 1 if account.is_demo else 0,
+                    "handover_dl": handover_dl,
+                },
+            )
+        except Exception:
+            pass
 
     user = User(
         id=account.id,
@@ -900,30 +942,49 @@ def list_project_members(
     session: Session = Depends(get_session),
 ):
     if user.project_id != project_id:
-        raise HTTPException(status_code=403, detail="Access denied to this project's members.")
+        membership = session.execute(
+            text("select 1 from project_memberships where user_id = :uid and project_id = :pid and active = 1"),
+            {"uid": user.id, "pid": project_id},
+        ).scalar()
+        if not membership:
+            legacy_m = session.execute(
+                text("select 1 from members where id = :uid and project_id = :pid and active = 1"),
+                {"uid": user.id, "pid": project_id},
+            ).scalar()
+            if not legacy_m:
+                raise HTTPException(status_code=403, detail="Access denied to this project's members.")
 
     check_and_expire_leavers(session, project_id)
 
     rows = session.execute(
         text("""
-            select u.id, u.name, u.email, u.is_demo, pm.role, pm.active, pm.created_at, pm.handover_deadline, pm.handover_status
+            select coalesce(u.id, pm.user_id) as id, coalesce(u.name, m.name, pm.user_id) as name,
+                   coalesce(u.email, m.email) as email, coalesce(u.is_demo, m.is_demo, 0) as is_demo,
+                   pm.role, pm.active, pm.created_at, pm.handover_deadline, pm.handover_status
             from project_memberships pm
-            join users u on u.id = pm.user_id
+            left join users u on u.id = pm.user_id
+            left join members m on m.id = pm.user_id and m.project_id = pm.project_id
             where pm.project_id = :pid
             order by pm.created_at asc
         """),
         {"pid": project_id},
     ).mappings().all()
 
-    if not rows:
-        rows = session.execute(
-            text("""
-                select id, name, email, is_demo, role, active, handover_deadline, handover_status
-                from members
-                where project_id = :pid
-            """),
-            {"pid": project_id},
-        ).mappings().all()
+    seen_ids = {r["id"] for r in rows}
+    legacy_rows = session.execute(
+        text("""
+            select id, name, email, is_demo, role, active, handover_deadline, handover_status
+            from members
+            where project_id = :pid
+        """),
+        {"pid": project_id},
+    ).mappings().all()
+
+    combined_rows = list(rows)
+    for lr in legacy_rows:
+        if lr["id"] not in seen_ids:
+            seen_ids.add(lr["id"])
+            combined_rows.append(lr)
 
     return [
         {
@@ -937,7 +998,7 @@ def list_project_members(
             "handover_deadline": r.get("handover_deadline"),
             "handover_status": r.get("handover_status") or ("active" if bool(r["active"]) else "inactive"),
         }
-        for r in rows
+        for r in combined_rows
     ]
 
 

@@ -25,8 +25,8 @@ CHUNK_OVERLAP = 120
 
 
 def can_manage_sources(role: str) -> bool:
-    """Source connection is a project-owner action; the approver is the seeded owner role."""
-    return role == "approver"
+    """Source connection and management is allowed for approver and leaver roles."""
+    return role in ("approver", "leaver")
 
 # Redact high-confidence credentials before text reaches storage or extraction.
 SECRET_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (

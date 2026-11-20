@@ -251,7 +251,7 @@ export const DashboardLight: React.FC<{ withLayout?: boolean }> = ({ withLayout 
         {/* Left Text & Call to Action */}
         <div className="relative z-10 max-w-xl flex-1 space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-semibold shadow-xs">
-            <span>Welcome back, {user?.firstName || "Manjiri"}!</span>
+            <span>Welcome back, {user?.firstName || user?.name || "Team Member"}!</span>
             <span className="animate-wave inline-block origin-bottom-right">👋</span>
           </div>
 
@@ -883,8 +883,11 @@ export const DashboardLight: React.FC<{ withLayout?: boolean }> = ({ withLayout 
       {/* Invite Member Modal */}
       <InviteMemberModal
         isOpen={inviteModalOpen}
-        onClose={() => setInviteModalOpen(false)}
-        projectId={user?.project_id}
+        onClose={() => {
+          setInviteModalOpen(false);
+          void loadDashboardData();
+        }}
+        projectId={activeProject?.id || user?.project_id}
         projectName={activeProject?.name || "Active Project"}
         currentUserRole={user?.role}
       />

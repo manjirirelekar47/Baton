@@ -256,14 +256,20 @@ function KnowledgeOrbit() {
 // 3. Main Split-Screen Unified Auth Component (Login + Registration)
 // ---------------------------------------------------------------------------
 
-export function SignUp() {
+export interface SignUpProps {
+  initialIsLogin?: boolean;
+}
+
+export function SignUp({ initialIsLogin }: SignUpProps = {}) {
   const location = useLocation();
   const navigate = useNavigate();
   const { switchRole, loginDemo, register, syncSession, createProject, joinProject, switchProject, fetchProjects } = useAuth();
   const { toggleTheme, isDark } = useTheme();
 
   // 1. Toggle State: false = Registration (Sign Up), true = Login
-  const [isLogin, setIsLogin] = useState<boolean>(location.pathname === "/login");
+  const [isLogin, setIsLogin] = useState<boolean>(
+    initialIsLogin ?? (location.pathname === "/login" || location.pathname === "/signin")
+  );
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [isRecovery, setIsRecovery] = useState(
     () => isPasswordRecoveryLocation(location.search, window.location.hash),
@@ -272,7 +278,11 @@ export function SignUp() {
 
   // Keep state synchronized if URL route shifts
   useEffect(() => {
-    setIsLogin(location.pathname === "/login");
+    if (initialIsLogin !== undefined) {
+      setIsLogin(initialIsLogin);
+    } else {
+      setIsLogin(location.pathname === "/login" || location.pathname === "/signin");
+    }
     const isRecoveryRedirect = isPasswordRecoveryLocation(location.search, window.location.hash);
     recoveryMode.current = isRecoveryRedirect;
     if (isRecoveryRedirect) {
@@ -281,7 +291,7 @@ export function SignUp() {
     } else {
       setIsRecovery(false);
     }
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, initialIsLogin]);
 
   useEffect(() => {
     // Supabase sends OAuth callback failures back to the redirect URL. Show
@@ -329,6 +339,17 @@ export function SignUp() {
   const [existingProjects, setExistingProjects] = useState<ProjectItem[]>([]);
   const [loadingExistingProjects, setLoadingExistingProjects] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const code = params.get("invite") || params.get("code") || params.get("invitation");
+    if (code) {
+      const trimmed = code.trim().toUpperCase();
+      setInvitationCode(trimmed);
+      setJoinInviteCode(trimmed);
+      sessionStorage.setItem("baton.pending_invite", trimmed);
+    }
+  }, [location.search]);
+
   const loadExistingProjects = useCallback(async () => {
     setLoadingExistingProjects(true);
     try {
@@ -372,7 +393,34 @@ export function SignUp() {
 
       const pendingInvite = sessionStorage.getItem("baton.pending_invite") || undefined;
       const metaInvite = (activeSession.user_metadata?.invitation_code as string | undefined);
-      const targetInvite = pendingInvite || metaInvite;
+      const targetInvite = (pendingInvite || metaInvite || invitationCode)?.trim();
+
+      if (targetInvite) {
+        // Direct redemption when invite code is present
+        try {
+          if (joinProject) {
+            await joinProject(targetInvite);
+            sessionStorage.removeItem("baton.pending_role");
+            sessionStorage.removeItem("baton.pending_invite");
+            navigate("/dashboard", { replace: true });
+            return;
+          }
+        } catch {
+          if (register) {
+            await register({
+              user_id: activeSession.id,
+              email: activeSession.email,
+              name: (activeSession.user_metadata?.full_name as string) || activeSession.email.split("@")[0],
+              invitation_code: targetInvite,
+              supabase_token: session?.access_token,
+            });
+            sessionStorage.removeItem("baton.pending_role");
+            sessionStorage.removeItem("baton.pending_invite");
+            navigate("/dashboard", { replace: true });
+            return;
+          }
+        }
+      }
 
       if (syncSession) {
         const syncResult = await syncSession(
@@ -409,20 +457,6 @@ export function SignUp() {
         }
       }
 
-      if (targetInvite && register) {
-        await register({
-          user_id: activeSession.id,
-          email: activeSession.email,
-          name: (activeSession.user_metadata?.full_name as string) || activeSession.email.split("@")[0],
-          invitation_code: targetInvite,
-          supabase_token: session?.access_token,
-        });
-        sessionStorage.removeItem("baton.pending_role");
-        sessionStorage.removeItem("baton.pending_invite");
-        navigate("/dashboard", { replace: true });
-        return;
-      }
-
       // No project assigned yet - show project onboarding
       setPendingProjectOnboarding({
         user_id: activeSession.id,
@@ -438,7 +472,7 @@ export function SignUp() {
       completingLogin.current = false;
       setSubmitting(false);
     }
-  }, [fetchProjects, loadExistingProjects, navigate, register, switchProject, syncSession]);
+  }, [fetchProjects, invitationCode, joinProject, loadExistingProjects, navigate, register, switchProject, syncSession]);
 
   const handleCompleteProjectOnboarding = async (e: FormEvent) => {
     e.preventDefault();

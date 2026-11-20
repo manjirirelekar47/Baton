@@ -29,9 +29,9 @@ def test_plan_response_has_no_restricted_text(client):
     assert [i["claim_id"] for i in plan["week_1"]] == ["c-006"]
 
 
-def test_requires_login_and_blocks_the_leaver(client):
+def test_requires_login_and_allows_the_leaver(client):
     assert client.get("/handover/v1/view").status_code == 401
-    assert client.get("/handover/v1/view", headers=login(client, "leaver")).status_code == 403
+    assert client.get("/handover/v1/view", headers=login(client, "leaver")).status_code == 200
 
 
 def test_unknown_version_is_404(client):

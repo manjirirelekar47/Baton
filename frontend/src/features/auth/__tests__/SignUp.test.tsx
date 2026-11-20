@@ -2,8 +2,9 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SignUp } from "@/pages/SignUp";
+import { SignIn } from "@/pages/SignIn";
 
-const { signInWithPassword, signUp, signOut, resetPasswordForEmail, getSession, onAuthStateChange, loginDemo } = vi.hoisted(() => ({
+const { signInWithPassword, signUp, signOut, resetPasswordForEmail, getSession, onAuthStateChange, loginDemo, joinProject } = vi.hoisted(() => ({
   signInWithPassword: vi.fn(),
   signUp: vi.fn(),
   signOut: vi.fn(),
@@ -11,6 +12,7 @@ const { signInWithPassword, signUp, signOut, resetPasswordForEmail, getSession, 
   getSession: vi.fn(),
   onAuthStateChange: vi.fn(),
   loginDemo: vi.fn(),
+  joinProject: vi.fn(),
 }));
 
 vi.mock("@/features/auth/supabase", () => ({
@@ -28,7 +30,7 @@ vi.mock("@/features/auth/supabase", () => ({
 }));
 
 vi.mock("@/app/auth", () => ({
-  useAuth: () => ({ loginDemo, switchRole: vi.fn() }),
+  useAuth: () => ({ loginDemo, switchRole: vi.fn(), joinProject }),
 }));
 
 vi.mock("@/context/ThemeContext", () => ({
@@ -269,5 +271,48 @@ describe("Supabase sign-in page", () => {
     expect(signOut).toHaveBeenCalledWith({ scope: "local" });
     expect(loginDemo).not.toHaveBeenCalled();
     expect(screen.queryByText("Dashboard")).not.toBeInTheDocument();
+  });
+
+  it("SignIn component redeems pending invite code from URL, calls joinProject, and navigates to dashboard", async () => {
+    joinProject.mockResolvedValue({ id: "proj-approver-shared", name: "Approver Core Service", role: "leaver" });
+    signInWithPassword.mockImplementation(async () => {
+      getSession.mockResolvedValue({
+        data: {
+          session: {
+            access_token: "mock-supabase-token",
+            user: { id: "usr-leaver-1", email: "leaver@example.com", user_metadata: { full_name: "Taylor Leaver" } },
+          },
+        },
+        error: null,
+      });
+      return { error: null };
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/signin?invite=INV-LEAVER-7788"]}>
+        <Routes>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/dashboard" element={<div>Dashboard Active Workspace</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "Welcome Back" })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Work Email"), { target: { value: "leaver@example.com" } });
+    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "SecretPass123!" } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /sign in to baton/i }));
+    });
+
+    await waitFor(() => {
+      expect(signInWithPassword).toHaveBeenCalledWith({
+        email: "leaver@example.com",
+        password: "SecretPass123!",
+      });
+      expect(joinProject).toHaveBeenCalledWith("INV-LEAVER-7788");
+      expect(screen.getByText("Dashboard Active Workspace")).toBeInTheDocument();
+    });
   });
 });

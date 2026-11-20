@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import threading
 import uuid
 from pathlib import Path
@@ -22,6 +23,7 @@ from app.core.config import get_settings
 from app.core.db import get_engine
 from app.modules.extraction.models import ExtractionBatch
 from app.modules.ingestion import public as ingestion_public
+from app.modules.risk.service import _is_valid_person_name, _module_from_chunk
 from app.modules.verification import public as verification_public
 
 EXTRACTION_SYSTEM_PROMPT = """You are Baton's knowledge extraction engine.
@@ -53,6 +55,12 @@ def load_replay_claims() -> list[dict[str, Any]]:
             pass
     from app.core.samples import load_sample
     return load_sample("claims")
+
+
+def _is_demo_project(project_id: str | None) -> bool:
+    if not project_id:
+        return False
+    return project_id == DEMO_PROJECT_ID or "demo" in project_id.lower()
 
 
 def _normalize_extraction_payload(data: Any, tier: str = "L1") -> dict[str, Any]:
@@ -110,15 +118,20 @@ class LLMProviderAdapter:
     def is_gemini(self) -> bool:
         return self.provider in ("gemini", "google") or "gemini" in self.model.lower()
 
-    def extract_from_chunks(self, tier: str, chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def extract_from_chunks(self, tier: str, chunks: list[dict[str, Any]], project_id: str | None = None) -> list[dict[str, Any]]:
         if not chunks:
             return []
 
         if not self.is_live_configured():
-            # In replay mode, load stored verified extractions and filter for this tier
-            all_replay = load_replay_claims()
-            tier_claims = [c for c in all_replay if c.get("acl_label", "L1") == tier]
-            return tier_claims
+            # In replay mode, load stored verified extractions ONLY for demo projects
+            if _is_demo_project(project_id):
+                all_replay = load_replay_claims()
+                tier_claims = [c for c in all_replay if c.get("acl_label", "L1") == tier]
+                return tier_claims
+            elif project_id and chunks:
+                all_extracted = extract_claims_from_project_chunks(project_id, chunks)
+                return [c for c in all_extracted if c.get("acl_label", "L1") == tier]
+            return []
 
         # Live extraction path
         import httpx
@@ -190,9 +203,14 @@ class LLMProviderAdapter:
                 batch = ExtractionBatch.model_validate(norm)
                 return [c.model_dump() for c in batch.claims]
             except Exception:
-                # If live retry fails, fall back safely to replay mode without fabricating data
-                all_replay = load_replay_claims()
-                return [c for c in all_replay if c.get("acl_label", "L1") == tier]
+                # If live retry fails, fall back safely without fabricating data or leaking demo claims
+                if _is_demo_project(project_id):
+                    all_replay = load_replay_claims()
+                    return [c for c in all_replay if c.get("acl_label", "L1") == tier]
+                elif project_id and chunks:
+                    all_extracted = extract_claims_from_project_chunks(project_id, chunks)
+                    return [c for c in all_extracted if c.get("acl_label", "L1") == tier]
+                return []
 
 
 def merge_entities(claims: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -228,9 +246,6 @@ def extract_claims_from_project_chunks(project_id: str, chunks: list[dict[str, A
     Ensures every claim has an exact substring quote matching chunk['text'] so that
     verification succeeds, confidence scores are high, and project KPIs update.
     """
-    import re
-    from app.modules.risk.service import _module_from_chunk, _is_valid_person_name
-
     claims: list[dict[str, Any]] = []
     seen_statements = set()
 
@@ -252,53 +267,174 @@ def extract_claims_from_project_chunks(project_id: str, chunks: list[dict[str, A
         clean_first_line = text.split("\n")[0].strip()
         quote = text[:140]
 
-        if stype == "git":
+        if stype in {"git", "github"}:
             commit_match = re.search(r"GitHub commit [^\n:]+:\s*([^\n]+)", text, re.IGNORECASE)
-            stmt = commit_match.group(1).strip() if commit_match else clean_first_line
-            stmt = re.sub(r"^[a-f0-9]{7,40}\s+", "", stmt).strip()
+            pr_match = re.search(r"GitHub pull request #(\d+):\s*([^\n]+)", text, re.IGNORECASE)
+            issue_match = re.search(r"GitHub issue #(\d+):\s*([^\n]+)", text, re.IGNORECASE)
+
+            if commit_match:
+                raw_stmt = commit_match.group(1).strip()
+                stmt = re.sub(r"^[a-f0-9]{7,40}\s+", "", raw_stmt).strip()
+                c_type = "decision"
+                attr = "implementation"
+            elif pr_match:
+                pr_num, pr_title = pr_match.group(1), pr_match.group(2).strip()
+                stmt = f"PR #{pr_num}: {pr_title}"
+                c_type = "decision"
+                attr = "pull_request"
+            elif issue_match:
+                issue_num, issue_title = issue_match.group(1), issue_match.group(2).strip()
+                stmt = f"Issue #{issue_num}: {issue_title}"
+                c_type = "decision"
+                attr = "issue"
+            else:
+                stmt = re.sub(r"^[a-f0-9]{7,40}\s+", "", clean_first_line).strip()
+                c_type = "decision"
+                attr = "implementation"
+
             if len(stmt) > 120:
                 stmt = stmt[:117] + "..."
-            if not stmt or stmt in seen_statements:
-                continue
-            seen_statements.add(stmt)
-
-            claims.append({
-                "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
-                "type": "decision",
-                "entity_key": f"module:{mod}",
-                "attribute": "implementation",
-                "statement": stmt,
-                "owner": author,
-                "acl_label": acl,
-                "evidence": [{
-                    "chunk_id": cid,
-                    "source_id": sid,
-                    "source_title": stitle,
+            if stmt and stmt not in seen_statements:
+                seen_statements.add(stmt)
+                claims.append({
+                    "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
+                    "type": c_type,
+                    "entity_key": f"module:{mod}",
+                    "attribute": attr,
+                    "statement": stmt,
+                    "owner": author,
                     "acl_label": acl,
-                    "quote": quote,
-                }]
-            })
+                    "evidence": [{
+                        "chunk_id": cid,
+                        "source_id": sid,
+                        "source_title": stitle,
+                        "acl_label": acl,
+                        "quote": quote,
+                    }]
+                })
+
+            # Also extract task items, risks, or blockers present in git PR or commit body
+            for ln in text.splitlines():
+                ln_clean = ln.strip()
+                if not ln_clean:
+                    continue
+                t_match = re.match(r"^[-*]\s+\[([ xX])\]\s+(.+)$", ln_clean)
+                if t_match:
+                    task_text = t_match.group(2).strip()
+                    status_flag = "completed" if t_match.group(1).lower() == "x" else "open"
+                    t_stmt = f"Next Action: {task_text[:100]} ({status_flag})"
+                    if t_stmt not in seen_statements:
+                        seen_statements.add(t_stmt)
+                        claims.append({
+                            "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
+                            "type": "next_action",
+                            "entity_key": f"module:{mod}",
+                            "attribute": "status",
+                            "statement": t_stmt,
+                            "owner": author,
+                            "acl_label": acl,
+                            "evidence": [{
+                                "chunk_id": cid,
+                                "source_id": sid,
+                                "source_title": stitle,
+                                "acl_label": acl,
+                                "quote": ln_clean[:140],
+                            }]
+                        })
+                elif ln_clean.startswith(("- ", "* ")):
+                    bullet_text = ln_clean[2:].strip()
+                    lower_b = bullet_text.lower()
+                    b_type = None
+                    if any(w in lower_b for w in ("risk", "caution", "warn", "vulnerability")):
+                        b_type = ("risk", "risk")
+                    elif any(w in lower_b for w in ("block", "blocked", "blocking")):
+                        b_type = ("blocker", "blocker")
+                    elif any(w in lower_b for w in ("depend", "requires", "prerequisite")):
+                        b_type = ("dependency", "dependency")
+                    if b_type and bullet_text not in seen_statements:
+                        seen_statements.add(bullet_text)
+                        claims.append({
+                            "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
+                            "type": b_type[0],
+                            "entity_key": f"module:{mod}",
+                            "attribute": b_type[1],
+                            "statement": bullet_text[:120],
+                            "owner": author,
+                            "acl_label": acl,
+                            "evidence": [{
+                                "chunk_id": cid,
+                                "source_id": sid,
+                                "source_title": stitle,
+                                "acl_label": acl,
+                                "quote": ln_clean[:140],
+                            }]
+                        })
 
         elif stype in {"document", "pdf", "file", "text"}:
-            paragraphs = [p.strip() for p in text.split("\n\n") if len(p.strip()) >= 20]
-            if not paragraphs:
-                paragraphs = [clean_first_line]
+            # Support markdown headings (#, ##), bullet points (- , * ), task lines (- [ ]), and paragraphs
+            lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+            extracted_items: list[tuple[str, str, str, str]] = []  # (stmt, quote, claim_type, attr)
 
-            for p in paragraphs[:2]:
-                p_quote = p[:140]
-                stmt = p.split(". ")[0].strip()
-                if len(stmt) > 120:
-                    stmt = stmt[:117] + "..."
+            for ln in lines:
+                # 1. Markdown headings: # Heading
+                h_match = re.match(r"^#{1,4}\s+(.+)$", ln)
+                if h_match:
+                    heading_text = h_match.group(1).strip()
+                    if len(heading_text) >= 5:
+                        stmt = heading_text[:120]
+                        extracted_items.append((stmt, ln[:140], "decision", "specification"))
+                        continue
+
+                # 2. Markdown tasks: - [ ] Task or - [x] Done
+                t_match = re.match(r"^[-*]\s+\[([ xX])\]\s+(.+)$", ln)
+                if t_match:
+                    task_text = t_match.group(2).strip()
+                    status_flag = "completed" if t_match.group(1).lower() == "x" else "open"
+                    stmt = f"Next Action: {task_text[:100]} ({status_flag})"
+                    extracted_items.append((stmt, ln[:140], "next_action", "status"))
+                    continue
+
+                # 3. Bullet points: - item or * item
+                b_match = re.match(r"^[-*]\s+(.+)$", ln)
+                if b_match:
+                    bullet_text = b_match.group(1).strip()
+                    if len(bullet_text) >= 10:
+                        c_type = "decision"
+                        attr = "rule"
+                        lower_b = bullet_text.lower()
+                        if any(w in lower_b for w in ("risk", "caution", "warn", "vulnerability")):
+                            c_type = "risk"
+                            attr = "risk"
+                        elif any(w in lower_b for w in ("block", "blocked", "blocking")):
+                            c_type = "blocker"
+                            attr = "blocker"
+                        elif any(w in lower_b for w in ("depend", "requires", "prerequisite")):
+                            c_type = "dependency"
+                            attr = "dependency"
+                        extracted_items.append((bullet_text[:120], ln[:140], c_type, attr))
+                        continue
+
+            # Fallback to paragraph splitting if no structured items found
+            if not extracted_items:
+                paragraphs = [p.strip() for p in text.split("\n\n") if len(p.strip()) >= 20]
+                if not paragraphs:
+                    paragraphs = [clean_first_line]
+                for p in paragraphs[:2]:
+                    p_quote = p[:140]
+                    stmt = p.split(". ")[0].strip()
+                    if len(stmt) > 120:
+                        stmt = stmt[:117] + "..."
+                    claim_type = "decision"
+                    attr = "specification" if any(w in p.lower() for w in ("architecture", "stack", "system", "infrastructure")) else "rule"
+                    extracted_items.append((stmt, p_quote, claim_type, attr))
+
+            for stmt, p_quote, c_type, attr in extracted_items[:6]:
                 if not stmt or stmt in seen_statements:
                     continue
                 seen_statements.add(stmt)
-
-                claim_type = "architecture" if any(w in p.lower() for w in ("architecture", "stack", "system", "infrastructure")) else "decision"
-                attr = "specification" if claim_type == "architecture" else "rule"
-
                 claims.append({
                     "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
-                    "type": claim_type,
+                    "type": c_type,
                     "entity_key": f"module:{mod}",
                     "attribute": attr,
                     "statement": stmt,
@@ -322,7 +458,7 @@ def extract_claims_from_project_chunks(project_id: str, chunks: list[dict[str, A
                     seen_statements.add(stmt)
                     claims.append({
                         "claim_id": f"c-{project_id[:8]}-{uuid.uuid4().hex[:6]}",
-                        "type": "task",
+                        "type": "next_action",
                         "entity_key": f"module:{mod}",
                         "attribute": "status",
                         "statement": stmt,
@@ -370,11 +506,13 @@ def run_reconstruction_task(job_id: str, project_id: str, mode: str) -> None:
 
             extracted_claims: list[dict[str, Any]] = []
             if actual_mode == "replay":
-                # Labelled replay mode
-                if chunks and project_id != DEMO_PROJECT_ID:
+                # Labelled replay mode - only the demo project uses replay fixture fallback
+                if _is_demo_project(project_id):
+                    extracted_claims = load_replay_claims()
+                elif chunks:
                     extracted_claims = extract_claims_from_project_chunks(project_id, chunks)
                 else:
-                    extracted_claims = load_replay_claims()
+                    extracted_claims = []
                 session.execute(
                     text("update extraction_jobs set progress = 65, updated_at = :now where id = :id and project_id = :p"),
                     {"id": job_id, "p": project_id, "now": now_iso()},
@@ -386,12 +524,12 @@ def run_reconstruction_task(job_id: str, project_id: str, mode: str) -> None:
                 tier_chunks = {t: [c for c in chunks if c.get("acl_label") == t] for t in tiers}
                 for t in tiers:
                     if tier_chunks[t]:
-                        claims_for_tier = adapter.extract_from_chunks(t, tier_chunks[t])
+                        claims_for_tier = adapter.extract_from_chunks(t, tier_chunks[t], project_id=project_id)
                         for c in claims_for_tier:
                             c["acl_label"] = t
                         extracted_claims.extend(claims_for_tier)
 
-                if not extracted_claims and chunks and project_id != DEMO_PROJECT_ID:
+                if not extracted_claims and chunks and not _is_demo_project(project_id):
                     extracted_claims = extract_claims_from_project_chunks(project_id, chunks)
 
                 session.execute(
@@ -505,7 +643,7 @@ def get_job(job_id: str, project_id: str | None = None) -> dict[str, Any] | None
             # Fall back to sample job for tests (only for default demo project)
             from app.core.samples import load_sample
             sample = load_sample("jobs")
-            if (sample.get("job_id") == job_id or job_id == "job-demo-1") and (project_id is None or project_id == "proj-campus-event-portal"):
+            if (sample.get("job_id") == job_id or job_id == "job-demo-1") and (project_id is None or _is_demo_project(project_id)):
                 return sample
             return None
 
