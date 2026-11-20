@@ -181,7 +181,7 @@ def _to_item(claim: Claim, decision: Review | None) -> QueueItem:
 
 
 def build_queue(ctx: Ctx) -> ReviewQueue:
-    require_roles(ctx.actor, Role.APPROVER)
+    require_roles(ctx.actor, Role.APPROVER, Role.LEAVER)
     claims = visible_claims(ctx)
     decisions = effective_decisions(ctx.session, ctx.project_id, claims)
     items = [_to_item(c, decisions.get(c.id)) for c in claims]
@@ -196,7 +196,7 @@ def build_queue(ctx: Ctx) -> ReviewQueue:
 
 # -------------------------------------------------------------- readiness
 def compute_readiness(ctx: Ctx) -> ReadinessReport:
-    require_roles(ctx.actor, Role.APPROVER)
+    require_roles(ctx.actor, Role.APPROVER, Role.LEAVER)
     claims = visible_claims(ctx)
     decisions = effective_decisions(ctx.session, ctx.project_id, claims)
 
@@ -264,7 +264,7 @@ def _check_confirmable(claim: Claim) -> None:
 
 
 def apply_action(ctx: Ctx, claim_id: str, req: ActionRequest) -> ActionResult:
-    require_roles(ctx.actor, Role.APPROVER)
+    require_roles(ctx.actor, Role.APPROVER, Role.LEAVER)
     claim = get_visible_claim(ctx, claim_id)
     before = _brief(claim)
     action = req.action

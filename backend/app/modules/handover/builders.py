@@ -5,7 +5,7 @@ Output is built from an explicit whitelist of fields rendered through fixed temp
 no free-text summariser, and nothing the viewer may not see can reach the response."""
 from app.core import acl
 
-VIEW_ROLES = {"approver", "incoming_maintainer", "incoming_contributor", "contributor"}
+VIEW_ROLES = {"approver", "leaver", "incoming_maintainer", "incoming_contributor", "contributor"}
 ACK_ROLES = {"incoming_maintainer", "incoming_contributor", "contributor"}
 
 SECTIONS = [
