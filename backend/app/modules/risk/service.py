@@ -400,7 +400,7 @@ def _timeline_event_details(chunk: dict[str, Any]) -> dict[str, Any]:
         or module
     )
     if not module or module == "Unassigned module":
-        t = (title or content).lower()
+        t = (str(payload.get("message") or payload.get("title") or "") or content).lower()
         if "ingest" in t:
             module = "ingestion"
         elif "categoris" in t or "categoriz" in t:

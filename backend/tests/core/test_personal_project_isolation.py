@@ -10,6 +10,7 @@ Verifies:
 import io
 import time
 import uuid
+
 from tests.conftest import make_supabase_token
 
 
@@ -33,7 +34,6 @@ def test_personal_project_clean_slate_and_zero_demo_leakage(client):
         headers={"Authorization": f"Bearer {account_token}"},
     )
     assert p_res.status_code == 200
-    proj_id = p_res.json()["project"]["id"]
     token = p_res.json()["token"]
     auth = {"Authorization": f"Bearer {token}"}
 

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import threading
 import uuid
 from pathlib import Path
@@ -22,6 +23,7 @@ from app.core.config import get_settings
 from app.core.db import get_engine
 from app.modules.extraction.models import ExtractionBatch
 from app.modules.ingestion import public as ingestion_public
+from app.modules.risk.service import _is_valid_person_name, _module_from_chunk
 from app.modules.verification import public as verification_public
 
 EXTRACTION_SYSTEM_PROMPT = """You are Baton's knowledge extraction engine.
@@ -244,9 +246,6 @@ def extract_claims_from_project_chunks(project_id: str, chunks: list[dict[str, A
     Ensures every claim has an exact substring quote matching chunk['text'] so that
     verification succeeds, confidence scores are high, and project KPIs update.
     """
-    import re
-    from app.modules.risk.service import _module_from_chunk, _is_valid_person_name
-
     claims: list[dict[str, Any]] = []
     seen_statements = set()
 
