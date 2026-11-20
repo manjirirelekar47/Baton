@@ -50,29 +50,82 @@ def _parse_task(chunk: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def _is_valid_person_name(name: str | None) -> bool:
+    """Validate that a person name is a real contributor name and not a template placeholder or generic string."""
+    if not name:
+        return False
+    clean = name.strip()
+    if not clean or len(clean) < 2:
+        return False
+    lower = clean.lower()
+    if lower in {"unknown", "unassigned", "none", "null", "undefined", "n/a", "system", "user"}:
+        return False
+    if re.search(r"\bmember\s*\d+\b", lower) or "full name" in lower or "placeholder" in lower:
+        return False
+    return True
+
+
 def _author_activity(chunk: dict[str, Any]) -> tuple[str, str] | None:
     """Return (module, author) for Git records only; non-Git prose must not affect bus-factor signals."""
     if chunk.get("source_type") != "git":
         return None
     module = _module_from_chunk(chunk)
     author = str(chunk.get("author") or "").strip()
-    if not module or not author or author.lower() in {"unknown", "none", "null", "unassigned"}:
+    if not module or not author or not _is_valid_person_name(author):
         return None
     return module, author
 
 
 def _module_from_chunk(chunk: dict[str, Any]) -> str | None:
-    """Find the explicit module label, with conservative fallbacks for older sample evidence."""
-    content = str(chunk.get("text", ""))
+    """Find the explicit module label, or extract from branch/feature names, conventional commits, or content keywords."""
+    content = str(chunk.get("text") or chunk.get("content") or "")
     match = re.search(r"\b(?:module|directory|component)\s*[:|]\s*([A-Za-z0-9_./-]+)", content, re.IGNORECASE)
     if match:
-        return match.group(1).strip("./")
+        return match.group(1).strip("./").lower()
+
+    # Check for branch or feature patterns (e.g. "Feature/ingestion", "fix/auth")
+    branch_match = re.search(r"\b(?:feature|feat|fix|refactor|chore)/([A-Za-z0-9_-]+)", content, re.IGNORECASE)
+    if branch_match:
+        return branch_match.group(1).lower()
+
+    # Conventional commits e.g. "feat(ingestion): ...", "fix(payments): ..."
+    conv_match = re.search(r"\b(?:feat|fix|refactor|test|chore)\(([A-Za-z0-9_-]+)\):", content, re.IGNORECASE)
+    if conv_match:
+        return conv_match.group(1).lower()
 
     lower = content.lower()
-    if "payments" in lower:
+    title_lower = str(chunk.get("source_title") or "").lower()
+    combined = f"{lower} {title_lower}"
+
+    if "ingest" in combined:
+        return "ingestion"
+    if "categoris" in combined or "categoriz" in combined:
+        return "categorisation"
+    if "recurring" in combined or "payment" in combined or "billing" in combined:
         return "payments"
-    if "kiosk" in lower or "check-in" in lower:
+    if "debt" in combined or "income" in combined or "savings" in combined:
+        return "financial-metrics"
+    if "forecast" in combined or "back-test" in combined or "predict" in combined:
+        return "forecasting"
+    if "frontend" in combined or "react" in combined or "ui" in combined:
+        return "frontend"
+    if "simulator" in combined or "accuracy" in combined:
+        return "simulator"
+    if "kiosk" in combined or "check-in" in combined:
         return "check-in-kiosk"
+    if "auth" in combined or "oauth" in combined or "login" in combined:
+        return "auth"
+    if "api" in combined or "backend" in combined:
+        return "backend-api"
+
+    # Fallback to source title if available
+    source_title = str(chunk.get("source_title") or "").strip()
+    if source_title:
+        clean = re.sub(r"[^\w\s-]", "", source_title).strip()
+        first_word = clean.split()[0].lower() if clean else ""
+        if first_word and first_word not in {"github", "file", "document", "upload"}:
+            return first_word
+
     return None
 
 
@@ -145,11 +198,12 @@ def build_graph_edges(chunks: list[dict[str, Any]]) -> list[dict[str, str]]:
         chunk_id = str(chunk.get("chunk_id", ""))
         module = _module_from_chunk(chunk)
         if chunk.get("source_type") == "git" and module:
-            author = str(chunk.get("author") or "Unknown").strip()
-            if author and author.lower() != "unknown":
+            author = str(chunk.get("author") or "").strip()
+            if author and _is_valid_person_name(author):
                 add_edge(chunk_id, "person", author, "authored", "module", module)
             for reviewer in _reviewers(str(chunk.get("text", ""))):
-                add_edge(chunk_id, "person", reviewer, "reviewed", "module", module)
+                if reviewer and _is_valid_person_name(reviewer):
+                    add_edge(chunk_id, "person", reviewer, "reviewed", "module", module)
             for target in sorted(_import_targets(chunk)):
                 if target.lower() != module.lower():
                     add_edge(chunk_id, "module", module, "imports", "module", target)
@@ -159,7 +213,7 @@ def build_graph_edges(chunks: list[dict[str, Any]]) -> list[dict[str, str]]:
             if not task:
                 continue
             owner = str(task.get("owner") or "").strip()
-            if owner and owner.lower() not in {"unknown", "unassigned", "none", "null"}:
+            if owner and _is_valid_person_name(owner):
                 add_edge(chunk_id, "person", owner, "owns", "task", task["id"])
             for blocker in task["blocked_by"]:
                 add_edge(chunk_id, "task", blocker, "blocks", "task", task["id"])
@@ -345,7 +399,22 @@ def _timeline_event_details(chunk: dict[str, Any]) -> dict[str, Any]:
         str(payload.get("module") or payload.get("directory") or payload.get("component") or "").strip()
         or module
     )
-    module = module or "Unassigned module"
+    if not module or module == "Unassigned module":
+        t = (title or content).lower()
+        if "ingest" in t:
+            module = "ingestion"
+        elif "categoris" in t or "categoriz" in t:
+            module = "categorisation"
+        elif "payment" in t or "recurring" in t:
+            module = "payments"
+        elif "debt" in t or "savings" in t:
+            module = "financial-metrics"
+        elif "forecast" in t or "back-test" in t:
+            module = "forecasting"
+        elif "frontend" in t or "react" in t:
+            module = "frontend"
+        else:
+            module = "core"
 
     number = metadata.get("number") or payload.get("number")
     state = str(metadata.get("state") or payload.get("state") or "").strip().lower()
@@ -551,16 +620,19 @@ def build_knowledge_graph(
         stype = c.get("source_type")
         stitle = str(c.get("source_title") or "Repository")
         if stype == "git":
-            mod = _module_from_chunk(c)
+            mod = _module_from_chunk(c) or "core"
             author = str(c.get("author") or "").strip()
+            sid = str(c.get("source_id") or "")
             if mod:
                 add_node(f"module:{mod}", mod.capitalize(), "module")
-            if author and author.lower() != "unknown":
+                if sid:
+                    add_edge(f"module:{mod}", f"source:{sid}", "SUPPORTED BY", chunk_id=cid, quote=text[:140], source_title=stitle)
+            if author and _is_valid_person_name(author):
                 add_node(f"person:{author}", author, "person")
                 if mod:
                     add_edge(f"person:{author}", f"module:{mod}", "AUTHORED", chunk_id=cid, quote=text[:140], source_title=stitle)
             for rev in _reviewers(text):
-                if rev and rev.lower() != "unknown":
+                if rev and _is_valid_person_name(rev):
                     add_node(f"person:{rev}", rev, "person")
                     if mod:
                         add_edge(f"person:{rev}", f"module:{mod}", "REVIEWED", chunk_id=cid, quote=text[:140], source_title=stitle)
@@ -570,6 +642,17 @@ def build_knowledge_graph(
                         add_node(f"module:{target.lower()}", target.capitalize(), "module")
                         add_edge(f"module:{mod}", f"module:{target.lower()}", "IMPORTS", chunk_id=cid, quote=text[:140], source_title=stitle)
 
+        elif stype in {"document", "pdf", "file"}:
+            mod = _module_from_chunk(c) or "documentation"
+            sid = str(c.get("source_id") or "")
+            author = str(c.get("author") or "").strip()
+            add_node(f"module:{mod}", mod.capitalize(), "module")
+            if sid:
+                add_edge(f"module:{mod}", f"source:{sid}", "SUPPORTED BY", chunk_id=cid, quote=text[:140], source_title=stitle)
+            if author and _is_valid_person_name(author):
+                add_node(f"person:{author}", author, "person")
+                add_edge(f"person:{author}", f"module:{mod}", "AUTHORED", chunk_id=cid, quote=text[:140], source_title=stitle)
+
         elif stype == "task_csv":
             task = _parse_task(c)
             if task:
@@ -577,7 +660,7 @@ def build_knowledge_graph(
                 title = task.get("title", tid)
                 owner = task.get("owner")
                 add_node(f"task:{tid}", f"{tid}: {title}", "task", {"status": task.get("status")})
-                if owner and owner.lower() not in {"unassigned", "unknown", "none"}:
+                if owner and _is_valid_person_name(owner):
                     add_node(f"person:{owner}", owner, "person")
                     add_edge(f"person:{owner}", f"task:{tid}", "OWNS", chunk_id=cid, quote=text[:140], source_title=stitle)
                 for blk in task.get("blocked_by", []):
@@ -604,7 +687,7 @@ def build_knowledge_graph(
         if ent:
             add_node(f"module:{ent.lower()}", ent.capitalize(), "module")
             add_edge(f"claim:{cid}", f"module:{ent.lower()}", "IMPORTS" if attr == "dependency" else "OWNS", quote=stmt)
-        if owner and owner.lower() not in {"unassigned", "unknown", "none"}:
+        if owner and _is_valid_person_name(owner):
             add_node(f"person:{owner}", owner, "person")
             if ent and attr == "owner":
                 add_edge(f"person:{owner}", f"module:{ent.lower()}", "OWNS", quote=stmt)

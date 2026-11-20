@@ -31,7 +31,10 @@ def _current_versions(project_id: str, role: str, session: Session) -> dict[str,
     current: dict[str, dict[str, Any]] = {}
     for key, versions in grouped.items():
         latest = max(versions, key=lambda item: str(item.get("created_at") or ""))
-        source_chunks = sorted(chunks_by_source.get(latest.get("source_id", ""), []), key=lambda item: item.get("chunk_id", ""))
+        source_chunks = sorted(
+            chunks_by_source.get(latest.get("source_id", ""), []),
+            key=lambda item: (item.get("event_time") or "", item.get("char_start", 0), item.get("chunk_id", "")),
+        )
         content_hash = hashlib.sha256("\n".join(str(item.get("content_hash") or "") for item in source_chunks).encode()).hexdigest()
         current[key] = {
             "source_id": latest.get("source_id", ""),

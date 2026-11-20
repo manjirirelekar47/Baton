@@ -259,19 +259,55 @@ def parse_upload(filename: str, content: bytes, *, allow_chat: bool = False) -> 
 
 
 def persist_source(session: Session, *, project_id: str, filename: str, source_type: str, acl_label: str, records: list[ParsedRecord]) -> dict[str, Any]:
+    # Check for existing source with same filename in this project
+    existing = session.execute(
+        text("select id, title, type, acl_label, chunks, created_at from sources where project_id = :p and title = :t"),
+        {"p": project_id, "t": filename},
+    ).mappings().first()
+
+    chunks: list[dict[str, Any]] = []
+    if existing:
+        temp_id = existing["id"]
+        for record in records:
+            chunks.extend(chunk_record(record, project_id=project_id, source_id=temp_id, source_type=source_type, source_title=filename, acl_label=acl_label))
+        if not chunks:
+            raise ValueError("No readable text was found in this file. Check the export and try again.")
+
+        existing_chunks = session.execute(
+            text("select content_hash from source_chunks where project_id = :p and source_id = :sid order by char_start asc"),
+            {"p": project_id, "sid": temp_id},
+        ).scalars().all()
+        new_hashes = [c["content_hash"] for c in sorted(chunks, key=lambda c: c["char_span"][0])]
+
+        if list(existing_chunks) == new_hashes and len(existing_chunks) == len(chunks):
+            # Identical content: update acl if needed, avoid duplicate rows/alerts
+            session.execute(
+                text("update sources set acl_label = :acl, status = 'parsed' where id = :sid and project_id = :p"),
+                {"acl": acl_label, "sid": temp_id, "p": project_id},
+            )
+            session.commit()
+            return {
+                "source_id": temp_id, "project_id": project_id, "title": filename, "type": source_type,
+                "acl_label": acl_label, "consent": True, "status": "parsed", "chunks": len(chunks), "note": None,
+                "created_at": existing["created_at"],
+            }
+
+        # Content changed: reset chunks to generate with new source_id
+        chunks = []
+
     source_id = f"src-{uuid.uuid4().hex[:12]}"
     created_at = datetime.now(UTC).isoformat()
-    chunks: list[dict[str, Any]] = []
     for record in records:
         chunks.extend(chunk_record(record, project_id=project_id, source_id=source_id, source_type=source_type, source_title=filename, acl_label=acl_label))
     if not chunks:
         raise ValueError("No readable text was found in this file. Check the export and try again.")
-    # The source-level ACL is stored on the source and copied to every chunk; IDs remain immutable.
+
     session.execute(text("""insert into sources (id, project_id, title, type, acl_label, consent, status, chunks, note, created_at)
         values (:id, :project_id, :title, :type, :acl_label, 1, 'parsed', :chunks, null, :created_at)"""), {
         "id": source_id, "project_id": project_id, "title": filename, "type": source_type,
         "acl_label": acl_label, "chunks": len(chunks), "created_at": created_at,
     })
+
     for chunk in chunks:
         session.execute(text("""insert into source_chunks
             (id, project_id, source_id, source_type, source_title, author, event_time, acl_label, content_hash, char_start, char_end, content)

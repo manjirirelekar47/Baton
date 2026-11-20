@@ -1,6 +1,7 @@
 """Core endpoints: GET /health, POST /auth/demo-login, GET /me, POST /demo/reset,
 POST /auth/register, POST /auth/session, invitations and multi-project management.
 """
+import os
 import secrets
 import uuid
 
@@ -124,8 +125,15 @@ def assert_not_last_approver(session: Session, project_id: str, target_user_id: 
 
 
 @router.get("/health", tags=["core"])
-def health():
-    return {"status": "ok"}
+def health(session: Session = Depends(get_session)):
+    is_postgres = "postgresql" in str(session.bind.url).lower()
+    return {
+        "status": "ok",
+        "database": "PostgreSQL" if is_postgres else "SQLite / WAL",
+        "storage": "Encrypted SQL Store" if is_postgres else "SQLite / WAL",
+        "engine": "FastAPI / Uvicorn",
+        "environment": os.getenv("ENVIRONMENT", "Production" if is_postgres else "Development"),
+    }
 
 
 @router.post("/auth/demo-login", tags=["core"])

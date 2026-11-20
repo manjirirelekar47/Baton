@@ -282,9 +282,13 @@ export function ReviewPage() {
           </div>
 
           {/* Cards List */}
-          {filteredItems.length === 0 ? (
-            <EmptyState title="All clear! No items need attention here.">
-              Everything in this category is resolved. Check the other tabs to finalize the handover.
+          {items.length === 0 ? (
+            <EmptyState title="No claims to review yet">
+              Connect project sources or reconstruct the project state to populate the review queue.
+            </EmptyState>
+          ) : filteredItems.length === 0 ? (
+            <EmptyState title="All clear! No items in this category.">
+              All items in this filter are resolved. Switch tabs to review other items.
             </EmptyState>
           ) : (
             <div className="space-y-4">

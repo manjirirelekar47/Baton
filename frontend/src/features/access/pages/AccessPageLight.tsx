@@ -5,8 +5,21 @@
  */
 
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { batonApi } from "../../../api/client";
+import { useAuth } from "../../../context/AuthContext";
 
 export const AccessPageLight: React.FC = () => {
+  const { user } = useAuth();
+  const { data: claimsData } = useQuery({
+    queryKey: ["claims", user?.project_id],
+    queryFn: () => batonApi.getClaims(),
+    enabled: !!user,
+  });
+  const claims = claimsData?.claims ?? [];
+  const l1Count = claims.filter((c) => c.acl_label === "L1").length;
+  const l2Count = claims.filter((c) => c.acl_label === "L2").length;
+  const l3Count = claims.filter((c) => c.acl_label === "L3").length;
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-300">
       <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-200 p-8 shadow-md shadow-slate-200/50">
@@ -39,17 +52,17 @@ export const AccessPageLight: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="rounded-2xl bg-white border border-slate-200 p-6 shadow-md shadow-slate-200/50 hover:shadow-lg transition-all">
           <p className="text-xs font-semibold text-slate-500">Team-Wide Details</p>
-          <p className="text-2xl font-black text-slate-900 mt-1 font-display">19 Details</p>
+          <p className="text-2xl font-black text-slate-900 mt-1 font-display">{l1Count} {l1Count === 1 ? "Detail" : "Details"}</p>
           <p className="text-xs text-purple-700 font-medium mt-1">Public to all team roles</p>
         </div>
         <div className="rounded-2xl bg-white border border-slate-200 p-6 shadow-md shadow-slate-200/50 hover:shadow-lg transition-all">
           <p className="text-xs font-semibold text-slate-500">Maintainer Details</p>
-          <p className="text-2xl font-black text-slate-900 mt-1 font-display">3 Details</p>
+          <p className="text-2xl font-black text-slate-900 mt-1 font-display">{l2Count} {l2Count === 1 ? "Detail" : "Details"}</p>
           <p className="text-xs text-purple-700 font-medium mt-1">Visible to maintainers and leads</p>
         </div>
         <div className="rounded-2xl bg-white border border-slate-200 p-6 shadow-md shadow-slate-200/50 hover:shadow-lg transition-all">
           <p className="text-xs font-semibold text-slate-500">Leadership Only</p>
-          <p className="text-2xl font-black text-slate-900 mt-1 font-display">2 Details</p>
+          <p className="text-2xl font-black text-slate-900 mt-1 font-display">{l3Count} {l3Count === 1 ? "Detail" : "Details"}</p>
           <p className="text-xs text-purple-700 font-medium mt-1">Confidential & financial details</p>
         </div>
       </div>

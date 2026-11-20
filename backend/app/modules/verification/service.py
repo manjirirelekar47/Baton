@@ -330,6 +330,7 @@ def persist_claims_and_gaps(
                     :state, :acl_label, :owner, :proposed_owner, :proposed_owner_id, :due_date,
                     :blocked_by_json, :attested_by, :conflict_with_json, :created_at, :updated_at)
                 on conflict(id) do update set
+                    project_id = excluded.project_id,
                     type = excluded.type,
                     entity_key = excluded.entity_key,
                     attribute = excluded.attribute,
