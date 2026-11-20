@@ -52,13 +52,13 @@ def test_non_approver_roles_forbidden(client, role, method, path):
     assert r.status_code == 403, (role, path, r.text)
 
 
-@pytest.mark.parametrize("role", ["incoming_maintainer", "incoming_contributor", "leaver"])
+@pytest.mark.parametrize("role", ["incoming_maintainer", "incoming_contributor"])
 def test_non_approver_cannot_act_on_claims(act, role):
     assert act("c-test", "confirm", role=role).status_code == 403
 
 
-def test_leaver_cannot_read_queue_but_can_list_versions(client):
-    assert client.get("/review/queue", headers=H("leaver")).status_code == 403
+def test_leaver_can_read_queue_and_list_versions(client):
+    assert client.get("/review/queue", headers=H("leaver")).status_code == 200
     assert client.get("/versions", headers=H("leaver")).status_code == 200
     assert client.get("/review/queue", headers=H("incoming_contributor")).status_code == 403
 

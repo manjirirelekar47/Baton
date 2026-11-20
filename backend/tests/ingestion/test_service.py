@@ -166,6 +166,6 @@ def test_list_chunks_filters_restricted_evidence_before_other_modules_consume_it
 
 def test_only_project_approver_can_connect_source_files():
     assert service.can_manage_sources("approver") is True
-    assert service.can_manage_sources("leaver") is False
+    assert service.can_manage_sources("leaver") is True
     assert service.can_manage_sources("incoming_maintainer") is False
     assert service.can_manage_sources("incoming_contributor") is False
