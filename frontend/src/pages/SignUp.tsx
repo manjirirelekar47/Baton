@@ -423,48 +423,31 @@ export function SignUp({ initialIsLogin }: SignUpProps = {}) {
       }
 
       if (syncSession) {
-        const syncResult = await syncSession(
+        await syncSession(
           activeSession.id,
           activeSession.email,
           (activeSession.user_metadata?.full_name as string) || activeSession.email.split("@")[0]
         );
-
-        if (syncResult.registered) {
-          sessionStorage.removeItem("baton.pending_role");
-          sessionStorage.removeItem("baton.pending_invite");
-          if (syncResult.requires_project) {
-            try {
-              const userProjects = await fetchProjects();
-              if (userProjects && userProjects.length > 0) {
-                await switchProject(userProjects[0].id);
-                navigate("/dashboard", { replace: true });
-                return;
-              }
-            } catch {
-              // Proceed to onboarding modal
-            }
-            setPendingProjectOnboarding({
-              user_id: activeSession.id,
-              email: activeSession.email,
-              name: (activeSession.user_metadata?.full_name as string) || activeSession.email.split("@")[0],
-            });
-            setOnboardingMode("create");
-            void loadExistingProjects();
-            return;
-          }
-          navigate("/dashboard", { replace: true });
-          return;
-        }
+        sessionStorage.removeItem("baton.pending_role");
+        sessionStorage.removeItem("baton.pending_invite");
       }
 
-      // No project assigned yet - show project onboarding
+      // Fresh sign-in: Fetch existing projects and present the Project Chooser modal
+      // with all 3 options (Create New Project, Join with Code, Open Existing Project)
+      let userProjects: ProjectItem[] = [];
+      try {
+        userProjects = await fetchProjects();
+      } catch {
+        userProjects = [];
+      }
+      setExistingProjects(userProjects);
       setPendingProjectOnboarding({
         user_id: activeSession.id,
         email: activeSession.email,
         name: (activeSession.user_metadata?.full_name as string) || activeSession.email.split("@")[0],
       });
-      setOnboardingMode("create");
-      void loadExistingProjects();
+      setOnboardingMode(userProjects && userProjects.length > 0 ? "existing" : "create");
+      return;
     } catch (cause) {
       completingLogin.current = false;
       setError(cause instanceof Error ? cause.message : "Signed in, but Baton could not open your workspace.");
@@ -541,6 +524,12 @@ export function SignUp({ initialIsLogin }: SignUpProps = {}) {
         setIsForgotPassword(false);
         setNotice("Choose a new password for your account.");
         navigate("/login?recovery=1", { replace: true });
+        return;
+      }
+      if (event === "SIGNED_OUT") {
+        setPendingProjectOnboarding(null);
+        setError(null);
+        setSubmitting(false);
         return;
       }
       if (event === "SIGNED_IN" && (signupInProgress.current || recoveryMode.current)) return;

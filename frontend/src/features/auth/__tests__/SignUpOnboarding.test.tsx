@@ -223,4 +223,55 @@ describe("SignUp Project Onboarding & Demo Persona Selection", () => {
       expect(screen.getByRole("button", { name: "Join Team" })).toBeInTheDocument();
     });
   });
+
+  it("fresh sign-in displays Project Chooser modal with all 3 options and loads selected existing project", async () => {
+    getSession.mockResolvedValue({
+      data: {
+        session: {
+          user: {
+            id: "uid-returning-user",
+            email: "returning@company.test",
+            user_metadata: { full_name: "Returning User" },
+          },
+          access_token: "sb-mock-token",
+        },
+      },
+      error: null,
+    });
+
+    syncSession.mockResolvedValue({
+      registered: true,
+      requires_project: false,
+    });
+
+    const userProjects = [
+      { id: "proj-101", name: "Alpha Gateway", role: "approver" as const },
+      { id: "proj-102", name: "Beta Analytics", role: "contributor" as const },
+    ];
+    fetchProjects.mockResolvedValue(userProjects);
+    switchProject.mockResolvedValue(undefined);
+
+    renderSignUp("/login");
+
+    // Must show Project Chooser modal with 3 options instead of auto-opening dashboard
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Set Up Your First Project" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Create New Project" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Join with Code" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Open Existing Project" })).toBeInTheDocument();
+    });
+
+    // Existing projects are displayed
+    expect(screen.getByText("Alpha Gateway")).toBeInTheDocument();
+    expect(screen.getByText("Beta Analytics")).toBeInTheDocument();
+
+    // Click Open on Beta Analytics
+    const openButtons = screen.getAllByRole("button", { name: /^open$/i });
+    fireEvent.click(openButtons[1]);
+
+    await waitFor(() => {
+      expect(switchProject).toHaveBeenCalledWith("proj-102");
+      expect(screen.getByText("Dashboard Workspace")).toBeInTheDocument();
+    });
+  });
 });

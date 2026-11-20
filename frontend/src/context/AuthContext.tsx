@@ -616,10 +616,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     setStoredToken(null);
     setStoredProjectId(null, currentUserId);
+    try {
+      // Clean up any user-scoped or global project storage keys on logout
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && (key === "baton_active_project_id" || key.startsWith("baton_active_project_id_"))) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch {
+      // Ignore in non-browser envs
+    }
     setUser(null);
     setProjects([]);
     setActiveProject(null);
     setRequiresProject(false);
+    try {
+      sessionStorage.removeItem("baton.pending_invite");
+      sessionStorage.removeItem("baton.pending_role");
+      sessionStorage.removeItem("baton.session_active");
+    } catch {
+      // Ignore in non-browser envs
+    }
     queryClient.clear();
   }, [user?.id]);
 

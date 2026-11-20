@@ -437,4 +437,94 @@ describe("Multi-Project Frontend Regression Tests", () => {
       expect(getStoredProjectId("usr-sync")).toBe("proj-custom");
     });
   });
+
+  it("logout clears active session, stored project ID, and resets project context cleanly", async () => {
+    const clearSpy = vi.spyOn(queryClient, "clear");
+
+    setStoredToken("active-user-jwt");
+    setStoredProjectId("proj-active-1", "usr-123");
+    sessionStorage.setItem("baton.session_active", "true");
+    sessionStorage.setItem("baton.pending_invite", "INV-123");
+
+    function LogoutComponent() {
+      const { logout, user, activeProject, requiresProject } = useAuth();
+      return (
+        <div>
+          <button onClick={() => logout()}>Log Out</button>
+          <span data-testid="user-state">{user ? "logged-in" : "logged-out"}</span>
+          <span data-testid="project-state">{activeProject ? activeProject.id : "none"}</span>
+          <span data-testid="requires-project">{requiresProject ? "yes" : "no"}</span>
+        </div>
+      );
+    }
+
+    render(
+      <AuthProvider>
+        <LogoutComponent />
+      </AuthProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Log Out" }));
+    });
+
+    await waitFor(() => {
+      expect(getStoredToken()).toBeNull();
+      expect(getStoredProjectId("usr-123")).toBeNull();
+      expect(getStoredProjectId()).toBeNull();
+      expect(sessionStorage.getItem("baton.session_active")).toBeNull();
+      expect(sessionStorage.getItem("baton.pending_invite")).toBeNull();
+      expect(screen.getByTestId("user-state").textContent).toBe("logged-out");
+      expect(screen.getByTestId("project-state").textContent).toBe("none");
+      expect(screen.getByTestId("requires-project").textContent).toBe("no");
+      expect(clearSpy).toHaveBeenCalled();
+    });
+  });
+
+  it("page reload preserves active project from localStorage without resetting workspace", async () => {
+    const clearSpy = vi.spyOn(queryClient, "clear");
+
+    const projectsList = [
+      { id: "proj-persist-1", name: "Primary Service", role: "approver" as const },
+      { id: "proj-persist-2", name: "Secondary Service", role: "contributor" as const },
+    ];
+
+    setStoredToken("session-jwt-token");
+    setStoredProjectId("proj-persist-2", "usr-reload-user");
+
+    vi.mocked(batonApi.getMe).mockResolvedValueOnce({
+      id: "usr-reload-user",
+      name: "Reload Dev",
+      role: "contributor",
+      project_id: "proj-persist-2",
+    });
+    vi.mocked(batonApi.getProjects).mockResolvedValueOnce(projectsList);
+
+    function ReloadWorkspaceComponent() {
+      const { activeProject, projects, loading, requiresProject } = useAuth();
+      if (loading) return <div>Restoring session...</div>;
+      return (
+        <div>
+          <span data-testid="restored-pid">{activeProject?.id || "none"}</span>
+          <span data-testid="restored-pname">{activeProject?.name || "none"}</span>
+          <span data-testid="requires-proj">{requiresProject ? "yes" : "no"}</span>
+          <span data-testid="total-projs">{projects.length}</span>
+        </div>
+      );
+    }
+
+    render(
+      <AuthProvider>
+        <ReloadWorkspaceComponent />
+      </AuthProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("restored-pid").textContent).toBe("proj-persist-2");
+      expect(screen.getByTestId("restored-pname").textContent).toBe("Secondary Service");
+      expect(screen.getByTestId("requires-proj").textContent).toBe("no");
+      expect(screen.getByTestId("total-projs").textContent).toBe("2");
+      expect(clearSpy).toHaveBeenCalled();
+    });
+  });
 });
