@@ -27,9 +27,9 @@ const roleGuardedFeatureRoutes = featureRoutes
   .filter((r) => r.path !== "dashboard")
   .map((route) => {
     let allowed: Role[] | undefined;
-    if (route.path === "sources") allowed = ["approver"];
+    if (route.path === "sources") allowed = ["approver", "leaver"];
     else if (route.path === "review") allowed = ["approver", "leaver", "incoming_maintainer", "contributor", "incoming_contributor"];
-    else if (route.path === "handover") allowed = ["approver", "incoming_maintainer", "contributor", "incoming_contributor"];
+    else if (route.path === "handover") allowed = ["approver", "leaver", "incoming_maintainer", "contributor", "incoming_contributor"];
     else if (route.path === "risk") allowed = ["approver", "leaver", "incoming_maintainer"];
 
     if (allowed) {
@@ -75,6 +75,15 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<PageSkeleton />}>
         <SignUp />
+      </Suspense>
+    ),
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/signin",
+    element: (
+      <Suspense fallback={<PageSkeleton />}>
+        <SignUp initialIsLogin={true} />
       </Suspense>
     ),
     errorElement: <RouteErrorBoundary />,
