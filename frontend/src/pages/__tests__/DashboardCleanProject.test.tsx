@@ -100,10 +100,9 @@ describe("Dashboard - Clean New Project (Empty State)", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Total Claims")).toBeInTheDocument();
+      const zeros = screen.getAllByText("0");
+      expect(zeros.length).toBeGreaterThanOrEqual(3);
     });
-
-    const zeros = screen.getAllByText("0");
-    expect(zeros.length).toBeGreaterThanOrEqual(3);
 
     expect(screen.queryByText("24")).not.toBeInTheDocument();
     expect(screen.queryByText("18")).not.toBeInTheDocument();
